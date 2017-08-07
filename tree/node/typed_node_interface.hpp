@@ -11,7 +11,7 @@ namespace tree::node{
     public:
         const std::type_info * const getReturnType()const noexcept override {return &typeid(T);}
     public:
-        virtual ~TypedNodeInterface(){}
+        virtual ~TypedNodeInterface()noexcept {}
     };
 }
 
