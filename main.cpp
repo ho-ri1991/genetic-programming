@@ -6,22 +6,27 @@
 #include <boost/type_index.hpp>
 
 class Add: public tree::node::NodeBase<int(int, int)> {
+    using ThisType = Add;
 public:
     int evaluate()override {
         return std::get<0>(this->children)->evaluate()+std::get<1>(this->children)->evaluate();
     }
     std::string getNodeName()const override {return "Add";}
+    std::shared_ptr<tree::node::NodeInterface> clone()const override {return std::make_shared<ThisType>();}
 };
 
 class Const: public tree::node::NodeBase<int(void)> {
 private:
-    int x = 0;
+    using ThisType = Const;
+    const int x;
 public:
     int evaluate()override { return x; }
     std::string getNodeName()const override {return "Const";}
+    std::shared_ptr<tree::node::NodeInterface> clone()const override {return std::make_shared<ThisType>(x);}
 public:
     Const(int x_):x(x_){}
 };
+
 
 template <typename T, typename ...Ts>
 const std::type_info* const getRTTI(std::size_t n)noexcept {
@@ -99,6 +104,6 @@ int main() {
     std::cout<<add->evaluate()<<std::endl;
     typename join<std::tuple<int, int>, std::tuple<double, double>>::type t;
     std::cout<<typeid(typename join<std::tuple<int, int>, std::tuple<double, double>>::type).name()<<std::endl;
-    func<7, int, double, bool>();
+    func<5, int, double, bool>();
     return 0;
 }

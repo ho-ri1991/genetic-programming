@@ -11,7 +11,12 @@ namespace tree::node{
     public:
         const std::type_info * const getReturnType()const noexcept override {return &typeid(T);}
     public:
-        virtual ~TypedNodeInterface()noexcept {}
+        virtual ~TypedNodeInterface() = default;
+        TypedNodeInterface() = default;
+        TypedNodeInterface(const TypedNodeInterface&) = default;
+        TypedNodeInterface(TypedNodeInterface&&) = default;
+        TypedNodeInterface& operator=(const TypedNodeInterface&) = default;
+        TypedNodeInterface& operator=(TypedNodeInterface&&) = default;
     };
 }
 
