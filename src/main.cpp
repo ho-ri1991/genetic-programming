@@ -1,9 +1,10 @@
 #include <iostream>
 #include <cassert>
 #include <exception>
-#include<tuple>
-#include "tree/node/node_base.hpp"
+#include <tuple>
+#include <tree/node/node_base.hpp>
 #include <boost/type_index.hpp>
+#include <any>
 
 class Add: public tree::node::NodeBase<int(int, int)> {
     using ThisType = Add;
@@ -105,5 +106,8 @@ int main() {
     typename join<std::tuple<int, int>, std::tuple<double, double>>::type t;
     std::cout<<typeid(typename join<std::tuple<int, int>, std::tuple<double, double>>::type).name()<<std::endl;
     func<5, int, double, bool>();
+
+    std::any a = 1;
+    std::cout<<std::any_cast<int>(a)<<std::endl;
     return 0;
 }
