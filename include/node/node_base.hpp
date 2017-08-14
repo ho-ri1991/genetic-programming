@@ -71,6 +71,7 @@ namespace gp::node{
         std::weak_ptr<NodeInterface> parent;
         std::tuple<std::shared_ptr<TypedNodeInterface<Args>>...> children;
     public:
+        const std::type_info* const getReturnType()const noexcept override {return &typeid(T);}
         std::size_t getChildNum()const override {return std::tuple_size<decltype(children)>::value;}
         const std::type_info* const getChildReturnType(std::size_t n)const noexcept override {
             return getRTTI<Args...>(n);
@@ -99,6 +100,7 @@ namespace gp::node{
     protected:
         std::weak_ptr<NodeInterface> parent;
     public:
+        const std::type_info* const getReturnType()const noexcept override {return &typeid(T);}
         std::size_t getChildNum()const override {return 0;}
         const std::type_info* const getChildReturnType(std::size_t)const noexcept override{return &typeid(void);}
         std::shared_ptr<NodeInterface> getChildNode(std::size_t)noexcept override {return nullptr;}

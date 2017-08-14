@@ -2,14 +2,13 @@
 #define GP_NODE_TYPED_NODE_INTERFACE
 
 #include "node_interface.hpp"
+#include <utility/evaluation_context.hpp>
 
 namespace gp::node{
     template<typename T>
     class TypedNodeInterface: public NodeInterface {
     public:
-        virtual T evaluate() = 0;
-    public:
-        const std::type_info * const getReturnType()const noexcept override {return &typeid(T);}
+        virtual T evaluate(utility::EvaluationContext&) = 0;
     public:
         virtual ~TypedNodeInterface() = default;
         TypedNodeInterface() = default;

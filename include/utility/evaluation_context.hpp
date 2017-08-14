@@ -96,8 +96,8 @@ namespace gp::utility {
                           LocalVariables&& localVariables_,
                           EvaluationCount maxEvaluationCount_ = defaultMaxEvaluationCount,
                           StackCount maxStackCount_ = defaultMaxStackCount)
-                : Arguments(std::forward<Arguments>(arguments_))
-                , LocalVariables(std::forward<LocalVariables>(localVariables_))
+                : arguments(std::forward<Arguments>(arguments_))
+                , localVariables(std::forward<LocalVariables>(localVariables_))
                 , maxEvaluationCount(maxEvaluationCount_)
                 , maxStackCount(maxStackCount_)
                 , evaluationStatus(EvaluationStatus::Evaluating){}

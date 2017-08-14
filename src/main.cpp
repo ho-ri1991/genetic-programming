@@ -2,6 +2,7 @@
 #include <cassert>
 #include <exception>
 #include <tuple>
+#include <utility/evaluation_context.hpp>
 #include <node/node_base.hpp>
 #include <boost/type_index.hpp>
 #include <any>
@@ -11,8 +12,8 @@ using namespace gp;
 class Add: public node::NodeBase<int(int, int)> {
     using ThisType = Add;
 public:
-    int evaluate()override {
-        return std::get<0>(this->children)->evaluate()+std::get<1>(this->children)->evaluate();
+    int evaluate(utility::EvaluationContext& evaluationContext)override {
+        return std::get<0>(this->children)->evaluate(evaluationContext)+std::get<1>(this->children)->evaluate(evaluationContext);
     }
     std::string getNodeName()const override {return "Add";}
     std::shared_ptr<node::NodeInterface> clone()const override {return std::make_shared<ThisType>();}
@@ -23,7 +24,7 @@ private:
     using ThisType = Const;
     const int x;
 public:
-    int evaluate()override { return x; }
+    int evaluate(utility::EvaluationContext&)override { return x; }
     std::string getNodeName()const override {return "Const";}
     std::shared_ptr<node::NodeInterface> clone()const override {return std::make_shared<ThisType>(x);}
 public:
@@ -104,7 +105,8 @@ int main() {
     auto c2 = std::make_shared<Const>(9);
     add->setChild(0, c1);
     add->setChild(1, c2);
-    std::cout<<add->evaluate()<<std::endl;
+    utility::EvaluationContext evaluationContext(utility::EvaluationContext::VariableTable{}, utility::EvaluationContext::VariableTable{});
+    std::cout<<add->evaluate(evaluationContext)<<std::endl;
     typename join<std::tuple<int, int>, std::tuple<double, double>>::type t;
     std::cout<<typeid(typename join<std::tuple<int, int>, std::tuple<double, double>>::type).name()<<std::endl;
     func<5, int, double, bool>();
