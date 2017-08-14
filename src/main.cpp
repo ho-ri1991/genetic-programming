@@ -2,28 +2,30 @@
 #include <cassert>
 #include <exception>
 #include <tuple>
-#include <tree/node/node_base.hpp>
+#include <node/node_base.hpp>
 #include <boost/type_index.hpp>
 #include <any>
 
-class Add: public tree::node::NodeBase<int(int, int)> {
+using namespace gp;
+
+class Add: public node::NodeBase<int(int, int)> {
     using ThisType = Add;
 public:
     int evaluate()override {
         return std::get<0>(this->children)->evaluate()+std::get<1>(this->children)->evaluate();
     }
     std::string getNodeName()const override {return "Add";}
-    std::shared_ptr<tree::node::NodeInterface> clone()const override {return std::make_shared<ThisType>();}
+    std::shared_ptr<node::NodeInterface> clone()const override {return std::make_shared<ThisType>();}
 };
 
-class Const: public tree::node::NodeBase<int(void)> {
+class Const: public node::NodeBase<int(void)> {
 private:
     using ThisType = Const;
     const int x;
 public:
     int evaluate()override { return x; }
     std::string getNodeName()const override {return "Const";}
-    std::shared_ptr<tree::node::NodeInterface> clone()const override {return std::make_shared<ThisType>(x);}
+    std::shared_ptr<node::NodeInterface> clone()const override {return std::make_shared<ThisType>(x);}
 public:
     Const(int x_):x(x_){}
 };

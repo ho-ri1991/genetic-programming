@@ -1,5 +1,5 @@
-#ifndef TREE_NODE_NODE_BASE
-#define TREE_NODE_NODE_BASE
+#ifndef GP_NODE_NODE_BASE
+#define GP_NODE_NODE_BASE
 
 #include "typed_node_interface.hpp"
 #include <tuple>
@@ -8,7 +8,7 @@
 #include <cassert>
 #include <type_traits>
 
-namespace tree::node{
+namespace gp::node{
     template <typename T, typename ...Ts>
     const std::type_info* const getRTTI(std::size_t n)noexcept {
         if constexpr (sizeof...(Ts) > 0) {

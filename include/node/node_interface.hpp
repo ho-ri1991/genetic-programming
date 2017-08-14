@@ -1,10 +1,10 @@
-#ifndef TREE_NODE_INTERFACE
-#define TREE_NODE_INTERFACE
+#ifndef GP_NODE_INTERFACE
+#define GP_NODE_INTERFACE
 
 #include<typeinfo>
 #include<memory>
 
-namespace tree::node{
+namespace gp::node{
     class NodeInterface {
     public:
         virtual const std::type_info* const getReturnType()const noexcept= 0;

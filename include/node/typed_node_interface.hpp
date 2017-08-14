@@ -1,9 +1,9 @@
-#ifndef TREE_NODE_TYPED_NODE_INTERFACE
-#define TREE_NODE_TYPED_NODE_INTERFACE
+#ifndef GP_NODE_TYPED_NODE_INTERFACE
+#define GP_NODE_TYPED_NODE_INTERFACE
 
 #include "node_interface.hpp"
 
-namespace tree::node{
+namespace gp::node{
     template<typename T>
     class TypedNodeInterface: public NodeInterface {
     public:
