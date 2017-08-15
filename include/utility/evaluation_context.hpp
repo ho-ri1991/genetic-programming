@@ -52,6 +52,13 @@ namespace gp::utility {
                 }
             }
         }
+        auto getEvaluationStatus()const noexcept {return evaluationStatus;}
+        void setEvaluationStatusWithoutUpdate(EvaluationStatus status){
+            if(evaluationStatus == EvaluationStatus::Evaluating) {
+                evaluationStatus = status;
+            }
+        }
+        void clearEvaluationStatus(){evaluationStatus = EvaluationStatus::Evaluating;}
         auto getEvaluationCount()const noexcept {return evaluationCount;}
         auto getStackCount()const noexcept {return stackCount;}
         auto getArgumentNum()const noexcept {return std::size(arguments);}
@@ -98,6 +105,8 @@ namespace gp::utility {
                           StackCount maxStackCount_ = defaultMaxStackCount)
                 : arguments(std::forward<Arguments>(arguments_))
                 , localVariables(std::forward<LocalVariables>(localVariables_))
+                , evaluationCount(0)
+                , stackCount(0)
                 , maxEvaluationCount(maxEvaluationCount_)
                 , maxStackCount(maxStackCount_)
                 , evaluationStatus(EvaluationStatus::Evaluating){}
