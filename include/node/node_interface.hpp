@@ -1,8 +1,10 @@
 #ifndef GP_NODE_INTERFACE
 #define GP_NODE_INTERFACE
 
-#include<typeinfo>
-#include<memory>
+#include <typeinfo>
+#include <memory>
+#include <any>
+#include <utility/evaluation_context.hpp>
 
 namespace gp::node{
     class NodeInterface {
@@ -18,6 +20,7 @@ namespace gp::node{
         virtual std::shared_ptr<const NodeInterface> getParent()const noexcept = 0;
         virtual void setParent(std::shared_ptr<NodeInterface> node) = 0;
         virtual std::shared_ptr<NodeInterface> clone()const = 0;
+        virtual std::any evaluateByAny(utility::EvaluationContext&)const = 0;
     public:
         virtual ~NodeInterface() = default;
         NodeInterface(NodeInterface&&) = default;

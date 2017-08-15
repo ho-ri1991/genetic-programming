@@ -3,12 +3,23 @@
 
 #include "node_interface.hpp"
 #include <utility/evaluation_context.hpp>
+#include <utility/default_initializer.hpp>
 
 namespace gp::node{
     template<typename T>
     class TypedNodeInterface: public NodeInterface {
+    private:
+        virtual T evaluationDefinition(utility::EvaluationContext&)const = 0;
     public:
-        virtual T evaluate(utility::EvaluationContext&) = 0;
+        T evaluate(utility::EvaluationContext& evaluationContext)const {
+            if(evaluationContext.getEvaluationStatus() == utility::EvaluationStatus::Evaluating){
+                evaluationContext.incrementEvaluationCount();
+                return evaluationDefinition(evaluationContext);
+            }else return utility::getDefaultValue<T>();
+        }
+    public:
+        const std::type_info* const getReturnType()const noexcept override {return &typeid(T);}
+        std::any evaluateByAny(utility::EvaluationContext& evaluationContext)const final override {return evaluate(evaluationContext);}
     public:
         virtual ~TypedNodeInterface() = default;
         TypedNodeInterface() = default;
