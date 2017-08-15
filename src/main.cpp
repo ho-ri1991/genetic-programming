@@ -11,10 +11,11 @@ using namespace gp;
 
 class Add: public node::NodeBase<int(int, int)> {
     using ThisType = Add;
-public:
-    int evaluate(utility::EvaluationContext& evaluationContext)override {
+private:
+    int evaluationDefinition(utility::EvaluationContext& evaluationContext)const override {
         return std::get<0>(this->children)->evaluate(evaluationContext)+std::get<1>(this->children)->evaluate(evaluationContext);
     }
+public:
     std::string getNodeName()const override {return "Add";}
     std::shared_ptr<node::NodeInterface> clone()const override {return std::make_shared<ThisType>();}
 };
@@ -23,8 +24,9 @@ class Const: public node::NodeBase<int(void)> {
 private:
     using ThisType = Const;
     const int x;
+private:
+    int evaluationDefinition(utility::EvaluationContext&)const override { return x; }
 public:
-    int evaluate(utility::EvaluationContext&)override { return x; }
     std::string getNodeName()const override {return "Const";}
     std::shared_ptr<node::NodeInterface> clone()const override {return std::make_shared<ThisType>(x);}
 public:
