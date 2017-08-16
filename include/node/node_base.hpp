@@ -91,6 +91,7 @@ namespace gp::node{
         std::shared_ptr<NodeInterface> getParent()noexcept override {return parent.lock();}
         std::shared_ptr<const NodeInterface> getParent()const noexcept override {return parent.lock();}
         void setParent(std::shared_ptr<NodeInterface> node)noexcept override { parent = node; }
+        virtual NodeType getNodeType()const noexcept override {return NodeType::Normal;}
     public:
         virtual ~NodeBase()noexcept {}
     };
@@ -111,6 +112,7 @@ namespace gp::node{
         std::shared_ptr<NodeInterface> getParent()noexcept override {return parent.lock();}
         std::shared_ptr<const NodeInterface> getParent()const noexcept override {return parent.lock();}
         void setParent(std::shared_ptr<NodeInterface> node)noexcept override {parent = node;}
+        virtual NodeType getNodeType()const noexcept override {return NodeType::Normal;}
     public:
         virtual ~NodeBase(){}
     };

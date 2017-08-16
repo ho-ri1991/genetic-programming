@@ -7,6 +7,14 @@
 #include <utility/evaluation_context.hpp>
 
 namespace gp::node{
+    enum class NodeType {
+        Normal,
+        Argument,
+        LocalVariable,
+        Progn,
+        Subroutine
+    };
+
     class NodeInterface {
     public:
         virtual const std::type_info& getReturnType()const noexcept= 0;
@@ -21,6 +29,7 @@ namespace gp::node{
         virtual void setParent(std::shared_ptr<NodeInterface> node) = 0;
         virtual std::shared_ptr<NodeInterface> clone()const = 0;
         virtual std::any evaluateByAny(utility::EvaluationContext&)const = 0;
+        virtual NodeType getNodeType()const noexcept = 0;
     public:
         virtual ~NodeInterface() = default;
         NodeInterface(NodeInterface&&) = default;
