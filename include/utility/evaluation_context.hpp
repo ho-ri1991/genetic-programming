@@ -19,11 +19,8 @@ namespace gp::utility {
     class EvaluationContext {
     public:
         using VariableTable = std::vector<std::any>;
-    private:
         using EvaluationCount = long long;
         using StackCount = long long;
-        static constexpr EvaluationCount defaultMaxEvaluationCount = 10000;
-        static constexpr StackCount defaultMaxStackCount = 10000;
     private:
         EvaluationStatus evaluationStatus;
         VariableTable arguments;
@@ -84,11 +81,15 @@ namespace gp::utility {
             assert(n < std::size(arguments));
             arguments[n] = std::forward<T>(val);
         }
+        template <typename Arguments>
+        void setArguments(Arguments&& arguments_) {arguments = std::forward<Arguments>(arguments_);}
         template <typename T>
         void setLocalVariable(std::size_t n, T&& val){
             assert(n < std::size(localVariables));
             localVariables[n] = std::forward<T>(val);
         }
+        template <typename LocalVariables>
+        void setLocalVariables(LocalVariables&& localVariables_) {localVariables_ = std::forward<LocalVariables>(localVariables_);}
         template <typename T>
         void setReturnValue(T&& val){
             if(evaluationStatus == EvaluationStatus::Evaluating){
@@ -101,8 +102,8 @@ namespace gp::utility {
         template <typename Arguments, typename LocalVariables>
         EvaluationContext(Arguments&& arguments_,
                           LocalVariables&& localVariables_,
-                          EvaluationCount maxEvaluationCount_ = defaultMaxEvaluationCount,
-                          StackCount maxStackCount_ = defaultMaxStackCount)
+                          EvaluationCount maxEvaluationCount_,
+                          StackCount maxStackCount_)
                 : arguments(std::forward<Arguments>(arguments_))
                 , localVariables(std::forward<LocalVariables>(localVariables_))
                 , evaluationCount(0)
