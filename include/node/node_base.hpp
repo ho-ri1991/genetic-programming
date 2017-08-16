@@ -11,13 +11,13 @@
 
 namespace gp::node{
     template <typename T, typename ...Ts>
-    const std::type_info* const getRTTI(std::size_t n)noexcept {
+    const std::type_info& getRTTI(std::size_t n)noexcept {
         if constexpr (sizeof...(Ts) > 0) {
-            if(n == 0)return &typeid(T);
+            if(n == 0)return typeid(T);
             else return getRTTI<Ts...>(n - 1);
         } else {
-            if(n != 0) return nullptr;
-            else return &typeid(T);
+            if(n != 0) return typeid(void);
+            else return typeid(T);
         }
     }
 
@@ -73,7 +73,7 @@ namespace gp::node{
         std::tuple<std::shared_ptr<TypedNodeInterface<Args>>...> children;
     public:
         std::size_t getChildNum()const override {return std::tuple_size<decltype(children)>::value;}
-        const std::type_info* const getChildReturnType(std::size_t n)const noexcept override {
+        const std::type_info& getChildReturnType(std::size_t n)const noexcept override {
             return getRTTI<Args...>(n);
         }
         std::shared_ptr<NodeInterface> getChildNode(std::size_t n)noexcept override {
@@ -101,7 +101,7 @@ namespace gp::node{
         std::weak_ptr<NodeInterface> parent;
     public:
         std::size_t getChildNum()const override {return 0;}
-        const std::type_info* const getChildReturnType(std::size_t)const noexcept override{return &typeid(void);}
+        const std::type_info& getChildReturnType(std::size_t)const noexcept override{return typeid(void);}
         std::shared_ptr<NodeInterface> getChildNode(std::size_t)noexcept override {return nullptr;}
         std::shared_ptr<const NodeInterface> getChildNode(std::size_t)const noexcept override {return nullptr;}
         void setChild(std::size_t, std::shared_ptr<NodeInterface>)override {

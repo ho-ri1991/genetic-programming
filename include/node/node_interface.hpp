@@ -9,8 +9,8 @@
 namespace gp::node{
     class NodeInterface {
     public:
-        virtual const std::type_info* const getReturnType()const noexcept= 0;
-        virtual const std::type_info* const getChildReturnType(std::size_t n)const noexcept = 0;
+        virtual const std::type_info& getReturnType()const noexcept= 0;
+        virtual const std::type_info& getChildReturnType(std::size_t n)const noexcept = 0;
         virtual std::string getNodeName()const = 0;
         virtual std::size_t getChildNum()const = 0;
         virtual std::shared_ptr<NodeInterface> getChildNode(std::size_t n) noexcept = 0;

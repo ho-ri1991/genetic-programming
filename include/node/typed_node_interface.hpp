@@ -18,7 +18,7 @@ namespace gp::node{
             }else return utility::getDefaultValue<T>();
         }
     public:
-        const std::type_info* const getReturnType()const noexcept override {return &typeid(T);}
+        const std::type_info& getReturnType()const noexcept override {return typeid(T);}
         std::any evaluateByAny(utility::EvaluationContext& evaluationContext)const final override {return evaluate(evaluationContext);}
     public:
         virtual ~TypedNodeInterface() = default;
