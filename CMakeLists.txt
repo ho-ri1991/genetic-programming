@@ -11,5 +11,5 @@ include_directories(./include)
 link_directories(~/llvm/build/lib)
 set(CMAKE_CXX_STANDARD 17)
 
-set(SOURCE_FILES src/main.cpp)
+set(SOURCE_FILES src/main.cpp src/tree/tree_operations.cpp)
 add_executable(genetic_programming ${SOURCE_FILES})

@@ -4,6 +4,8 @@
 #include <tuple>
 #include <utility/evaluation_context.hpp>
 #include <node/node_base.hpp>
+#include <tree/tree.hpp>
+#include <node/argument_node.hpp>
 #include <boost/type_index.hpp>
 #include <any>
 
@@ -103,13 +105,16 @@ void func(){
 
 int main() {
     auto add = std::make_shared<Add>();
-    auto c1 = std::make_shared<Const>(1);
-    auto c2 = std::make_shared<Const>(9);
+    auto c1 = std::make_shared<node::ArgumentNode<int, 0>>();
+    auto c2 = std::make_shared<node::ArgumentNode<int, 1>>();
     add->setChild(0, c1);
     add->setChild(1, c2);
-    utility::EvaluationContext evaluationContext(utility::EvaluationContext::VariableTable{}, utility::EvaluationContext::VariableTable{});
-    std::cout<<add->evaluate(evaluationContext)<<std::endl;
-    typename join<std::tuple<int, int>, std::tuple<double, double>>::type t;
+    tree::Tree tree(typeid(int), std::vector<const std::type_info*>{&typeid(int), &typeid(int)}, std::vector<const std::type_info*>{}, add);
+    auto ans = tree.evaluate(std::vector<std::any>{1, 2});
+    std::cout<<std::any_cast<int>(ans.getReturnValue())<<std::endl;
+//    utility::EvaluationContext evaluationContext(utility::EvaluationContext::VariableTable{}, utility::EvaluationContext::VariableTable{}, 1000, 1000);
+//    std::cout<<add->evaluate(evaluationContext)<<std::endl;
+//    typename join<std::tuple<int, int>, std::tuple<double, double>>::type t;
     std::cout<<typeid(typename join<std::tuple<int, int>, std::tuple<double, double>>::type).name()<<std::endl;
     func<5, int, double, bool>();
 
