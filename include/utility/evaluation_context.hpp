@@ -5,6 +5,7 @@
 #include <any>
 #include <cassert>
 #include <exception>
+#include "variable.hpp"
 
 namespace gp::utility {
     enum class EvaluationStatus {
@@ -18,7 +19,7 @@ namespace gp::utility {
 
     class EvaluationContext {
     public:
-        using VariableTable = std::vector<std::any>;
+        using VariableTable = std::vector<utility::Variable>;
         using EvaluationCount = long long;
         using StackCount = long long;
     private:
@@ -60,19 +61,19 @@ namespace gp::utility {
         auto getStackCount()const noexcept {return stackCount;}
         auto getArgumentNum()const noexcept {return std::size(arguments);}
         auto getLocalVariableNum()const noexcept {return std::size(localVariables);}
-        std::any& getArgument(std::size_t n){
+        decltype(auto) getArgument(std::size_t n){
             assert(n < std::size(arguments));
             return arguments[n];
         }
-        const std::any& getArgument(std::size_t n)const {
+        decltype(auto) getArgument(std::size_t n)const {
             assert(n < std::size(arguments));
             return arguments[n];
         }
-        std::any& getLocalVariable(std::size_t n) {
+        decltype(auto) getLocalVariable(std::size_t n) {
             assert(n < std::size(localVariables));
             return localVariables[n];
         }
-        const std::any& getLocalVariable(std::size_t n)const {
+        decltype(auto) getLocalVariable(std::size_t n)const {
             assert(n < std::size(localVariables));
             return localVariables[n];
         }

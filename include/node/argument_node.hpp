@@ -10,13 +10,14 @@ namespace gp::node {
         using ThisType = ArgumentNode;
     private:
         T evaluationDefinition(utility::EvaluationContext& evaluationContext)const override {
-            return std::any_cast<T>(evaluationContext.getArgument(n));
+            return evaluationContext.getArgument(n).get<T>();
         }
     public:
         std::string getNodeName()const override {
             return std::string("Argument<") + utility::typeName<T>() + std::string(",") + std::to_string(n) + std::string(">");
         }
         std::shared_ptr<NodeInterface> clone()const override {return std::make_shared<ThisType>();}
+        NodeType getNodeType()const noexcept override final {return NodeType::Argument;}
     };
 }
 

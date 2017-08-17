@@ -110,15 +110,22 @@ int main() {
     add->setChild(0, c1);
     add->setChild(1, c2);
     tree::Tree tree(typeid(int), std::vector<const std::type_info*>{&typeid(int), &typeid(int)}, std::vector<const std::type_info*>{}, add);
-    auto ans = tree.evaluate(std::vector<std::any>{1, 2});
+    auto ans = tree.evaluate(std::vector<utility::Variable>{1, 2});
     std::cout<<std::any_cast<int>(ans.getReturnValue())<<std::endl;
-//    utility::EvaluationContext evaluationContext(utility::EvaluationContext::VariableTable{}, utility::EvaluationContext::VariableTable{}, 1000, 1000);
-//    std::cout<<add->evaluate(evaluationContext)<<std::endl;
-//    typename join<std::tuple<int, int>, std::tuple<double, double>>::type t;
-    std::cout<<typeid(typename join<std::tuple<int, int>, std::tuple<double, double>>::type).name()<<std::endl;
+    std::cout<<c1->getNodeName()<<std::endl;
     func<5, int, double, bool>();
 
-    std::any a = 1;
-    std::cout<<std::any_cast<int>(a)<<std::endl;
+    utility::Variable v(1);
+    std::cout<< v.get<int>() << std::endl;
+    v.get<int&>() = 2;
+    std::cout<< v.get<int>() << std::endl;
+    *v.get<int*>() = 3;
+    std::cout<< v.get<const int&>() <<std::endl;
+    std::unique_ptr<int> p = std::make_unique<int>(10);
+    utility::Variable v1(p.get());
+    std::cout<< v1.get<int>() <<std::endl;
+    *v1.get<int*>() = 50;
+    std::cout<< v1.get<const int&>() <<std::endl;
+
     return 0;
 }
