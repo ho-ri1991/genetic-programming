@@ -9,7 +9,7 @@
 namespace gp::utility {
     class Variable {
     private:
-        const bool hasPointer;
+        bool hasPointer;
         std::any variable;
         const std::type_info* type;
     public:
