@@ -14,7 +14,9 @@ namespace gp::utility {
         StackCountExceeded,
         ValueReturned,
         BreakCalled,
-        ContinueCalled
+        ContinueCalled,
+        InvalidLeftHandValue,
+        InvalidReference
     };
 
     class EvaluationContext {
