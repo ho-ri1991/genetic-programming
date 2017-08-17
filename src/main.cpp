@@ -8,6 +8,8 @@
 #include <node/argument_node.hpp>
 #include <boost/type_index.hpp>
 #include <any>
+#include <node/local_variable_node.hpp>
+#include <node/basic_operation_node.hpp>
 
 using namespace gp;
 
@@ -105,11 +107,19 @@ void func(){
 
 int main() {
     auto add = std::make_shared<Add>();
+    auto add1 = std::make_shared<Add>();
+    auto subst = std::make_shared<node::SubstitutionNode<int>>();
+    auto lovalVar = std::make_shared<node::LocalVariableNode<int, 0>>();
+    auto localVarL = std::make_shared<node::LocalVariableNode<utility::LeftHandValue<int>, 0>>();
     auto c1 = std::make_shared<node::ArgumentNode<int, 0>>();
     auto c2 = std::make_shared<node::ArgumentNode<int, 1>>();
-    add->setChild(0, c1);
-    add->setChild(1, c2);
-    tree::Tree tree(typeid(int), std::vector<const std::type_info*>{&typeid(int), &typeid(int)}, std::vector<const std::type_info*>{}, add);
+    add->setChild(1, lovalVar);
+    add->setChild(0, subst);
+    subst->setChild(0, localVarL);
+    subst->setChild(1, c1);
+//    add->setChild(0, c1);
+//    add->setChild(1, c2);
+    tree::Tree tree(typeid(int), std::vector<const std::type_info*>{&typeid(int), &typeid(int)}, std::vector<const std::type_info*>{&typeid(int)}, add);
     auto ans = tree.evaluate(std::vector<utility::Variable>{1, 2});
     std::cout<<std::any_cast<int>(ans.getReturnValue())<<std::endl;
     std::cout<<c1->getNodeName()<<std::endl;
