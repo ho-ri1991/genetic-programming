@@ -17,6 +17,10 @@ namespace gp::node{
                 return evaluationDefinition(evaluationContext);
             }else return utility::getDefaultValue<T>();
         }
+        virtual void setNodePropertyByString(const std::string&)override {}
+        virtual std::string getNodePropertyByString()const override {return "";}
+        virtual void setNodePropertyByAny(const std::any&) override {}
+        virtual std::any getNodePropertyByAny()const override {return std::any();}
     public:
         const std::type_info& getReturnType()const noexcept override {return typeid(T);}
         std::any evaluateByAny(utility::EvaluationContext& evaluationContext)const final override {return evaluate(evaluationContext);}

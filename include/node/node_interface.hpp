@@ -12,7 +12,8 @@ namespace gp::node{
         Argument,
         LocalVariable,
         Progn,
-        Subroutine
+        Subroutine,
+        Const
     };
 
     class NodeInterface {
@@ -30,6 +31,10 @@ namespace gp::node{
         virtual std::shared_ptr<NodeInterface> clone()const = 0;
         virtual std::any evaluateByAny(utility::EvaluationContext&)const = 0;
         virtual NodeType getNodeType()const noexcept = 0;
+        virtual void setNodePropertyByString(const std::string&) = 0;
+        virtual std::string getNodePropertyByString()const = 0;
+        virtual void setNodePropertyByAny(const std::any&) = 0;
+        virtual std::any getNodePropertyByAny()const = 0;
     public:
         virtual ~NodeInterface() = default;
         NodeInterface(NodeInterface&&) = default;
