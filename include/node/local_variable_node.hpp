@@ -45,6 +45,27 @@ namespace gp::node {
         std::shared_ptr<NodeInterface> clone()const override {return std::make_shared<ThisType>();}
         NodeType getNodeType()const noexcept override final {return NodeType::LocalVariable;}
     };
+
+    template <typename T, std::size_t n>
+    class LocalVariableNode<utility::Reference<T>, n>: public NodeBase<utility::Reference<T>(void)> {
+    private:
+        using ThisType = LocalVariableNode;
+        using ReturnType = utility::Reference<T>;
+    private:
+        ReturnType evaluationDefinition(utility::EvaluationContext& evaluationContext)const override {
+            auto& localVariable = evaluationContext.getLocalVariable(n);
+            if(!localVariable.hasValue()) {
+                localVariable.set(utility::getDefaultValue<T>());
+            }
+            return ReturnType(localVariable);
+        }
+    public:
+        std::string getNodeName()const override {
+            return std::string("LocalVariable<") + utility::typeName<ReturnType>() + std::string(",") + std::to_string(n) + std::string(">");
+        }
+        std::shared_ptr<NodeInterface> clone()const override {return std::make_shared<ThisType>();}
+        NodeType getNodeType()const noexcept override final {return NodeType::LocalVariable;}
+    };
 }
 
 #endif
