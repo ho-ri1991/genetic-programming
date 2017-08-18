@@ -13,17 +13,6 @@
 
 using namespace gp;
 
-class Add: public node::NodeBase<int(int, int)> {
-    using ThisType = Add;
-private:
-    int evaluationDefinition(utility::EvaluationContext& evaluationContext)const override {
-        return std::get<0>(this->children)->evaluate(evaluationContext)+std::get<1>(this->children)->evaluate(evaluationContext);
-    }
-public:
-    std::string getNodeName()const override {return "Add";}
-    std::shared_ptr<node::NodeInterface> clone()const override {return std::make_shared<ThisType>();}
-};
-
 class Const: public node::NodeBase<int(void)> {
 private:
     using ThisType = Const;
@@ -48,29 +37,6 @@ const std::type_info* const getRTTI(std::size_t n)noexcept {
         else return &typeid(T);
     }
 }
-
-
-template <typename T1, typename T2>
-struct type_accumulator {
-    using type1 = T1;
-    using type2 = T2;
-};
-
-template <typename ...Ts>
-struct types{
-    template <std::size_t n>
-    using type = typename std::tuple_element<n, std::tuple<Ts...>>::type;
-};
-
-template <typename...> struct join;
-
-template <template <typename...> class Tpl,
-        typename ...Args1,
-        typename ...Args2>
-struct join<Tpl<Args1...>, Tpl<Args2...>>
-{
-    typedef Tpl<Args1..., Args2...> type;
-};
 
 template <std::size_t n, typename ...> struct acc;
 
@@ -106,8 +72,8 @@ void func(){
 }
 
 int main() {
-    auto add = std::make_shared<Add>();
-    auto add1 = std::make_shared<Add>();
+    auto add = std::make_shared<node::AddNode<int>>();
+    auto add1 = std::make_shared<node::AddNode<int>>();
     auto subst = std::make_shared<node::SubstitutionNode<int>>();
     auto lovalVar = std::make_shared<node::LocalVariableNode<int, 0>>();
     auto localVarL = std::make_shared<node::LocalVariableNode<utility::LeftHandValue<int>, 0>>();

@@ -16,7 +16,8 @@ namespace gp::utility {
         BreakCalled,
         ContinueCalled,
         InvalidLeftHandValue,
-        InvalidReference
+        InvalidReference,
+        InvalidValue
     };
 
     class EvaluationContext {
