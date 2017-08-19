@@ -1,32 +1,9 @@
 #include <iostream>
-#include <cassert>
-#include <exception>
-#include <tuple>
-#include <utility/evaluation_context.hpp>
-#include <node/node_base.hpp>
 #include <tree/tree.hpp>
-#include <node/argument_node.hpp>
 #include <boost/type_index.hpp>
-#include <any>
-#include <node/local_variable_node.hpp>
-#include <node/basic_operation_node.hpp>
-#include <node/const_node.hpp>
+#include <node/node.hpp>
 
 using namespace gp;
-
-class Const: public node::NodeBase<int(void)> {
-private:
-    using ThisType = Const;
-    const int x;
-private:
-    int evaluationDefinition(utility::EvaluationContext&)const override { return x; }
-public:
-    std::string getNodeName()const override {return "Const";}
-    std::shared_ptr<node::NodeInterface> clone()const override {return std::make_shared<ThisType>(x);}
-public:
-    Const(int x_):x(x_){}
-};
-
 
 template <typename T, typename ...Ts>
 const std::type_info* const getRTTI(std::size_t n)noexcept {
@@ -73,6 +50,7 @@ void func(){
 }
 
 int main() {
+    auto progn = std::make_shared<node::PrognNode<int, 2>>();
     auto add = std::make_shared<node::AddNode<int>>();
     auto add1 = std::make_shared<node::AddNode<int>>();
     auto subst = std::make_shared<node::SubstitutionNode<int>>();
@@ -81,18 +59,24 @@ int main() {
     auto a1 = std::make_shared<node::ArgumentNode<int, 0>>();
     auto a2 = std::make_shared<node::ArgumentNode<int, 1>>();
     auto c1 = std::make_shared<node::ConstNode<int>>(10);
-    add1->setChild(0, c1);
-    add1->setChild(1, add);
-    add->setChild(0, subst);
-    add->setChild(1, lovalVar);
+    progn->setChild(0, subst);
+    progn->setChild(1, add1);
     subst->setChild(0, localVarL);
     subst->setChild(1, a1);
+    add1->setChild(0, c1);
+    add1->setChild(1, add);
+    add->setChild(0, a2);
+    add->setChild(1, lovalVar);
 //    add->setChild(0, c1);
 //    add->setChild(1, c2);
-    tree::Tree tree(typeid(int), std::vector<const std::type_info*>{&typeid(int), &typeid(int)}, std::vector<const std::type_info*>{&typeid(int)}, add1);
+    tree::Tree tree(typeid(int), std::vector<const std::type_info*>{&typeid(int), &typeid(int)}, std::vector<const std::type_info*>{&typeid(int)}, progn);
     auto ans = tree.evaluate(std::vector<utility::Variable>{1, 2});
     std::cout<<std::any_cast<int>(ans.getReturnValue())<<std::endl;
-    func<5, int, double, bool>();
+//    std::cout<<ans.getArgument(0).get<int>()<<std::endl;
+//    std::cout<<ans.getArgument(1).get<int>()<<std::endl;
+//    std::cout<<ans.getLocalVariable(0).get<int>()<<std::endl;
+
+//    func<5, int, double, bool>();
 
     utility::Variable v(1);
     std::cout<< v.get<int>() << std::endl;
