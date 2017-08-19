@@ -21,7 +21,7 @@ namespace gp::node{
         virtual const std::type_info& getReturnType()const noexcept= 0;
         virtual const std::type_info& getChildReturnType(std::size_t n)const noexcept = 0;
         virtual std::string getNodeName()const = 0;
-        virtual std::size_t getChildNum()const = 0;
+        virtual std::size_t getChildNum()const noexcept = 0;
         virtual std::shared_ptr<NodeInterface> getChildNode(std::size_t n) noexcept = 0;
         virtual std::shared_ptr<const NodeInterface> getChildNode(std::size_t n)const noexcept = 0;
         virtual void setChild(std::size_t n, std::shared_ptr<NodeInterface> node) = 0;
