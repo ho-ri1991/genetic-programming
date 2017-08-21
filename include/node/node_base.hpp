@@ -63,6 +63,28 @@ namespace gp::node{
         setDynamicHelper<0, Ts...>(n, node, t);
     }
 
+    template <std::size_t n, typename> struct EvaluateChildrenHelper;
+
+    template <std::size_t n,
+              template <typename ...> class Tpl,
+              typename ...Ts>
+    struct EvaluateChildrenHelper<n, Tpl<Ts...>> {
+        static auto eval(const std::tuple<std::shared_ptr<TypedNodeInterface<Ts>>...>& children, utility::EvaluationContext& evaluationContext) {
+            if constexpr (sizeof...(Ts) - 1 == n) {
+                return std::make_tuple(std::get<n>(children)->evaluate(evaluationContext));
+            } else {
+                return std::tuple_cat(std::make_tuple(std::get<n>(children)->evaluate(evaluationContext)),
+                                        EvaluateChildrenHelper<n + 1, Tpl<Ts...>>::eval(children, evaluationContext));
+            }
+        }
+    };
+
+
+    template <typename ...Ts>
+    std::tuple<Ts...> evaluateChildren(const std::tuple<std::shared_ptr<TypedNodeInterface<Ts>>...>& children, utility::EvaluationContext& evaluationContext) {
+        return EvaluateChildrenHelper<0, std::tuple<Ts...>>::eval(children, evaluationContext);
+    }
+
     template <typename T>
     class NodeBase;
 

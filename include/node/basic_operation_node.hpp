@@ -30,8 +30,8 @@ namespace gp::node {
         using ThisType = AddNode;
     private:
         T evaluationDefinition(utility::EvaluationContext& evaluationContext)const override {
-            return std::get<0>(this->children)->evaluate(evaluationContext)
-                    + std::get<1>(this->children)->evaluate(evaluationContext);
+            auto [a1, a2] = evaluateChildren(this->children, evaluationContext);
+            return a1 + a2;
         }
     public:
         std::string getNodeName()const override {
@@ -45,8 +45,8 @@ namespace gp::node {
         using ThisType = SubtractNode;
     private:
         T evaluationDefinition(utility::EvaluationContext& evaluationContext)const override {
-            return std::get<0>(this->children)->evaluate(evaluationContext)
-                    - std::get<1>(this->children)->evaluate(evaluationContext);
+            auto [a1, a2] = evaluateChildren(this->children, evaluationContext);
+            return a1 - a2;
         }
     public:
         std::string getNodeName()const override {
@@ -60,8 +60,8 @@ namespace gp::node {
         using ThisType = MultiplyNode;
     private:
         T evaluationDefinition(utility::EvaluationContext& evaluationContext)const override {
-            return std::get<0>(this->children)->evaluate(evaluationContext)
-                    * std::get<1>(this->children)->evaluate(evaluationContext);
+            auto [a1, a2] = evaluateChildren(this->children, evaluationContext);
+            return a1 * a2;
         }
     public:
         std::string getNodeName()const override {
@@ -78,8 +78,7 @@ namespace gp::node {
         using ThisType = DivisionNode;
     private:
         T evaluationDefinition(utility::EvaluationContext& evaluationContext)const override {
-            auto c1 = std::get<0>(this->children)->evaluate(evaluationContext);
-            auto c2 = std::get<1>(this->children)->evaluate(evaluationContext);
+            auto [c1, c2] = evaluateChildren(this->children, evaluationContext);
             if(c2 == 0){
                 evaluationContext.setEvaluationStatusWithoutUpdate(utility::EvaluationStatus::InvalidValue);
                 return utility::DefaultInitializer<T>();
@@ -97,8 +96,8 @@ namespace gp::node {
         using ThisType = AndNode;
     private:
         bool evaluationDefinition(utility::EvaluationContext& evaluationContext)const override {
-            return std::get<0>(this->children)->evaluate(evaluationContext)
-                   && std::get<1>(this->children)->evaluate(evaluationContext);
+            auto [b1, b2] = evaluateChildren(this->children, evaluationContext);
+            return b1 && b2;
         }
     public:
         std::string getNodeName()const override {return std::string("AND");}
@@ -109,8 +108,8 @@ namespace gp::node {
         using ThisType = OrNode;
     private:
         bool evaluationDefinition(utility::EvaluationContext& evaluationContext)const override {
-            return std::get<0>(this->children)->evaluate(evaluationContext)
-                    || std::get<1>(this->children)->evaluate(evaluationContext);
+            auto [b1, b2] = evaluateChildren(this->children, evaluationContext);
+            return b1 || b2;
         }
     public:
         std::string getNodeName()const override {return std::string("OR");}

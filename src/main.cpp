@@ -50,6 +50,8 @@ void func(){
 }
 
 int main() {
+    auto subtruct = std::make_shared<node::SubtractNode<int>>();
+    auto mult = std::make_shared<node::MultiplyNode<int>>();
     auto progn = std::make_shared<node::PrognNode<int, 2>>();
     auto add = std::make_shared<node::AddNode<int>>();
     auto add1 = std::make_shared<node::AddNode<int>>();
