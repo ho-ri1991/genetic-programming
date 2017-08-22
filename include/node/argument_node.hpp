@@ -2,7 +2,6 @@
 #define GP_NODE_ARGUMENT_NODE
 
 #include "node_base.hpp"
-#include <utility/type_name.hpp>
 #include <utility/left_hand_value.hpp>
 #include <utility/reference.hpp>
 

@@ -5,6 +5,7 @@
 #include <memory>
 #include <any>
 #include <utility/evaluation_context.hpp>
+#include <utility/type.hpp>
 
 namespace gp::node{
     enum class NodeType {
