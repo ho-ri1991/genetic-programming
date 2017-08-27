@@ -2,19 +2,9 @@
 #include <tree/tree.hpp>
 #include <boost/type_index.hpp>
 #include <node/node.hpp>
-
+#include <io/tree_io.hpp>
+#include <utility/string.hpp>
 using namespace gp;
-
-template <typename T, typename ...Ts>
-const std::type_info* const getRTTI(std::size_t n)noexcept {
-    if constexpr (sizeof...(Ts) > 0) {
-        if(n == 0)return &typeid(T);
-        else return getRTTI<Ts...>(n - 1);
-    } else {
-        if(n != 0) return nullptr;
-        else return &typeid(T);
-    }
-}
 
 template <std::size_t n, typename ...> struct acc;
 
@@ -63,12 +53,20 @@ int main() {
     auto c1 = std::make_shared<node::ConstNode<int>>(10);
     progn->setChild(0, subst);
     progn->setChild(1, add1);
+    subst->setParent(progn);
+    add1->setParent(progn);
     subst->setChild(0, localVarL);
     subst->setChild(1, a1);
+    localVarL->setParent(subst);
+    a1->setParent(subst);
     add1->setChild(0, c1);
     add1->setChild(1, add);
+    c1->setParent(add1);
+    add->setParent(add1);
     add->setChild(0, a2);
     add->setChild(1, lovalVar);
+    a2->setParent(add);
+    lovalVar->setParent(a2);
 //    add->setChild(0, c1);
 //    add->setChild(1, c2);
     tree::Tree tree(typeid(int), std::vector<const std::type_info*>{&typeid(int), &typeid(int)}, std::vector<const std::type_info*>{&typeid(int)}, progn);
@@ -79,6 +77,12 @@ int main() {
 //    std::cout<<ans.getLocalVariable(0).get<int>()<<std::endl;
 
 //    func<5, int, double, bool>();
+
+    utility::TypeTranslator typeTranslator;
+    typeTranslator.setTypeNamePair<int>("int");
+    typeTranslator.setTypeNamePair<utility::LeftHandValue<int>>("lvalue<int>");
+    io::TreeWriter treeWriter(typeTranslator, "");
+    treeWriter(progn, std::vector<const std::type_info*>{&typeid(int), &typeid(int)}, std::vector<const std::type_info*>{&typeid(int)}, "test");
 
     utility::Variable v(1);
     std::cout<< v.get<int>() << std::endl;
@@ -91,6 +95,11 @@ int main() {
     std::cout<< v1.get<int>() <<std::endl;
     *v1.get<int*>() = 50;
     std::cout<< v1.get<const int&>() <<std::endl;
+
+    auto u_add = std::make_unique<node::AddNode<int>>();
+    std::unique_ptr<node::NodeInterface> u = std::move(u_add);
+    std::cout<<u->getChildNum()<<std::endl;
+
 
     return 0;
 }
