@@ -18,7 +18,7 @@ namespace gp::node {
         std::string getNodeName()const override {
             return std::string("Const<") + utility::typeName<T>() + std::string(">");
         }
-        std::shared_ptr<NodeInterface> clone()const override {return std::make_shared<ThisType>(data);}
+        std::unique_ptr<NodeInterface> clone()const override {return std::make_unique<ThisType>(data);}
         NodeType getNodeType()const noexcept override final {return NodeType::Const;}
         void setNodePropertyByString(const std::string& prop) override {
             std::stringstream sstream;

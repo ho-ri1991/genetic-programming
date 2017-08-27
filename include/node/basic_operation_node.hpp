@@ -22,7 +22,7 @@ namespace gp::node {
         std::string getNodeName()const override {
             return std::string("Substitute<") + utility::typeName<T>() + std::string(">");
         }
-        std::shared_ptr<NodeInterface> clone()const override {return std::make_shared<ThisType>();}
+        std::unique_ptr<NodeInterface> clone()const override {return std::make_unique<ThisType>();}
     };
 
     template <typename T>
@@ -37,7 +37,7 @@ namespace gp::node {
         std::string getNodeName()const override {
             return std::string("Add<") + utility::typeName<T>() + std::string(">");
         }
-        std::shared_ptr<NodeInterface> clone()const override {return std::make_shared<ThisType>();}
+        std::unique_ptr<NodeInterface> clone()const override {return std::make_unique<ThisType>();}
     };
 
     template <typename T>
@@ -52,7 +52,7 @@ namespace gp::node {
         std::string getNodeName()const override {
             return std::string("Sub<") + utility::typeName<T>() + std::string(">");
         }
-        std::shared_ptr<NodeInterface> clone()const override {return std::make_shared<ThisType>();}
+        std::unique_ptr<NodeInterface> clone()const override {return std::make_unique<ThisType>();}
     };
 
     template <typename T>
@@ -67,7 +67,7 @@ namespace gp::node {
         std::string getNodeName()const override {
             return std::string("Mult<") + utility::typeName<T>() + std::string(">");
         }
-        std::shared_ptr<NodeInterface> clone()const override {return std::make_shared<ThisType>();}
+        std::unique_ptr<NodeInterface> clone()const override {return std::make_unique<ThisType>();}
     };
 
     template <typename T, bool is_arithmetic = std::is_arithmetic_v<T>>
@@ -89,7 +89,7 @@ namespace gp::node {
         std::string getNodeName()const override {
             return std::string("Div<") + utility::typeName<T>() + std::string(">");
         }
-        std::shared_ptr<NodeInterface> clone()const override {return std::make_shared<ThisType>();}
+        std::unique_ptr<NodeInterface> clone()const override {return std::make_unique<ThisType>();}
     };
 
     class AndNode: public NodeBase<bool(bool, bool)> {
@@ -101,7 +101,7 @@ namespace gp::node {
         }
     public:
         std::string getNodeName()const override {return std::string("AND");}
-        std::shared_ptr<NodeInterface> clone()const override {return std::make_shared<ThisType>();}
+        std::unique_ptr<NodeInterface> clone()const override {return std::make_unique<ThisType>();}
     };
 
     class OrNode: public NodeBase<bool(bool, bool)> {
@@ -113,7 +113,7 @@ namespace gp::node {
         }
     public:
         std::string getNodeName()const override {return std::string("OR");}
-        std::shared_ptr<NodeInterface> clone()const override {return std::make_shared<ThisType>();}
+        std::unique_ptr<NodeInterface> clone()const override {return std::make_unique<ThisType>();}
     };
 
     class NotNode: public NodeBase<bool(bool)> {
@@ -124,7 +124,7 @@ namespace gp::node {
         }
     public:
         std::string getNodeName()const override {return std::string("NOT");}
-        std::shared_ptr<NodeInterface> clone()const override {return std::make_shared<ThisType>();}
+        std::unique_ptr<NodeInterface> clone()const override {return std::make_unique<ThisType>();}
     };
 
     template <typename T>
@@ -143,7 +143,7 @@ namespace gp::node {
         std::string getNodeName()const override {
             return std::string("If<") + utility::typeName<T>() + std::string(">");
         }
-        std::shared_ptr<NodeInterface> clone()const override {return std::make_shared<ThisType>();}
+        std::unique_ptr<NodeInterface> clone()const override {return std::make_unique<ThisType>();}
     };
 }
 

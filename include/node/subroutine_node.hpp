@@ -35,7 +35,7 @@ namespace gp::node {
         T evaluationDefinition(utility::EvaluationContext* evaluationContext)const override;
     public:
         std::string getNodeName()const override {return name;}
-        std::shared_ptr<NodeInterface> clone()const override {return std::make_shared<ThisType>(name, subroutineEntitySet);}
+        std::unique_ptr<NodeInterface> clone()const override {return std::make_unique<ThisType>(name, subroutineEntitySet);}
         NodeType getNodeType()const noexcept override final {return NodeType::Subroutine;}
     };
 }

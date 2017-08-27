@@ -40,36 +40,30 @@ void func(){
 }
 
 int main() {
-    auto subtruct = std::make_shared<node::SubtractNode<int>>();
-    auto mult = std::make_shared<node::MultiplyNode<int>>();
-    auto progn = std::make_shared<node::PrognNode<int, 2>>();
-    auto add = std::make_shared<node::AddNode<int>>();
-    auto add1 = std::make_shared<node::AddNode<int>>();
-    auto subst = std::make_shared<node::SubstitutionNode<int>>();
-    auto lovalVar = std::make_shared<node::LocalVariableNode<int, 0>>();
-    auto localVarL = std::make_shared<node::LocalVariableNode<utility::LeftHandValue<int>, 0>>();
-    auto a1 = std::make_shared<node::ArgumentNode<int, 0>>();
-    auto a2 = std::make_shared<node::ArgumentNode<int, 1>>();
-    auto c1 = std::make_shared<node::ConstNode<int>>(10);
-    progn->setChild(0, subst);
-    progn->setChild(1, add1);
-    subst->setParent(progn);
-    add1->setParent(progn);
-    subst->setChild(0, localVarL);
-    subst->setChild(1, a1);
-    localVarL->setParent(subst);
-    a1->setParent(subst);
-    add1->setChild(0, c1);
-    add1->setChild(1, add);
-    c1->setParent(add1);
-    add->setParent(add1);
-    add->setChild(0, a2);
-    add->setChild(1, lovalVar);
-    a2->setParent(add);
-    lovalVar->setParent(a2);
+    auto subtruct = std::make_unique<node::SubtractNode<int>>();
+    auto mult = std::make_unique<node::MultiplyNode<int>>();
+    auto progn = std::make_unique<node::PrognNode<int, 2>>();
+    auto add = std::make_unique<node::AddNode<int>>();
+    auto add1 = std::make_unique<node::AddNode<int>>();
+    auto subst = std::make_unique<node::SubstitutionNode<int>>();
+    auto lovalVar = std::make_unique<node::LocalVariableNode<int, 0>>();
+    auto localVarL = std::make_unique<node::LocalVariableNode<utility::LeftHandValue<int>, 0>>();
+    auto a1 = std::make_unique<node::ArgumentNode<int, 0>>();
+    auto a2 = std::make_unique<node::ArgumentNode<int, 1>>();
+    auto c1 = std::make_unique<node::ConstNode<int>>(10);
+    add->setChild(0, std::move(a2));
+    add->setChild(1, std::move(lovalVar));
+    add1->setChild(0, std::move(c1));
+    add1->setChild(1, std::move(add));
+    subst->setChild(0, std::move(localVarL));
+    subst->setChild(1, std::move(a1));
+    progn->setChild(0, std::move(subst));
+    progn->setChild(1, std::move(add1));
+
 //    add->setChild(0, c1);
 //    add->setChild(1, c2);
-    tree::Tree tree(typeid(int), std::vector<const std::type_info*>{&typeid(int), &typeid(int)}, std::vector<const std::type_info*>{&typeid(int)}, progn);
+    tree::Tree tree(typeid(int), std::vector<const std::type_info*>{&typeid(int), &typeid(int)}, std::vector<const std::type_info*>{&typeid(int)}, std::move(progn));
+    std::cout<<"tree created"<<std::endl;
     auto ans = tree.evaluate(std::vector<utility::Variable>{1, 2});
     std::cout<<std::any_cast<int>(ans.getReturnValue())<<std::endl;
 //    std::cout<<ans.getArgument(0).get<int>()<<std::endl;
@@ -82,7 +76,7 @@ int main() {
     typeTranslator.setTypeNamePair<int>("int");
     typeTranslator.setTypeNamePair<utility::LeftHandValue<int>>("lvalue<int>");
     io::TreeWriter treeWriter(typeTranslator, "");
-    treeWriter(progn, std::vector<const std::type_info*>{&typeid(int), &typeid(int)}, std::vector<const std::type_info*>{&typeid(int)}, "test");
+    treeWriter(tree.getRootNode(), std::vector<const std::type_info*>{&typeid(int), &typeid(int)}, std::vector<const std::type_info*>{&typeid(int)}, "test");
 
     utility::Variable v(1);
     std::cout<< v.get<int>() << std::endl;

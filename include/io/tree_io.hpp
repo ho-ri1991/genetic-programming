@@ -16,13 +16,14 @@ namespace gp::io {
         const utility::TypeTranslator& typeTranslator;
     private:
         static std::string createNextOffset(const std::string& currentOffset,
-                                            std::shared_ptr<const node::NodeInterface> currentNode) {
-            auto parent = currentNode->getParent();
+                                            const node::NodeInterface& currentNode) {
+            auto hasParent = currentNode.hasParent();
             if(currentOffset.empty())return std::string(OFFSET_NUM, OFFSET_CHAR);
-            if(!parent){
+            if(!hasParent){
                 return "";
             } else {
-                if(parent->getChildNode(parent->getChildNum() - 1) == currentNode){
+                const auto& parent = currentNode.getParent();
+                if(&parent.getChildNode(parent.getChildNum() - 1) == &currentNode){
                     return currentOffset + std::string(OFFSET_NUM + 1, OFFSET_CHAR);
                 } else {
                     return currentOffset + std::string(1, CONNECTION) + std::string(OFFSET_NUM, OFFSET_CHAR);
@@ -30,21 +31,21 @@ namespace gp::io {
             }
         }
         static std::string createNextConnectionLine(const std::string& currentConnectionLine,
-                                                   std::shared_ptr<const node::NodeInterface> currentNode,
+                                                   const node::NodeInterface& currentNode,
                                                    std::size_t childIndex) {
-            const auto childNum = currentNode->getChildNum();
+            const auto childNum = currentNode.getChildNum();
             if(childNum - 1 == childIndex){
                 //in case of the last child
-                auto nextChild = currentNode->getChildNode(childIndex);
-                if(nextChild->getChildNum() == 0){
+                const auto& nextChild = currentNode.getChildNode(childIndex);
+                if(nextChild.getChildNum() == 0){
                     //in case of the next node is a leaf node
                     return currentConnectionLine.substr(0, std::size(currentConnectionLine) - 1);
                 } else {
                     return currentConnectionLine.substr(0, std::size(currentConnectionLine) - 1) + std::string(OFFSET_NUM + 1, OFFSET_CHAR) + CONNECTION;
                 }
             } else {
-                auto nextChild = currentNode->getChildNode(childIndex);
-                if(nextChild->getChildNum() == 0) {
+                const auto& nextChild = currentNode.getChildNode(childIndex);
+                if(nextChild.getChildNum() == 0) {
                     //in case of the next node is a leaf node
                     return currentConnectionLine;
                 }else {
@@ -52,15 +53,15 @@ namespace gp::io {
                 }
             }
         }
-        static void writeTreeHelper(std::shared_ptr<const node::NodeInterface> node,
+        static void writeTreeHelper(const node::NodeInterface& node,
                                     std::ofstream& fout,
                                     std::string offsetStr = "",
                                     std::string connectionLine = std::string(OFFSET_NUM, OFFSET_CHAR) + std::string(1, CONNECTION)) {
-            const auto childNum = node->getChildNum();
-            fout << offsetStr << NODE_HEADER << node->getNodeName() << std::endl;
+            const auto childNum = node.getChildNum();
+            fout << offsetStr << NODE_HEADER << node.getNodeName() << std::endl;
             fout << connectionLine << std::endl;
-            for(int i = 0; i < node->getChildNum(); ++i) {
-                writeTreeHelper(node->getChildNode(i),
+            for(int i = 0; i < node.getChildNum(); ++i) {
+                writeTreeHelper(node.getChildNode(i),
                                 fout,
                                 createNextOffset(offsetStr, node),
                                 createNextConnectionLine(connectionLine, node, i));
@@ -68,7 +69,7 @@ namespace gp::io {
         }
     public:
         template <typename ArgumentTypes_, typename LocalVariableTypes_, typename TreeName>
-        void operator()(std::shared_ptr<const node::NodeInterface> rootNode,
+        void operator()(const node::NodeInterface& rootNode,
                         ArgumentTypes_&& argumentTypes,
                         LocalVariableTypes_&& localVariableTypes,
                         TreeName&& treeName)const {

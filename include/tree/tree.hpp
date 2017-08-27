@@ -17,7 +17,7 @@ namespace gp::tree {
         static constexpr EvaluationCount defaultMaxEvaluationCount = 10000;
         static constexpr StackCount defaultMaxStackCount = 10000;
     private:
-        std::shared_ptr<node::NodeInterface> rootNode;
+        std::unique_ptr<node::NodeInterface> rootNode;
         const std::type_info* returnType;
         ArgumentTypes argumentTypes;
         LocalVariableTypes localVariableTypes;
@@ -26,8 +26,8 @@ namespace gp::tree {
         Tree(const std::type_info& returnType_,
              ArgumentTypes_&& argumentTypes_,
              LocalVariableTypes_&& localVariableTypes_,
-             std::shared_ptr<node::NodeInterface> rootNode_):
-                rootNode(rootNode_),
+             std::unique_ptr<node::NodeInterface> rootNode_):
+                rootNode(std::move(rootNode_)),
                 returnType(&returnType_),
                 argumentTypes(std::forward<ArgumentTypes_>(argumentTypes_)),
                 localVariableTypes(std::forward<LocalVariableTypes_>(localVariableTypes_)){
@@ -53,6 +53,16 @@ namespace gp::tree {
         }
         Tree& operator=(Tree&&) = default;
     public:
+        node::NodeInterface& getRootNode(){
+            assert(rootNode);
+            if(!rootNode) throw std::runtime_error("the root node of tree is nullptr");
+            else return *rootNode;
+        }
+        const node::NodeInterface& getRootNode()const{
+            assert(rootNode);
+            if(!rootNode) throw std::runtime_error("the root node of tree is nullptr");
+            else return *rootNode;
+        }
         auto getArgumentNum()const noexcept {return std::size(argumentTypes);}
         auto getLocalVariableNum()const noexcept {return std::size(localVariableTypes);}
         const std::type_info& getArgumentType(std::size_t n)const noexcept {

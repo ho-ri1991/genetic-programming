@@ -17,7 +17,7 @@ namespace gp::node {
         std::string getNodeName()const override {
             return std::string("Argument<") + utility::typeName<T>() + std::string(",") + std::to_string(n) + std::string(">");
         }
-        std::shared_ptr<NodeInterface> clone()const override {return std::make_shared<ThisType>();}
+        std::unique_ptr<NodeInterface> clone()const override {return std::make_unique<ThisType>();}
         NodeType getNodeType()const noexcept override final {return NodeType::Argument;}
     };
 
@@ -34,7 +34,7 @@ namespace gp::node {
         std::string getNodeName()const override {
             return std::string("Argument<") + utility::typeName<ReturnType>() + std::string(",") + std::to_string(n) + std::string(">");
         }
-        std::shared_ptr<NodeInterface> clone()const override {return std::make_shared<ThisType>();}
+        std::unique_ptr<NodeInterface> clone()const override {return std::make_unique<ThisType>();}
         NodeType getNodeType()const noexcept override final {return NodeType::Argument;}
     };
 
@@ -51,7 +51,7 @@ namespace gp::node {
         std::string getNodeName()const override {
             return std::string("Argument<") + utility::typeName<ReturnType>() + std::string(",") + std::to_string(n) + std::string(">");
         }
-        std::shared_ptr<NodeInterface> clone()const override {return std::make_shared<ThisType>();}
+        std::unique_ptr<NodeInterface> clone()const override {return std::make_unique<ThisType>();}
         NodeType getNodeType()const noexcept override final {return NodeType::Argument;}
     };
 }

@@ -12,9 +12,11 @@ namespace gp::node {
     class PrognNode: public TypedNodeInterface<T> {
         static_assert(1 < n, "progn node whose child num is smaller than 2 is not supported");
     private:
-        std::weak_ptr<NodeInterface> parent;
-        std::array<std::shared_ptr<NodeInterface>, n - 1> children;
-        std::shared_ptr<TypedNodeInterface<T>> lastChild;
+        NodeInterface* parent;
+        std::array<std::unique_ptr<NodeInterface>, n - 1> children;
+        std::unique_ptr<TypedNodeInterface<T>> lastChild;
+    protected:
+        void setParent(NodeInterface* node)override {parent = node;}
     private:
         T evaluationDefinition(utility::EvaluationContext& evaluationContext)const override {
             for(const auto& node: children)
@@ -28,37 +30,69 @@ namespace gp::node {
             else if(m == n - 1)return typeid(T);
             else return typeid(arbitrary);
         }
-        std::shared_ptr<NodeInterface> getChildNode(std::size_t m)noexcept override {
-            if(n <= m)return nullptr;
-            else if(m == n - 1)return lastChild;
-            else return children[m];
+        NodeInterface& getChildNode(std::size_t m)override {
+            if(n <= m)throw std::invalid_argument("the index exceeded the number of children");
+            else if(m == n - 1){
+                if(!lastChild)throw std::runtime_error("the specified child is nullptr");
+                return *lastChild;
+            }
+            else {
+                if(!children[m])throw std::runtime_error("the specified child is nullptr");
+                return *children[m];
+            }
         }
-        std::shared_ptr<const NodeInterface> getChildNode(std::size_t m)const noexcept override {
-            if(n <= m)return nullptr;
-            else if(m == n - 1)return lastChild;
-            else return children[m];
+        const NodeInterface& getChildNode(std::size_t m)const override {
+            if(n <= m)throw std::invalid_argument("the index exceeded the number of children");
+            else if(m == n - 1){
+                if(!lastChild)throw std::runtime_error("the specified child is nullptr");
+                return *lastChild;
+            }
+            else {
+                if(!children[m])throw std::runtime_error("the specified child is nullptr");
+                return *children[m];
+            }
         }
-        void setChild(std::size_t m, std::shared_ptr<NodeInterface> node)override {
+        void setChild(std::size_t m, std::unique_ptr<NodeInterface> node)override {
             assert((m < n) && "the child index must be smaller than the number of children of the node");
             if(n <= m) throw std::invalid_argument("invalid child index");
             if(m == n - 1){
                 assert(typeid(T) == node->getReturnType());
                 if(typeid(T) != node->getReturnType()) throw std::invalid_argument("invalied type node was set as a child");
-                lastChild = std::dynamic_pointer_cast<TypedNodeInterface<T>>(node);
+                if(auto typed_ptr = dynamic_cast<TypedNodeInterface<T>*>(node.get())){
+                    node.release();
+                    lastChild.reset(typed_ptr);
+                    lastChild->setParent(this);
+                }else {
+                    throw std::invalid_argument("invalied type node was set as a child");
+                }
             }else {
-                children[m] = node;
+                children[m] = std::move(node);
+                children[m]->setParent(this);
             }
         }
-        std::shared_ptr<NodeInterface> getParent()noexcept override {return parent.lock();}
-        std::shared_ptr<const NodeInterface> getParent()const noexcept override {return parent.lock();}
-        void setParent(std::shared_ptr<NodeInterface> node)noexcept override {parent = node;}
+        NodeInterface& getParent()override {
+            if(parent == nullptr)throw std::runtime_error("the parent is null");
+            return *parent;
+        }
+        const NodeInterface& getParent()const override {
+            if(parent == nullptr)throw std::runtime_error("the parent is null");
+            return *parent;
+        }
         NodeType getNodeType()const noexcept override final {return NodeType::Progn;}
         std::string getNodeName()const override {
             return std::string("Progn<") + utility::typeName<T>() + std::string(",") + std::to_string(n) + std::string(">");
         }
-        std::shared_ptr<NodeInterface> clone()const override {return std::make_shared<PrognNode>();}
+        std::unique_ptr<NodeInterface> clone()const override {return std::make_unique<PrognNode>();}
         std::string getNodePropertyByString()const override {return std::to_string(n);}
         std::any getNodePropertyByAny()const override {return n;}
+        bool hasChild(std::size_t m)const noexcept override {
+            if(n <= m)return false;
+            else if(n - 1 == m)return static_cast<bool>(lastChild);
+            else return static_cast<bool>(children[m]);
+        }
+        bool hasParent()const noexcept override {return parent != nullptr;}
+    public:
+        PrognNode(): parent(nullptr){}
     };
 }
 
