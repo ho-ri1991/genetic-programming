@@ -21,6 +21,15 @@ namespace gp::tree {
         const std::type_info* returnType;
         ArgumentTypes argumentTypes;
         LocalVariableTypes localVariableTypes;
+    private:
+        static std::unique_ptr<node::NodeInterface> copyTreeStructure(const node::NodeInterface& rootNode) {
+            std::unique_ptr<node::NodeInterface> targetRootNode = rootNode.clone();
+            for(int i = 0; i < rootNode.getChildNum(); ++i) {
+                if(!rootNode.hasChild(i)) throw std::runtime_error("the copy node must not be null");
+                targetRootNode->setChild(i, copyTreeStructure(rootNode.getChildNode(i)));
+            }
+            return targetRootNode;
+        }
     public:
         template <typename ArgumentTypes_, typename LocalVariableTypes_>
         Tree(const std::type_info& returnType_,

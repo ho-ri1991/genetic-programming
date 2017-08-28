@@ -63,13 +63,11 @@ int main() {
 //    add->setChild(0, c1);
 //    add->setChild(1, c2);
     tree::Tree tree(typeid(int), std::vector<const std::type_info*>{&typeid(int), &typeid(int)}, std::vector<const std::type_info*>{&typeid(int)}, std::move(progn));
-    std::cout<<"tree created"<<std::endl;
     auto ans = tree.evaluate(std::vector<utility::Variable>{1, 2});
     std::cout<<std::any_cast<int>(ans.getReturnValue())<<std::endl;
 //    std::cout<<ans.getArgument(0).get<int>()<<std::endl;
 //    std::cout<<ans.getArgument(1).get<int>()<<std::endl;
 //    std::cout<<ans.getLocalVariable(0).get<int>()<<std::endl;
-
 //    func<5, int, double, bool>();
 
     utility::TypeTranslator typeTranslator;

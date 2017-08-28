@@ -6,7 +6,6 @@
 namespace gp::tree {
     std::size_t getDepth(const node::NodeInterface&);
     std::size_t getHeight(const node::NodeInterface&);
-    std::unique_ptr<node::NodeInterface> copyTreeStructure(const node::NodeInterface&);
 }
 
 #endif

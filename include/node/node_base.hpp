@@ -21,7 +21,7 @@ namespace gp::node{
         }
     }
 
-    template <size_t offset, typename ...Ts>
+    template <std::size_t offset, typename ...Ts>
     NodeInterface& getDynamicHelper(std::size_t n, std::tuple<Ts...>& t) {
         if constexpr(offset < sizeof...(Ts)){
             if(n == 0) {
@@ -42,6 +42,24 @@ namespace gp::node{
     template <typename ...Ts>
     const NodeInterface& getDynamic(std::size_t n, const std::tuple<Ts...>& t) {
         return getDynamicHelper<0, Ts...>(n, const_cast<std::tuple<Ts...>&>(t));
+    }
+
+    template <std::size_t offset, typename ...Ts>
+    bool hasChildHelper(std::size_t n, const std::tuple<Ts...>& t)noexcept {
+        if constexpr(offset < sizeof...(Ts)){
+            if(n == 0) {
+                if(std::get<offset>(t))return static_cast<bool>(std::get<offset>(t));
+                else return false;
+            }
+            else return hasChildHelper<offset + 1, Ts...>(n - 1, t);
+        }else {
+            return false;
+        }
+    };
+
+    template <typename ...Ts>
+    bool hasChildHelper(std::size_t n, const std::tuple<Ts...>& t)noexcept {
+        return hasChildHelper<0, Ts...>(n, t);
     }
 
     template <std::size_t offset, typename ...Ts>
@@ -129,7 +147,8 @@ namespace gp::node{
         }
         virtual NodeType getNodeType()const noexcept override {return NodeType::Normal;}
         bool hasChild(std::size_t n)const noexcept override {
-            return false;
+            if(sizeof...(Args) <= n) return false;
+            return hasChildHelper(n, children);
         }
         bool hasParent()const noexcept override {return parent != nullptr;}
     public:
