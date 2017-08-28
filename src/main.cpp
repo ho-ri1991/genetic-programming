@@ -3,7 +3,7 @@
 #include <boost/type_index.hpp>
 #include <node/node.hpp>
 #include <io/tree_io.hpp>
-#include <utility/string.hpp>
+#include <tree_operations/tree_operations.hpp>
 using namespace gp;
 
 template <std::size_t n, typename ...> struct acc;
@@ -75,6 +75,9 @@ int main() {
     typeTranslator.setTypeNamePair<utility::LeftHandValue<int>>("lvalue<int>");
     io::TreeWriter treeWriter(typeTranslator, "");
     treeWriter(tree.getRootNode(), std::vector<const std::type_info*>{&typeid(int), &typeid(int)}, std::vector<const std::type_info*>{&typeid(int)}, "test");
+
+    std::cout<<tree_operations::getHeight(tree.getRootNode())<<std::endl;
+    std::cout<<tree_operations::getDepth(tree.getRootNode())<<std::endl;
 
     utility::Variable v(1);
     std::cout<< v.get<int>() << std::endl;

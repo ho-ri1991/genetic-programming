@@ -4,11 +4,11 @@
 #include <utility/evaluation_context.hpp>
 #include <node/node_interface.hpp>
 #include <exception>
-#include "tree_operations.hpp"
 
 namespace gp::tree {
     class Tree {
     public:
+        using NodeType = node::NodeInterface;
         using ArgumentTypes = std::vector<const std::type_info*>;
         using LocalVariableTypes = std::vector<const std::type_info*>;
     private:
