@@ -45,8 +45,7 @@ namespace gp::node{
         //method for evaluation
         virtual std::any evaluateByAny(utility::EvaluationContext&)const = 0;
         //methods for properties
-        virtual void setNodePropertyByString(const std::string&) = 0;
-        virtual std::string getNodePropertyByString()const = 0;
+        virtual void setNodePropertyByNodeName(const std::string&) = 0;
         virtual void setNodePropertyByAny(const std::any&) = 0;
         virtual std::any getNodePropertyByAny()const = 0;
         virtual std::string getNodeName()const = 0;

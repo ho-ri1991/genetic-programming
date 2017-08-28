@@ -16,19 +16,21 @@ namespace gp::node {
         }
     public:
         std::string getNodeName()const override {
-            return std::string("Const<") + utility::typeName<T>() + std::string(">");
+            std::stringstream sstream;
+            sstream <<',' << data;
+            return std::string("Const<") + utility::typeName<T>() + sstream.str() + std::string(">");
         }
         std::unique_ptr<NodeInterface> clone()const override {return std::make_unique<ThisType>(data);}
         NodeType getNodeType()const noexcept override final {return NodeType::Const;}
-        void setNodePropertyByString(const std::string& prop) override {
+        void setNodePropertyByNodeName(const std::string& name) override {
+            auto beg = name.find('<');
+            auto end = name.find('>');
+            if(beg == std::string::npos || end == std::string::npos || end < beg) throw std::invalid_argument("invalid node name of const node");
+            auto sep = name.find(',', beg);
+            if(sep == std::string::npos || end < sep) throw std::invalid_argument("invalid node name of const node");
             std::stringstream sstream;
-            sstream << prop;
+            sstream << name.substr(sep + 1, end - sep - 1);
             sstream >> data;
-        }
-        std::string getNodePropertyByString()const override {
-            std::stringstream sstream;
-            sstream << data;
-            return sstream.str();
         }
         void setNodePropertyByAny(const std::any& prop) override {
             assert(prop.type() == typeid(T));

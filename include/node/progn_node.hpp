@@ -83,7 +83,6 @@ namespace gp::node {
             return std::string("Progn<") + utility::typeName<T>() + std::string(",") + std::to_string(n) + std::string(">");
         }
         std::unique_ptr<NodeInterface> clone()const override {return std::make_unique<PrognNode>();}
-        std::string getNodePropertyByString()const override {return std::to_string(n);}
         std::any getNodePropertyByAny()const override {return n;}
         bool hasChild(std::size_t m)const noexcept override {
             if(n <= m)return false;
