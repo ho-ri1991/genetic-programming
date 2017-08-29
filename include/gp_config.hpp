@@ -8,7 +8,6 @@ namespace gp {
         constexpr const char CONNECTION = '|';
         constexpr const char OFFSET_CHAR = ' ';
         constexpr std::size_t OFFSET_NUM = 4;
-        constexpr const char* EXTENSION = ".txt";
     }
 }
 

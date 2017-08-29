@@ -73,8 +73,9 @@ int main() {
     utility::TypeTranslator typeTranslator;
     typeTranslator.setTypeNamePair<int>("int");
     typeTranslator.setTypeNamePair<utility::LeftHandValue<int>>("lvalue<int>");
-    io::TreeWriter treeWriter(typeTranslator, "");
-    treeWriter(tree.getRootNode(), std::vector<const std::type_info*>{&typeid(int), &typeid(int)}, std::vector<const std::type_info*>{&typeid(int)}, "test");
+//    treeWriter(tree.getRootNode(), std::vector<const std::type_info*>{&typeid(int), &typeid(int)}, std::vector<const std::type_info*>{&typeid(int)}, "test");
+    std::ofstream fout("tree.txt");
+    tree_operations::writeTree(tree.getRootNode(), fout);
 
     std::cout<<tree_operations::getHeight(tree.getRootNode())<<std::endl;
     std::cout<<tree_operations::getDepth(tree.getRootNode())<<std::endl;
