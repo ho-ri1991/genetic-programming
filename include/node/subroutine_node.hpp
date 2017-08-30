@@ -24,6 +24,7 @@ namespace gp::node {
     class SubroutineNode: public NodeBase<T(Args...)> {
     private:
         using ThisType = SubroutineNode;
+        using node_instance_type = NodeInterface::node_instance_type;
         const SubroutineEntitySet& subroutineEntitySet;
         const std::string name;
     public:
@@ -35,7 +36,7 @@ namespace gp::node {
         T evaluationDefinition(utility::EvaluationContext* evaluationContext)const override;
     public:
         std::string getNodeName()const override {return name;}
-        std::unique_ptr<NodeInterface> clone()const override {return std::make_unique<ThisType>(name, subroutineEntitySet);}
+        node_instance_type clone()const override {return NodeInterface::createInstance<ThisType>(name, subroutineEntitySet);}
         NodeType getNodeType()const noexcept override final {return NodeType::Subroutine;}
     };
 }

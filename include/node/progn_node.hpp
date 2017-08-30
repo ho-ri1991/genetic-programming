@@ -11,7 +11,8 @@ namespace gp::node {
     template <typename T, std::size_t n>
     class PrognNode: public TypedNodeInterface<T> {
     public:
-        using Type = NodeInterface::Type;
+        using type = NodeInterface::type;
+        using node_instance_type = NodeInterface::node_instance_type;
         static_assert(1 < n, "progn node whose child num is smaller than 2 is not supported");
     private:
         NodeInterface* parent;
@@ -27,7 +28,7 @@ namespace gp::node {
         }
     public:
         std::size_t getChildNum()const noexcept override {return n;}
-        Type& getChildReturnType(std::size_t m)const noexcept override {
+        type getChildReturnType(std::size_t m)const noexcept override {
             if(n <= m)return utility::typeInfo<utility::error>();
             else if(m == n - 1)return utility::typeInfo<T>();
             else return utility::typeInfo<utility::any>();
@@ -84,7 +85,7 @@ namespace gp::node {
         std::string getNodeName()const override {
             return std::string("Progn<") + utility::typeInfo<T>().name() + std::string(",") + std::to_string(n) + std::string(">");
         }
-        std::unique_ptr<NodeInterface> clone()const override {return std::make_unique<PrognNode>();}
+        node_instance_type clone()const override {return NodeInterface::createInstance<PrognNode>();}
         std::any getNodePropertyByAny()const override {return n;}
         bool hasChild(std::size_t m)const noexcept override {
             if(n <= m)return false;

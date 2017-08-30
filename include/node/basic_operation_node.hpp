@@ -8,6 +8,7 @@ namespace gp::node {
     template <typename T>
     class SubstitutionNode: public NodeBase<T(utility::LeftHandValue<T>, T)> {
         using ThisType = SubstitutionNode;
+        using node_instance_type = NodeInterface::node_instance_type;
     private:
         T evaluationDefinition(utility::EvaluationContext& evaluationContext)const override {
             auto lvalue = std::get<0>(this->children)->evaluate(evaluationContext);
@@ -22,12 +23,13 @@ namespace gp::node {
         std::string getNodeName()const override {
             return std::string("Substitute<") + utility::typeInfo<T>().name() + std::string(">");
         }
-        std::unique_ptr<NodeInterface> clone()const override {return std::make_unique<ThisType>();}
+        node_instance_type clone()const override {return NodeInterface::createInstance<ThisType>();}
     };
 
     template <typename T>
     class AddNode: public NodeBase<T(T, T)> {
         using ThisType = AddNode;
+        using node_instance_type = NodeInterface::node_instance_type;
     private:
         T evaluationDefinition(utility::EvaluationContext& evaluationContext)const override {
             auto [a1, a2] = evaluateChildren(this->children, evaluationContext);
@@ -37,12 +39,13 @@ namespace gp::node {
         std::string getNodeName()const override {
             return std::string("Add<") + utility::typeInfo<T>().name() + std::string(">");
         }
-        std::unique_ptr<NodeInterface> clone()const override {return std::make_unique<ThisType>();}
+        node_instance_type clone()const override {return NodeInterface::createInstance<ThisType>();}
     };
 
     template <typename T>
     class SubtractNode: public NodeBase<T(T, T)> {
         using ThisType = SubtractNode;
+        using node_instance_type = NodeInterface::node_instance_type;
     private:
         T evaluationDefinition(utility::EvaluationContext& evaluationContext)const override {
             auto [a1, a2] = evaluateChildren(this->children, evaluationContext);
@@ -52,12 +55,13 @@ namespace gp::node {
         std::string getNodeName()const override {
             return std::string("Sub<") + utility::typeInfo<T>().name() + std::string(">");
         }
-        std::unique_ptr<NodeInterface> clone()const override {return std::make_unique<ThisType>();}
+        node_instance_type clone()const override {return NodeInterface::createInstance<ThisType>();}
     };
 
     template <typename T>
     class MultiplyNode: public NodeBase<T(T, T)> {
         using ThisType = MultiplyNode;
+        using node_instance_type = NodeInterface::node_instance_type;
     private:
         T evaluationDefinition(utility::EvaluationContext& evaluationContext)const override {
             auto [a1, a2] = evaluateChildren(this->children, evaluationContext);
@@ -67,7 +71,7 @@ namespace gp::node {
         std::string getNodeName()const override {
             return std::string("Mult<") + utility::typeInfo<T>().name() + std::string(">");
         }
-        std::unique_ptr<NodeInterface> clone()const override {return std::make_unique<ThisType>();}
+        node_instance_type clone()const override {return NodeInterface::createInstance<ThisType>();}
     };
 
     template <typename T, bool is_arithmetic = std::is_arithmetic_v<T>>
@@ -76,6 +80,7 @@ namespace gp::node {
     template <typename T>
     class DivisionNode<T, true>: public NodeBase<T(T, T)> {
         using ThisType = DivisionNode;
+        using node_instance_type = NodeInterface::node_instance_type;
     private:
         T evaluationDefinition(utility::EvaluationContext& evaluationContext)const override {
             auto [c1, c2] = evaluateChildren(this->children, evaluationContext);
@@ -89,11 +94,12 @@ namespace gp::node {
         std::string getNodeName()const override {
             return std::string("Div<") + utility::typeInfo<T>().name() + std::string(">");
         }
-        std::unique_ptr<NodeInterface> clone()const override {return std::make_unique<ThisType>();}
+        node_instance_type clone()const override {return NodeInterface::createInstance<ThisType>();}
     };
 
     class AndNode: public NodeBase<bool(bool, bool)> {
         using ThisType = AndNode;
+        using node_instance_type = NodeInterface::node_instance_type;
     private:
         bool evaluationDefinition(utility::EvaluationContext& evaluationContext)const override {
             auto [b1, b2] = evaluateChildren(this->children, evaluationContext);
@@ -101,11 +107,12 @@ namespace gp::node {
         }
     public:
         std::string getNodeName()const override {return std::string("AND");}
-        std::unique_ptr<NodeInterface> clone()const override {return std::make_unique<ThisType>();}
+        node_instance_type clone()const override {return NodeInterface::createInstance<ThisType>();}
     };
 
     class OrNode: public NodeBase<bool(bool, bool)> {
         using ThisType = OrNode;
+        using node_instance_type = NodeInterface::node_instance_type;
     private:
         bool evaluationDefinition(utility::EvaluationContext& evaluationContext)const override {
             auto [b1, b2] = evaluateChildren(this->children, evaluationContext);
@@ -113,23 +120,25 @@ namespace gp::node {
         }
     public:
         std::string getNodeName()const override {return std::string("OR");}
-        std::unique_ptr<NodeInterface> clone()const override {return std::make_unique<ThisType>();}
+        node_instance_type clone()const override {return NodeInterface::createInstance<ThisType>();}
     };
 
     class NotNode: public NodeBase<bool(bool)> {
         using ThisType = NotNode;
+        using node_instance_type = NodeInterface::node_instance_type;
     private:
         bool evaluationDefinition(utility::EvaluationContext& evaluationContext)const override {
             return !std::get<0>(this->children)->evaluate(evaluationContext);
         }
     public:
         std::string getNodeName()const override {return std::string("NOT");}
-        std::unique_ptr<NodeInterface> clone()const override {return std::make_unique<ThisType>();}
+        node_instance_type clone()const override {return NodeInterface::createInstance<ThisType>();}
     };
 
     template <typename T>
     class IfNode: public NodeBase<T(bool, T, T)> {
         using ThisType = IfNode;
+        using node_instance_type = NodeInterface::node_instance_type;
     private:
         T evaluationDefinition(utility::EvaluationContext& evaluationContext)const override {
             auto cond = std::get<0>(this->children)->evaluate(evaluationContext);
@@ -143,7 +152,7 @@ namespace gp::node {
         std::string getNodeName()const override {
             return std::string("If<") + utility::typeInfo<T>().name() + std::string(">");
         }
-        std::unique_ptr<NodeInterface> clone()const override {return std::make_unique<ThisType>();}
+        node_instance_type clone()const override {return NodeInterface::createInstance<ThisType>();}
     };
 }
 

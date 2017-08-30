@@ -9,6 +9,7 @@ namespace gp::node {
     template <typename T, std::size_t n>
     class ArgumentNode: public NodeBase<T(void)> {
         using ThisType = ArgumentNode;
+        using node_instance_type = NodeInterface::node_instance_type;
     private:
         T evaluationDefinition(utility::EvaluationContext& evaluationContext)const override {
             return evaluationContext.getArgument(n).get<T>();
@@ -17,7 +18,7 @@ namespace gp::node {
         std::string getNodeName()const override {
             return std::string("Argument<") + utility::typeInfo<T>().name() + std::string(",") + std::to_string(n) + std::string(">");
         }
-        std::unique_ptr<NodeInterface> clone()const override {return std::make_unique<ThisType>();}
+        node_instance_type clone()const override {return NodeInterface::createInstance<ThisType>();}
         NodeType getNodeType()const noexcept override final {return NodeType::Argument;}
     };
 
@@ -26,6 +27,7 @@ namespace gp::node {
     private:
         using ThisType = ArgumentNode;
         using ReturnType = utility::LeftHandValue<T>;
+        using node_instance_type = NodeInterface::node_instance_type;
     private:
         ReturnType evaluationDefinition(utility::EvaluationContext& evaluationContext)const override {
             return ReturnType(evaluationContext.getArgument(n));
@@ -34,7 +36,7 @@ namespace gp::node {
         std::string getNodeName()const override {
             return std::string("Argument<") + utility::typeInfo<ReturnType>().name() + std::string(",") + std::to_string(n) + std::string(">");
         }
-        std::unique_ptr<NodeInterface> clone()const override {return std::make_unique<ThisType>();}
+        node_instance_type clone()const override {return NodeInterface::createInstance<ThisType>();}
         NodeType getNodeType()const noexcept override final {return NodeType::Argument;}
     };
 
@@ -43,6 +45,7 @@ namespace gp::node {
     private:
         using ThisType = ArgumentNode;
         using ReturnType = utility::Reference<T>;
+        using node_instance_type = NodeInterface::node_instance_type;
     private:
         ReturnType evaluationDefinition(utility::EvaluationContext& evaluationContext)const override {
             return ReturnType(evaluationContext.getArgument(n));
@@ -51,7 +54,7 @@ namespace gp::node {
         std::string getNodeName()const override {
             return std::string("Argument<") + utility::typeInfo<ReturnType>().name() + std::string(",") + std::to_string(n) + std::string(">");
         }
-        std::unique_ptr<NodeInterface> clone()const override {return std::make_unique<ThisType>();}
+        node_instance_type clone()const override {return NodeInterface::createInstance<ThisType>();}
         NodeType getNodeType()const noexcept override final {return NodeType::Argument;}
     };
 }

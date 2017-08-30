@@ -9,6 +9,7 @@ namespace gp::node {
     class ConstNode: public NodeBase<T(void)> {
     private:
         using ThisType = ConstNode;
+        using node_instance_type = NodeInterface::node_instance_type;
         T data;
     private:
         T evaluationDefinition(utility::EvaluationContext& evaluationContext)const override {
@@ -20,7 +21,7 @@ namespace gp::node {
             sstream <<',' << data;
             return std::string("Const<") + utility::typeInfo<T>().name() + sstream.str() + std::string(">");
         }
-        std::unique_ptr<NodeInterface> clone()const override {return std::make_unique<ThisType>(data);}
+        node_instance_type clone()const override {return NodeInterface::createInstance<ThisType>();}
         NodeType getNodeType()const noexcept override final {return NodeType::Const;}
         void setNodePropertyByNodeName(const std::string& name) override {
             auto beg = name.find('<');

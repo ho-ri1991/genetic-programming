@@ -30,9 +30,11 @@ namespace gp::tree_operations {
         using node_traits<node>::set_child;
         using node_traits<node>::has_parent;
         using node_traits<node>::get_parent;
+        //type of type information
+        using type = typename node_traits<node>::type;
         //methods for type information
-        static const std::type_info& get_return_type(const node& node_) {return node_.getReturnType();}
-        static const std::type_info& get_child_return_type(const node& node_, std::size_t n) {return node_.getChildReturnType(n);}
+        static type get_return_type(const node& node_) {return node_.getReturnType();}
+        static type get_child_return_type(const node& node_, std::size_t n) {return node_.getChildReturnType(n);}
     };
 
     template <typename node>
