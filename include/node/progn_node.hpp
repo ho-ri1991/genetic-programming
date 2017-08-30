@@ -10,6 +10,8 @@ namespace gp::node {
 
     template <typename T, std::size_t n>
     class PrognNode: public TypedNodeInterface<T> {
+    public:
+        using Type = NodeInterface::Type;
         static_assert(1 < n, "progn node whose child num is smaller than 2 is not supported");
     private:
         NodeInterface* parent;
@@ -25,10 +27,10 @@ namespace gp::node {
         }
     public:
         std::size_t getChildNum()const noexcept override {return n;}
-        const std::type_info& getChildReturnType(std::size_t m)const noexcept override {
-            if(n <= m)return typeid(void);
-            else if(m == n - 1)return typeid(T);
-            else return typeid(arbitrary);
+        Type& getChildReturnType(std::size_t m)const noexcept override {
+            if(n <= m)return utility::typeInfo<utility::error>();
+            else if(m == n - 1)return utility::typeInfo<T>();
+            else return utility::typeInfo<utility::any>();
         }
         NodeInterface& getChildNode(std::size_t m)override {
             if(n <= m)throw std::invalid_argument("the index exceeded the number of children");
@@ -56,8 +58,8 @@ namespace gp::node {
             assert((m < n) && "the child index must be smaller than the number of children of the node");
             if(n <= m) throw std::invalid_argument("invalid child index");
             if(m == n - 1){
-                assert(typeid(T) == node->getReturnType());
-                if(typeid(T) != node->getReturnType()) throw std::invalid_argument("invalied type node was set as a child");
+                assert(node->getReturnType() == utility::typeInfo<T>());
+                if(utility::typeInfo<T>() != node->getReturnType()) throw std::invalid_argument("invalied type node was set as a child");
                 if(auto typed_ptr = dynamic_cast<TypedNodeInterface<T>*>(node.get())){
                     node.release();
                     lastChild.reset(typed_ptr);
@@ -80,7 +82,7 @@ namespace gp::node {
         }
         NodeType getNodeType()const noexcept override final {return NodeType::Progn;}
         std::string getNodeName()const override {
-            return std::string("Progn<") + utility::typeName<T>() + std::string(",") + std::to_string(n) + std::string(">");
+            return std::string("Progn<") + utility::typeInfo<T>().name() + std::string(",") + std::to_string(n) + std::string(">");
         }
         std::unique_ptr<NodeInterface> clone()const override {return std::make_unique<PrognNode>();}
         std::any getNodePropertyByAny()const override {return n;}

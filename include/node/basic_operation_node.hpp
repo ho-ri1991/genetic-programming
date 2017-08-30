@@ -20,7 +20,7 @@ namespace gp::node {
         }
     public:
         std::string getNodeName()const override {
-            return std::string("Substitute<") + utility::typeName<T>() + std::string(">");
+            return std::string("Substitute<") + utility::typeInfo<T>().name() + std::string(">");
         }
         std::unique_ptr<NodeInterface> clone()const override {return std::make_unique<ThisType>();}
     };
@@ -35,7 +35,7 @@ namespace gp::node {
         }
     public:
         std::string getNodeName()const override {
-            return std::string("Add<") + utility::typeName<T>() + std::string(">");
+            return std::string("Add<") + utility::typeInfo<T>().name() + std::string(">");
         }
         std::unique_ptr<NodeInterface> clone()const override {return std::make_unique<ThisType>();}
     };
@@ -50,7 +50,7 @@ namespace gp::node {
         }
     public:
         std::string getNodeName()const override {
-            return std::string("Sub<") + utility::typeName<T>() + std::string(">");
+            return std::string("Sub<") + utility::typeInfo<T>().name() + std::string(">");
         }
         std::unique_ptr<NodeInterface> clone()const override {return std::make_unique<ThisType>();}
     };
@@ -65,7 +65,7 @@ namespace gp::node {
         }
     public:
         std::string getNodeName()const override {
-            return std::string("Mult<") + utility::typeName<T>() + std::string(">");
+            return std::string("Mult<") + utility::typeInfo<T>().name() + std::string(">");
         }
         std::unique_ptr<NodeInterface> clone()const override {return std::make_unique<ThisType>();}
     };
@@ -87,7 +87,7 @@ namespace gp::node {
         }
     public:
         std::string getNodeName()const override {
-            return std::string("Div<") + utility::typeName<T>() + std::string(">");
+            return std::string("Div<") + utility::typeInfo<T>().name() + std::string(">");
         }
         std::unique_ptr<NodeInterface> clone()const override {return std::make_unique<ThisType>();}
     };
@@ -141,7 +141,7 @@ namespace gp::node {
         }
     public:
         std::string getNodeName()const override {
-            return std::string("If<") + utility::typeName<T>() + std::string(">");
+            return std::string("If<") + utility::typeInfo<T>().name() + std::string(">");
         }
         std::unique_ptr<NodeInterface> clone()const override {return std::make_unique<ThisType>();}
     };

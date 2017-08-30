@@ -7,56 +7,89 @@
 #include <unordered_map>
 
 namespace gp::utility {
-    template <typename T>
-    class TypeName {
-        friend class TypeTranslator;
-        static std::string name;
+    //describes error type of the TypeInfo
+    struct error{};
+    //describes any type of TypeInfo (this is used in the PrognNode because PrognNode takes any types of chlid)
+    struct any{};
+
+    class TypeInfo {
+    private:
+        friend class StringToType;
+        virtual const std::type_info* getTypePtr()const noexcept = 0;
+        virtual void setName(const std::string&) = 0;
     public:
-        std::string get()const {return name;}
+        virtual std::string name()const = 0;
+    public:
+        operator std::type_index() {return *getTypePtr();}
+        bool operator==(const TypeInfo& other) const {return getTypePtr() == other.getTypePtr();}
+        bool operator!=(const TypeInfo& other) const {return !(*this == other);}
     };
 
     template <typename T>
-    std::string TypeName<T>::name = typeid(T).name();
-
-    class TypeTranslator {
+    class TypeInfoImpl: public TypeInfo {
     private:
-        using StringToType = std::unordered_map<std::string, const std::type_info*>;
-        using TypeToString = std::unordered_map<std::type_index, std::string>;
+        template <typename U>
+        friend const TypeInfo& typeInfo();
+        friend class StringToType;
+        static const std::type_info& type_;
+        static std::string name_;
     private:
-        StringToType stringToType;
-        TypeToString typeToString;
+        const std::type_info* getTypePtr()const noexcept override {return &type_;}
+        void setName(const std::string& str)override {name_ = str;}
     public:
-        template <typename TypeName>
-        const std::type_info* getType(TypeName&& name) const {
-            auto itr = stringToType.find(std::forward<TypeName>(name));
-            if(itr == std::end(stringToType))return nullptr;
-            else return itr->second;
-        }
-        std::string getTypeName(const std::type_info& type) const {
-            auto itr = typeToString.find(type);
-            if(itr == std::end(typeToString))return "";
-            else return itr->second;
-        }
-        template <typename T>
-        void setTypeNamePair(const std::string& name) {
-            TypeName<T>::name = name;
-            auto itr1 = typeToString.find(typeid(T));
-            if (itr1 != std::end(typeToString)) { //update name
-                stringToType.erase(itr1->second);
-                stringToType.insert(std::make_pair(name, &typeid(T)));
-                itr1->second = name;
-            } else {
-                typeToString[typeid(T)] = name;
-                stringToType[name] = &typeid(T);
-            }
+        std::string name()const override {return name_;}
+    public:
+        TypeInfoImpl(const TypeInfoImpl&) = delete;
+        TypeInfoImpl(TypeInfoImpl&&) = delete;
+        TypeInfoImpl& operator=(const TypeInfoImpl&) = delete;
+        TypeInfoImpl& operator=(TypeInfoImpl&&) = delete;
+    private:
+        TypeInfoImpl() = default;
+        ~TypeInfoImpl() = default;
+    private:
+        static TypeInfo& get(){
+            static TypeInfoImpl type;
+            return type;
         }
     };
 
     template <typename T>
-    std::string typeName(){
-        static TypeName<T> type;
-        return type.get();
+    const std::type_info& TypeInfoImpl<T>::type_ = typeid(T);
+    template <typename T>
+    std::string TypeInfoImpl<T>::name_ = typeid(T).name();
+
+    template <typename T>
+    const TypeInfo& typeInfo(){
+        return TypeInfoImpl<T>::get();
     }
+
+    class StringToType {
+    public:
+        using Type = const TypeInfo&;
+    private:
+        using KeyType = std::string;
+        using HoldingType = const TypeInfo*;
+        using ContainerType = std::unordered_map<KeyType, HoldingType>;
+    private:
+        ContainerType container;
+    public:
+        template <typename String>
+        Type operator()(String&& name)const {return container[name];}
+        template <typename String>
+        bool hasType(String&& name)const {return container.find(name) != std::end(container);}
+        template <typename T, typename String>
+        void setTypeNamePair(String&& name) {
+            auto& type = TypeInfoImpl<T>::get();
+            for(auto itr = std::begin(container); itr != std::end(container); ++itr){
+                if(*itr->second == type){
+                    container.erase(itr);
+                    break;
+                }
+            }
+            type.setName(name);
+            container[name] = &type;
+        }
+    };
 }
 
 #endif

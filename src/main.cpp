@@ -60,8 +60,6 @@ int main() {
     progn->setChild(0, std::move(subst));
     progn->setChild(1, std::move(add1));
 
-//    add->setChild(0, c1);
-//    add->setChild(1, c2);
     tree::Tree tree(typeid(int), std::vector<const std::type_info*>{&typeid(int), &typeid(int)}, std::vector<const std::type_info*>{&typeid(int)}, std::move(progn));
     auto ans = tree.evaluate(std::vector<utility::Variable>{1, 2});
     std::cout<<std::any_cast<int>(ans.getReturnValue())<<std::endl;
@@ -70,10 +68,9 @@ int main() {
 //    std::cout<<ans.getLocalVariable(0).get<int>()<<std::endl;
 //    func<5, int, double, bool>();
 
-    utility::TypeTranslator typeTranslator;
-    typeTranslator.setTypeNamePair<int>("int");
-    typeTranslator.setTypeNamePair<utility::LeftHandValue<int>>("lvalue<int>");
-//    treeWriter(tree.getRootNode(), std::vector<const std::type_info*>{&typeid(int), &typeid(int)}, std::vector<const std::type_info*>{&typeid(int)}, "test");
+    utility::StringToType stringToType;
+    stringToType.setTypeNamePair<int>("int");
+    stringToType.setTypeNamePair<utility::LeftHandValue<int>>("lvalue<int>");
     std::ofstream fout("tree.txt");
     tree_operations::writeTree(tree.getRootNode(), fout);
 

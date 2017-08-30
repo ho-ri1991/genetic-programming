@@ -11,13 +11,13 @@
 
 namespace gp::node{
     template <typename T, typename ...Ts>
-    const std::type_info& getRTTI(std::size_t n)noexcept {
+    NodeInterface::Type getRTTI(std::size_t n)noexcept {
         if constexpr (sizeof...(Ts) > 0) {
-            if(n == 0)return typeid(T);
+            if(n == 0)return utility::typeInfo<T>();
             else return getRTTI<Ts...>(n - 1);
         } else {
-            if(n != 0) return typeid(void);
-            else return typeid(T);
+            if(n != 0) return utility::typeInfo<utility::error>();
+            else return utility::typeInfo<T>();
         }
     }
 
@@ -113,6 +113,8 @@ namespace gp::node{
 
     template <typename T, typename ...Args>
     class NodeBase<T(Args...)>: public TypedNodeInterface<T> {
+    public:
+        using Type = NodeInterface::Type;
     protected:
         NodeInterface* parent;
         std::tuple<std::unique_ptr<TypedNodeInterface<Args>>...> children;
@@ -120,7 +122,7 @@ namespace gp::node{
         void setParent(NodeInterface* node)override {parent = node;}
     public:
         std::size_t getChildNum()const noexcept override {return std::tuple_size<decltype(children)>::value;}
-        const std::type_info& getChildReturnType(std::size_t n)const noexcept override {
+        Type getChildReturnType(std::size_t n)const noexcept override {
             return getRTTI<Args...>(n);
         }
         NodeInterface& getChildNode(std::size_t n)override {
@@ -133,7 +135,7 @@ namespace gp::node{
         }
         void setChild(std::size_t n, std::unique_ptr<NodeInterface> node)override {
             assert((n < sizeof...(Args)) && "the child index must be smaller than the number of children of the node");
-            assert(node->getReturnType() == getRTTI<Args...>(n) && "the return type of child must equal to the argument type of the node");
+            assert(getRTTI<Args...>(n) == node->getReturnType() && "the return type of child must equal to the argument type of the node");
             setDynamic(n, std::move(node), children);
             getChildNode(n).setParent(this);
         }
@@ -158,13 +160,15 @@ namespace gp::node{
 
     template<typename T>
     class NodeBase<T(void)>: public TypedNodeInterface<T> {
+    public:
+        using Type = NodeInterface::Type;
     private:
         NodeInterface* parent;
     protected:
         void setParent(NodeInterface* node)override {parent = node;}
     public:
         std::size_t getChildNum()const noexcept override {return 0;}
-        const std::type_info& getChildReturnType(std::size_t)const noexcept override{return typeid(void);}
+        Type getChildReturnType(std::size_t)const noexcept override{return utility::typeInfo<utility::error>();}
         NodeInterface& getChildNode(std::size_t)override {throw std::invalid_argument("tried to get child, but this child takes no child");}
         const NodeInterface& getChildNode(std::size_t)const override {throw std::invalid_argument("tried to get child, but this child takes no child");}
         void setChild(std::size_t, std::unique_ptr<NodeInterface>)override {

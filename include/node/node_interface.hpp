@@ -24,14 +24,16 @@ namespace gp::node{
     class PrognNode;
 
     class NodeInterface {
+    public:
+        using Type = const utility::TypeInfo&;
     private:
         template <typename T> friend class NodeBase;
         template <typename T, std::size_t n> friend class PrognNode;
         virtual void setParent(NodeInterface* node) = 0;
     public:
         //type information methods
-        virtual const std::type_info& getReturnType()const noexcept= 0;
-        virtual const std::type_info& getChildReturnType(std::size_t n)const noexcept = 0;
+        virtual Type getReturnType()const noexcept= 0;
+        virtual Type getChildReturnType(std::size_t n)const noexcept = 0;
         //methods for children
         virtual std::size_t getChildNum()const noexcept = 0;
         virtual bool hasChild(std::size_t n)const noexcept = 0;

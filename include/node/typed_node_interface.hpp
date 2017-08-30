@@ -8,6 +8,8 @@
 namespace gp::node{
     template<typename T>
     class TypedNodeInterface: public NodeInterface {
+    public:
+        using Type = NodeInterface::Type;
     private:
         virtual T evaluationDefinition(utility::EvaluationContext&)const = 0;
     public:
@@ -21,7 +23,7 @@ namespace gp::node{
         virtual void setNodePropertyByAny(const std::any&) override {}
         virtual std::any getNodePropertyByAny()const override {return std::any();}
     public:
-        const std::type_info& getReturnType()const noexcept override {return typeid(T);}
+        Type getReturnType()const noexcept override {return utility::typeInfo<T>();}
         std::any evaluateByAny(utility::EvaluationContext& evaluationContext)const final override {return evaluate(evaluationContext);}
     public:
         virtual ~TypedNodeInterface() = default;
