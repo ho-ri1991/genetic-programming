@@ -73,6 +73,7 @@ namespace gp::tree_operations {
 
     template <typename node>
     std::size_t getDepth(const node& node_) {
+        static_assert(is_node_type<node>::value);
         using traits = node_traits<node>;
         if(!traits::has_parent(node_)) return 0;
         else return 1 + getDepth(traits::get_parent(node_));
@@ -80,6 +81,7 @@ namespace gp::tree_operations {
 
     template <typename node>
     std::size_t getHeight(const node& node_) {
+        static_assert(is_node_type<node>::value);
         using traits = node_traits<node>;
         if(traits::get_child_num(node_) == 0) return 0;
         std::size_t ans = 0;
@@ -92,7 +94,13 @@ namespace gp::tree_operations {
 
     template <typename output_node>
     void writeTree(const output_node& rootNode, std::ostream& out) {
+        static_assert(is_output_node_type<output_node>::value);
         TreeOperationHelper::writeTreeHelper(rootNode, out);
+    }
+
+    template <typename string_to_node, typename tree_property>
+    auto readTree(const string_to_node& stringToNode, const tree_property& treeProperty, std::istream& in) {
+
     }
 }
 

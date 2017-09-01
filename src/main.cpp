@@ -60,7 +60,15 @@ int main() {
     progn->setChild(0, std::move(subst));
     progn->setChild(1, std::move(add1));
 
-    tree::Tree tree(typeid(int), std::vector<const std::type_info*>{&typeid(int), &typeid(int)}, std::vector<const std::type_info*>{&typeid(int)}, std::move(progn));
+    node::NodeInterface::node_instance_type rootNode = std::move(progn);
+
+//    std::ofstream fout1("ptr.txt");
+//    tree_operations::writeTree(rootNode, fout1);
+
+    std::cout<<tree_operations::getDepth(rootNode)<<std::endl;
+    std::cout<<tree_operations::getHeight(rootNode)<<std::endl;
+
+    tree::Tree tree(typeid(int), std::vector<const std::type_info*>{&typeid(int), &typeid(int)}, std::vector<const std::type_info*>{&typeid(int)}, std::move(rootNode));
     auto ans = tree.evaluate(std::vector<utility::Variable>{1, 2});
     std::cout<<std::any_cast<int>(ans.getReturnValue())<<std::endl;
 //    std::cout<<ans.getArgument(0).get<int>()<<std::endl;
