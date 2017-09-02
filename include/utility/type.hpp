@@ -2,9 +2,8 @@
 #define GP_UTILITY_TYPE
 
 #include <string>
-#include <typeinfo>
-#include <typeindex>
 #include <unordered_map>
+#include <functional>
 
 namespace gp::utility {
     //describes error type of the TypeInfo
@@ -12,29 +11,28 @@ namespace gp::utility {
     //describes any type of TypeInfo (this is used in the PrognNode because PrognNode takes any types of chlid)
     struct any{};
 
+    template <typename T>
+    class TypeInfoImpl;
+
     class TypeInfo {
     private:
         friend class StringToType;
-        virtual const std::type_info* getTypePtr()const noexcept = 0;
         virtual void setName(const std::string&) = 0;
     public:
         virtual std::string name()const = 0;
-    public:
-        operator std::type_index() {return *getTypePtr();}
-        bool operator==(const TypeInfo& other) const {return getTypePtr() == other.getTypePtr();}
+    public://expect singleton
+        bool operator==(const TypeInfo& other) const {return this == &other;}
         bool operator!=(const TypeInfo& other) const {return !(*this == other);}
+    private:
+        template <typename T> friend class TypeInfoImpl;
+        TypeInfo() = default;
     };
 
     template <typename T>
     class TypeInfoImpl: public TypeInfo {
     private:
-        template <typename U>
-        friend const TypeInfo& typeInfo();
-        friend class StringToType;
-        static const std::type_info& type_;
         static std::string name_;
     private:
-        const std::type_info* getTypePtr()const noexcept override {return &type_;}
         void setName(const std::string& str)override {name_ = str;}
     public:
         std::string name()const override {return name_;}
@@ -43,10 +41,10 @@ namespace gp::utility {
         TypeInfoImpl(TypeInfoImpl&&) = delete;
         TypeInfoImpl& operator=(const TypeInfoImpl&) = delete;
         TypeInfoImpl& operator=(TypeInfoImpl&&) = delete;
-    private:
+    private:// singleton
         TypeInfoImpl() = default;
         ~TypeInfoImpl() = default;
-    private:
+    public:
         static TypeInfo& get(){
             static TypeInfoImpl type;
             return type;
@@ -54,9 +52,20 @@ namespace gp::utility {
     };
 
     template <typename T>
-    const std::type_info& TypeInfoImpl<T>::type_ = typeid(T);
-    template <typename T>
     std::string TypeInfoImpl<T>::name_ = typeid(T).name();
+
+    class TypeIndex {
+    private:
+        const TypeInfo& type;
+    public:
+        bool operator==(const TypeIndex& other)const {return type == other.type;}
+        bool operator!=(const TypeIndex& other)const {return type != other.type;}
+        TypeIndex(const TypeInfo& type_): type(type_){}
+    public://hash function
+        struct Hash {
+            std::size_t operator()(const TypeIndex& key)const {return std::hash<const TypeInfo*>()(&key.type);}
+        };
+    };
 
     template <typename T>
     const TypeInfo& typeInfo(){
