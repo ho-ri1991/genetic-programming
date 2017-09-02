@@ -3,7 +3,7 @@
 
 #include <memory>
 #include <type_traits>
-#include <node/node_interface.hpp>
+#include <gp/node/node_interface.hpp>
 
 namespace gp::tree_operations {
     template <typename T>

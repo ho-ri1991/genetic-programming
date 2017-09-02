@@ -2,7 +2,7 @@
 #define GP_NODE_BASIC_OPERATION_NODE
 
 #include "node_base.hpp"
-#include <utility/left_hand_value.hpp>
+#include <gp/utility/left_hand_value.hpp>
 
 namespace gp::node {
     template <typename T>

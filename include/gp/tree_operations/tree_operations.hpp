@@ -2,7 +2,7 @@
 #define GP_TREE_TREE_OPERATIONS_TREE_OPERATIONS
 
 #include <iostream>
-#include <gp_config.hpp>
+#include <gp/gp_config.hpp>
 #include "node_traits.hpp"
 #include "tree_traits.hpp"
 #include "string_to_node_traits.hpp"
@@ -119,7 +119,7 @@ namespace gp::tree_operations {
     auto readTree(const string_to_node& stringToNode, const tree_property& treeProperty, std::istream& in) {
         static_assert(is_string_to_node_type_v<string_to_node>);
         static_assert(is_tree_property_type_v<tree_property>);
-        using node_type = string_to_node_traits<string_to_node>::node_instance_type;
+        using node_type = typename string_to_node_traits<string_to_node>::node_instance_type;
         static_assert(is_node_type_v<node_type> || is_node_ptr_type_v<node_type>);
     }
 }

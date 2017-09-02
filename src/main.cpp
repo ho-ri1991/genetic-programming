@@ -1,9 +1,9 @@
 #include <iostream>
-#include <tree/tree.hpp>
+#include <gp/tree/tree.hpp>
 #include <boost/type_index.hpp>
-#include <node/node.hpp>
-#include <io/tree_io.hpp>
-#include <tree_operations/tree_operations.hpp>
+#include <gp/node/node.hpp>
+#include <gp/io/tree_io.hpp>
+#include <gp/tree_operations/tree_operations.hpp>
 using namespace gp;
 
 template <std::size_t n, typename ...> struct acc;

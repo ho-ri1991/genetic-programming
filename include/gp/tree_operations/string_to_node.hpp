@@ -1,7 +1,7 @@
 #ifndef GP_TREE_OPERATIONS_STRING_TO_NODE
 #define GP_TREE_OPERATIONS_STRING_TO_NODE
 
-#include <node/node_interface.hpp>
+#include <gp/node/node_interface.hpp>
 #include <unordered_map>
 
 namespace gp::tree_operations {

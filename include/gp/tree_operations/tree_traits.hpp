@@ -2,7 +2,7 @@
 #define GP_TREE_OPERATIONS_TREE_TRAITS
 
 #include <type_traits>
-#include <tree/tree.hpp>
+#include <gp/tree/tree.hpp>
 #include "string_to_node.hpp"
 
 namespace gp::tree_operations {

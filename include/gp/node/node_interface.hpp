@@ -1,11 +1,10 @@
 #ifndef GP_NODE_INTERFACE
 #define GP_NODE_INTERFACE
 
-#include <typeinfo>
 #include <memory>
 #include <any>
-#include <utility/evaluation_context.hpp>
-#include <utility/type.hpp>
+#include <gp/utility/evaluation_context.hpp>
+#include <gp/utility/type.hpp>
 
 namespace gp::node{
     enum class NodeType {

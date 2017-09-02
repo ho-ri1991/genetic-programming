@@ -2,8 +2,8 @@
 #define GP_NODE_LOCAL_VARIABLE_NODE
 
 #include "node_base.hpp"
-#include <utility/left_hand_value.hpp>
-#include <utility/reference.hpp>
+#include <gp/utility/left_hand_value.hpp>
+#include <gp/utility/reference.hpp>
 
 namespace gp::node {
     template <typename T, std::size_t n>

@@ -2,8 +2,8 @@
 #define GP_NODE_TYPED_NODE_INTERFACE
 
 #include "node_interface.hpp"
-#include <utility/evaluation_context.hpp>
-#include <utility/default_initializer.hpp>
+#include <gp/utility/evaluation_context.hpp>
+#include <gp/utility/default_initializer.hpp>
 
 namespace gp::node{
     template<typename T>

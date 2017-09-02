@@ -1,8 +1,8 @@
 #ifndef GP_TREE_TREE
 #define GP_TREE_TREE
 
-#include <utility/evaluation_context.hpp>
-#include <node/node_interface.hpp>
+#include <gp/utility/evaluation_context.hpp>
+#include <gp/node/node_interface.hpp>
 #include <exception>
 
 namespace gp::tree {
