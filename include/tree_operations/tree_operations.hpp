@@ -73,29 +73,45 @@ namespace gp::tree_operations {
 
     template <typename node>
     std::size_t getDepth(const node& node_) {
-        static_assert(is_node_type<node>::value);
-        using traits = node_traits<node>;
-        if(!traits::has_parent(node_)) return 0;
-        else return 1 + getDepth(traits::get_parent(node_));
+        static_assert(is_node_type_v<node> || is_node_ptr_type_v<node>);
+        if constexpr(is_node_ptr_type_v<node>) {
+            static_assert(is_node_type_v<remove_cv_reference_t<decltype(*node_)>>);
+            return getDepth(*node_);
+        } else {
+            using traits = node_traits<node>;
+            if (!traits::has_parent(node_)) return 0;
+            else return 1 + getDepth(traits::get_parent(node_));
+        }
     }
 
     template <typename node>
     std::size_t getHeight(const node& node_) {
-        static_assert(is_node_type<node>::value);
-        using traits = node_traits<node>;
-        if(traits::get_child_num(node_) == 0) return 0;
-        std::size_t ans = 0;
-        for(int i = 0; i < traits::get_child_num(node_); ++i) {
-            if(!traits::has_child(node_, i)) throw std::runtime_error("the operating tree structure must not have null node");
-            ans = std::max(ans, getHeight(traits::get_child(node_, i)));
+        static_assert(is_node_type_v<node> || is_node_ptr_type_v<node>);
+        if constexpr (is_node_ptr_type_v<node>) {
+            static_assert(is_node_type_v<remove_cv_reference_t<decltype(*node_)>>);
+            return getHeight(*node_);
+        } else {
+            using traits = node_traits<node>;
+            if (traits::get_child_num(node_) == 0) return 0;
+            std::size_t ans = 0;
+            for (int i = 0; i < traits::get_child_num(node_); ++i) {
+                if (!traits::has_child(node_, i))
+                    throw std::runtime_error("the operating tree structure must not have null node");
+                ans = std::max(ans, getHeight(traits::get_child(node_, i)));
+            }
+            return ans + 1;
         }
-        return ans + 1;
     }
 
     template <typename output_node>
     void writeTree(const output_node& rootNode, std::ostream& out) {
-        static_assert(is_output_node_type<output_node>::value);
-        TreeOperationHelper::writeTreeHelper(rootNode, out);
+        static_assert(is_output_node_type_v<output_node> || is_output_node_ptr_type_v<output_node>);
+        if constexpr (is_output_node_ptr_type_v<output_node>) {
+            static_assert(is_node_type_v<remove_cv_reference_t<decltype(*rootNode)>>);
+            return writeTree(*rootNode, out);
+        } else {
+            return TreeOperationHelper::writeTreeHelper(rootNode, out);
+        }
     }
 
     template <typename string_to_node, typename tree_property>

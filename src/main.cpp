@@ -40,6 +40,11 @@ void func(){
 }
 
 int main() {
+    utility::StringToType stringToType;
+    stringToType.setTypeNamePair<int>("int");
+    stringToType.setTypeNamePair<utility::LeftHandValue<int>>("lvalue<int>");
+
+
     auto subtruct = std::make_unique<node::SubtractNode<int>>();
     auto mult = std::make_unique<node::MultiplyNode<int>>();
     auto progn = std::make_unique<node::PrognNode<int, 2>>();
@@ -62,8 +67,8 @@ int main() {
 
     node::NodeInterface::node_instance_type rootNode = std::move(progn);
 
-//    std::ofstream fout1("ptr.txt");
-//    tree_operations::writeTree(rootNode, fout1);
+    std::ofstream fout1("ptr.txt");
+    tree_operations::writeTree(rootNode, fout1);
 
     std::cout<<tree_operations::getDepth(rootNode)<<std::endl;
     std::cout<<tree_operations::getHeight(rootNode)<<std::endl;
@@ -76,9 +81,6 @@ int main() {
 //    std::cout<<ans.getLocalVariable(0).get<int>()<<std::endl;
 //    func<5, int, double, bool>();
 
-    utility::StringToType stringToType;
-    stringToType.setTypeNamePair<int>("int");
-    stringToType.setTypeNamePair<utility::LeftHandValue<int>>("lvalue<int>");
     std::ofstream fout("tree.txt");
     tree_operations::writeTree(tree.getRootNode(), fout);
 
