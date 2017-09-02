@@ -25,7 +25,7 @@ namespace gp::node{
 
     class NodeInterface {
     public:
-        using type = const utility::TypeInfo&;
+        using type_info = const utility::TypeInfo&;
         using node_instance_type = std::unique_ptr<NodeInterface>;
         template <typename NodeType, typename ...Ts>
         static node_instance_type createInstance(Ts&&... args) {return std::make_unique<NodeType>(std::forward<Ts>(args)...);}
@@ -35,8 +35,8 @@ namespace gp::node{
         virtual void setParent(NodeInterface* node) = 0;
     public:
         //type information methods
-        virtual type getReturnType()const noexcept= 0;
-        virtual type getChildReturnType(std::size_t n)const noexcept = 0;
+        virtual type_info getReturnType()const noexcept= 0;
+        virtual type_info getChildReturnType(std::size_t n)const noexcept = 0;
         //methods for children
         virtual std::size_t getChildNum()const noexcept = 0;
         virtual bool hasChild(std::size_t n)const noexcept = 0;

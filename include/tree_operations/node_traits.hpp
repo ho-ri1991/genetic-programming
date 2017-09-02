@@ -1,7 +1,6 @@
 #ifndef GP_TREE_OPERATIONS_NODE_TRAITS
 #define GP_TREE_OPERATIONS_NODE_TRAITS
 
-#include <typeinfo>
 #include <memory>
 #include <type_traits>
 #include <node/node_interface.hpp>
@@ -80,7 +79,7 @@ namespace gp::tree_operations {
         using node_traits<adapt_type>::has_parent;
         using node_traits<adapt_type>::get_parent;
         //type of type information
-        using type_info = typename adapt_type::type;
+        using type_info = typename adapt_type::type_info;
         //methods for type information
         static type_info get_return_type(const adapt_type& node_) {return node_.getReturnType();}
         static type_info get_child_return_type(const adapt_type& node_, std::size_t n) {return node_.getChildReturnType(n);}

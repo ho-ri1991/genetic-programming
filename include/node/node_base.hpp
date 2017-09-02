@@ -11,7 +11,7 @@
 
 namespace gp::node{
     template <typename T, typename ...Ts>
-    NodeInterface::type getRTTI(std::size_t n)noexcept {
+    NodeInterface::type_info getRTTI(std::size_t n)noexcept {
         if constexpr (sizeof...(Ts) > 0) {
             if(n == 0)return utility::typeInfo<T>();
             else return getRTTI<Ts...>(n - 1);
@@ -114,7 +114,7 @@ namespace gp::node{
     template <typename T, typename ...Args>
     class NodeBase<T(Args...)>: public TypedNodeInterface<T> {
     public:
-        using type = NodeInterface::type;
+        using type_info = NodeInterface::type_info;
         using node_instance_type =NodeInterface::node_instance_type;
     protected:
         NodeInterface* parent;
@@ -123,7 +123,7 @@ namespace gp::node{
         void setParent(NodeInterface* node)override {parent = node;}
     public:
         std::size_t getChildNum()const noexcept override {return std::tuple_size<decltype(children)>::value;}
-        type getChildReturnType(std::size_t n)const noexcept override {
+        type_info getChildReturnType(std::size_t n)const noexcept override {
             return getRTTI<Args...>(n);
         }
         NodeInterface& getChildNode(std::size_t n)override {
@@ -162,7 +162,7 @@ namespace gp::node{
     template<typename T>
     class NodeBase<T(void)>: public TypedNodeInterface<T> {
     public:
-        using type = NodeInterface::type;
+        using type_info = NodeInterface::type_info;
         using node_instance_type =NodeInterface::node_instance_type;
     private:
         NodeInterface* parent;
@@ -170,7 +170,7 @@ namespace gp::node{
         void setParent(NodeInterface* node)override {parent = node;}
     public:
         std::size_t getChildNum()const noexcept override {return 0;}
-        type getChildReturnType(std::size_t)const noexcept override{return utility::typeInfo<utility::error>();}
+        type_info getChildReturnType(std::size_t)const noexcept override{return utility::typeInfo<utility::error>();}
         NodeInterface& getChildNode(std::size_t)override {throw std::invalid_argument("tried to get child, but this child takes no child");}
         const NodeInterface& getChildNode(std::size_t)const override {throw std::invalid_argument("tried to get child, but this child takes no child");}
         void setChild(std::size_t, std::unique_ptr<NodeInterface>)override {

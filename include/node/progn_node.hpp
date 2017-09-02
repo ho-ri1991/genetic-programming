@@ -11,7 +11,7 @@ namespace gp::node {
     template <typename T, std::size_t n>
     class PrognNode: public TypedNodeInterface<T> {
     public:
-        using type = NodeInterface::type;
+        using type_info = NodeInterface::type_info;
         using node_instance_type = NodeInterface::node_instance_type;
         static_assert(1 < n, "progn node whose child num is smaller than 2 is not supported");
     private:
@@ -28,7 +28,7 @@ namespace gp::node {
         }
     public:
         std::size_t getChildNum()const noexcept override {return n;}
-        type getChildReturnType(std::size_t m)const noexcept override {
+        type_info getChildReturnType(std::size_t m)const noexcept override {
             if(n <= m)return utility::typeInfo<utility::error>();
             else if(m == n - 1)return utility::typeInfo<T>();
             else return utility::typeInfo<utility::any>();
