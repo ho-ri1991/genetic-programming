@@ -81,8 +81,8 @@ namespace gp::tree_operations {
         //type of type information
         using type_info = typename adapt_type::type_info;
         //methods for type information
-        static type_info get_return_type(const adapt_type& node_) {return node_.getReturnType();}
-        static type_info get_child_return_type(const adapt_type& node_, std::size_t n) {return node_.getChildReturnType(n);}
+        static const type_info& get_return_type(const adapt_type& node_) {return node_.getReturnType();}
+        static const type_info& get_child_return_type(const adapt_type& node_, std::size_t n) {return node_.getChildReturnType(n);}
     };
 
     template <>
@@ -135,6 +135,7 @@ namespace gp::tree_operations {
     template <typename node>
     struct input_node_traits: private typed_node_traits<node> {
         using node_instance_type = typename typed_node_traits<node>::node_instance_type;
+        using type_info = typename typed_node_traits<node>::type_info;
         using typed_node_traits<node>::get_child_num;
         using typed_node_traits<node>::has_child;
         using typed_node_traits<node>::get_child;

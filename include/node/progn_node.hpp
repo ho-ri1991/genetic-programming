@@ -28,7 +28,7 @@ namespace gp::node {
         }
     public:
         std::size_t getChildNum()const noexcept override {return n;}
-        type_info getChildReturnType(std::size_t m)const noexcept override {
+        const type_info& getChildReturnType(std::size_t m)const noexcept override {
             if(n <= m)return utility::typeInfo<utility::error>();
             else if(m == n - 1)return utility::typeInfo<T>();
             else return utility::typeInfo<utility::any>();
