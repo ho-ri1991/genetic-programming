@@ -19,6 +19,8 @@ namespace gp::node{
 
     //primary declarations for friend class declarations
     template <typename T>
+    class TypedNodeInterface;
+    template <typename T>
     class NodeBase;
     template <typename T, std::size_t n>
     class PrognNode;
@@ -30,8 +32,10 @@ namespace gp::node{
         template <typename NodeType, typename ...Ts>
         static node_instance_type createInstance(Ts&&... args) {return std::make_unique<NodeType>(std::forward<Ts>(args)...);}
     private:
+        template <typename T> friend class TypedNodeInterface;
         template <typename T> friend class NodeBase;
         template <typename T, std::size_t n> friend class PrognNode;
+        NodeInterface() = default; //only the TypedNodeInterface can construct NodeInterface. Users who want to create custom node must derive NodeBase or TypedNodeInterface.
         virtual void setParent(NodeInterface* node) = 0;
     public:
         //type information methods
@@ -62,7 +66,6 @@ namespace gp::node{
         NodeInterface& operator=(NodeInterface&&) = default;
         NodeInterface(const NodeInterface&) = default;
         NodeInterface& operator=(const NodeInterface&) = default;
-        NodeInterface() = default;
     };
 }
 
