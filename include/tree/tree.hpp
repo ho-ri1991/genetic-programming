@@ -6,6 +6,13 @@
 #include <exception>
 
 namespace gp::tree {
+    struct TreeProperty {
+        using type_info = node::NodeInterface::type_info;
+        using container_type = std::vector<const type_info*>;
+        container_type argumentTypes;
+        const type_info* returnType;
+    };
+
     class Tree {
     public:
         using NodeType = node::NodeInterface;
