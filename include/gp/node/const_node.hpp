@@ -5,6 +5,12 @@
 #include <sstream>
 
 namespace gp::node {
+    namespace const_node {
+        constexpr const char* nameHeader = "Const<";
+        constexpr char nameDelimiter = '>';
+        constexpr char propertySeparator = ',';
+    }
+
     template <typename T>
     class ConstNode: public NodeBase<T(void)> {
     private:
@@ -18,8 +24,8 @@ namespace gp::node {
     public:
         std::string getNodeName()const override {
             std::stringstream sstream;
-            sstream <<',' << data;
-            return std::string("Const<") + utility::typeInfo<T>().name() + sstream.str() + std::string(">");
+            sstream << const_node::propertySeparator << data;
+            return std::string(const_node::nameHeader) + utility::typeInfo<T>().name() + sstream.str() + std::string(1, const_node::nameDelimiter);
         }
         node_instance_type clone()const override {return NodeInterface::createInstance<ThisType>();}
         NodeType getNodeType()const noexcept override final {return NodeType::Const;}
