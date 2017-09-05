@@ -6,7 +6,7 @@
 #include <gp/utility/reference.hpp>
 
 namespace gp::node {
-    template <typename T, std::size_t n>
+    template <typename T, node::NodeInterface::variable_index_type n>
     class ArgumentNode: public NodeBase<T(void)> {
         using ThisType = ArgumentNode;
         using node_instance_type = NodeInterface::node_instance_type;
@@ -22,7 +22,7 @@ namespace gp::node {
         NodeType getNodeType()const noexcept override final {return NodeType::Argument;}
     };
 
-    template <typename T, std::size_t n>
+    template <typename T, node::NodeInterface::variable_index_type n>
     class ArgumentNode<utility::LeftHandValue<T>, n>: public NodeBase<utility::LeftHandValue<T>(void)> {
     private:
         using ThisType = ArgumentNode;
@@ -40,7 +40,7 @@ namespace gp::node {
         NodeType getNodeType()const noexcept override final {return NodeType::Argument;}
     };
 
-    template <typename T, std::size_t n>
+    template <typename T, node::NodeInterface::variable_index_type n>
     class ArgumentNode<utility::Reference<T>, n>: public NodeBase<utility::Reference<T>(void)> {
     private:
         using ThisType = ArgumentNode;

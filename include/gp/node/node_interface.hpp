@@ -30,6 +30,8 @@ namespace gp::node{
         using node_instance_type = std::unique_ptr<NodeInterface>;
         template <typename NodeType, typename ...Ts>
         static node_instance_type createInstance(Ts&&... args) {return std::make_unique<NodeType>(std::forward<Ts>(args)...);}
+    public:
+        using variable_index_type = std::size_t;
     private:
         template <typename T> friend class TypedNodeInterface;
         template <typename T> friend class NodeBase;

@@ -6,7 +6,7 @@
 #include <gp/utility/reference.hpp>
 
 namespace gp::node {
-    template <typename T, std::size_t n>
+    template <typename T, node::NodeInterface::variable_index_type n>
     class LocalVariableNode: public NodeBase<T(void)> {
         using ThisType = LocalVariableNode;
         using node_instance_type = NodeInterface::node_instance_type;
@@ -27,7 +27,7 @@ namespace gp::node {
         NodeType getNodeType()const noexcept override final {return NodeType::LocalVariable;}
     };
 
-    template <typename T, std::size_t n>
+    template <typename T, node::NodeInterface::variable_index_type n>
     class LocalVariableNode<utility::LeftHandValue<T>, n>: public NodeBase<utility::LeftHandValue<T>(void)> {
         using ThisType = LocalVariableNode;
         using ReturnType = utility::LeftHandValue<T>;
@@ -48,7 +48,7 @@ namespace gp::node {
         NodeType getNodeType()const noexcept override final {return NodeType::LocalVariable;}
     };
 
-    template <typename T, std::size_t n>
+    template <typename T, node::NodeInterface::variable_index_type n>
     class LocalVariableNode<utility::Reference<T>, n>: public NodeBase<utility::Reference<T>(void)> {
     private:
         using ThisType = LocalVariableNode;
