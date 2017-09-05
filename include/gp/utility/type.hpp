@@ -4,6 +4,8 @@
 #include <string>
 #include <unordered_map>
 #include <functional>
+#include "reference.hpp"
+#include "left_hand_value.hpp"
 
 namespace gp::utility {
     //describes error type of the TypeInfo
@@ -23,6 +25,12 @@ namespace gp::utility {
     public://expect singleton
         bool operator==(const TypeInfo& other) const {return this == &other;}
         bool operator!=(const TypeInfo& other) const {return !(*this == other);}
+        virtual bool isAnyType()const noexcept {return false;}
+        virtual bool isErrorType()const noexcept {return false;}
+        virtual bool isReferenceType()const noexcept {return false;}
+        virtual bool isLeftHandValueType()const noexcept {return false;}
+        virtual const TypeInfo& removeReferenceType()const noexcept {return *this;}
+        virtual const TypeInfo& removeLeftHandValueType()const noexcept {return *this;}
     private:
         template <typename T> friend class TypeInfoImpl;
         TypeInfo() = default;
@@ -36,6 +44,8 @@ namespace gp::utility {
         void setName(const std::string& str)override {name_ = str;}
     public:
         std::string name()const override {return name_;}
+        bool isAnyType()const noexcept override {return std::is_same_v<T, any>;}
+        bool isErrorType()const noexcept override {return std::is_same_v<T, error>;}
     public:
         TypeInfoImpl(const TypeInfoImpl&) = delete;
         TypeInfoImpl(TypeInfoImpl&&) = delete;
@@ -53,6 +63,62 @@ namespace gp::utility {
 
     template <typename T>
     std::string TypeInfoImpl<T>::name_ = typeid(T).name();
+
+    template <typename T>
+    class TypeInfoImpl<Reference<T>>: public TypeInfo {
+    private:
+        static std::string name_;
+    private:
+        void setName(const std::string& str)override {name_ = str;}
+    public:
+        std::string name()const override {return name_;}
+    public:
+        TypeInfoImpl(const TypeInfoImpl&) = delete;
+        TypeInfoImpl(TypeInfoImpl&&) = delete;
+        TypeInfoImpl& operator=(const TypeInfoImpl&) = delete;
+        TypeInfoImpl& operator=(TypeInfoImpl&&) = delete;
+    private:// singleton
+        TypeInfoImpl() = default;
+        ~TypeInfoImpl() = default;
+    public:
+        bool isReferenceType()const noexcept override {return true;}
+        const TypeInfo& removeReferenceType()const noexcept override {return TypeInfoImpl<T>::get();}
+        static TypeInfo& get(){
+            static TypeInfoImpl type;
+            return type;
+        }
+    };
+
+    template <typename T>
+    std::string TypeInfoImpl<Reference<T>>::name_ = typeid(Reference<T>).name();
+
+    template <typename T>
+    class TypeInfoImpl<LeftHandValue<T>>: public TypeInfo {
+    private:
+        static std::string name_;
+    private:
+        void setName(const std::string& str)override {name_ = str;}
+    public:
+        std::string name()const override {return name_;}
+    public:
+        TypeInfoImpl(const TypeInfoImpl&) = delete;
+        TypeInfoImpl(TypeInfoImpl&&) = delete;
+        TypeInfoImpl& operator=(const TypeInfoImpl&) = delete;
+        TypeInfoImpl& operator=(TypeInfoImpl&&) = delete;
+    private:// singleton
+        TypeInfoImpl() = default;
+        ~TypeInfoImpl() = default;
+    public:
+        bool isLeftHandValueType()const noexcept override {return true;}
+        const TypeInfo& removeLeftHandValueType()const noexcept override {return TypeInfoImpl<T>::get();}
+        static TypeInfo& get(){
+            static TypeInfoImpl type;
+            return type;
+        }
+    };
+
+    template <typename T>
+    std::string TypeInfoImpl<LeftHandValue<T>>::name_ = typeid(Reference<T>).name();
 
     class TypeIndex {
     private:
