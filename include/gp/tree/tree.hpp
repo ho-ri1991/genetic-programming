@@ -10,6 +10,7 @@ namespace gp::tree {
         using type_info = node::NodeInterface::type_info;
         using container_type = std::vector<const type_info*>;
         container_type argumentTypes;
+        container_type localVariableTypes;
         const type_info* returnType;
     };
 
