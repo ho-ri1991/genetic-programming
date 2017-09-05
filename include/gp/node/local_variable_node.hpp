@@ -25,6 +25,7 @@ namespace gp::node {
         }
         node_instance_type clone()const override {return NodeInterface::createInstance<ThisType>();}
         NodeType getNodeType()const noexcept override final {return NodeType::LocalVariable;}
+        std::any getNodePropertyByAny()const override final {return n;}
     };
 
     template <typename T, node::NodeInterface::variable_index_type n>
@@ -46,6 +47,7 @@ namespace gp::node {
         }
         node_instance_type clone()const override {return NodeInterface::createInstance<ThisType>();}
         NodeType getNodeType()const noexcept override final {return NodeType::LocalVariable;}
+        std::any getNodePropertyByAny()const override final {return n;}
     };
 
     template <typename T, node::NodeInterface::variable_index_type n>
@@ -68,6 +70,7 @@ namespace gp::node {
         }
         node_instance_type clone()const override {return NodeInterface::createInstance<ThisType>();}
         NodeType getNodeType()const noexcept override final {return NodeType::LocalVariable;}
+        std::any getNodePropertyByAny()const override final {return n;}
     };
 }
 

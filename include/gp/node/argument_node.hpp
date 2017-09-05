@@ -10,6 +10,7 @@ namespace gp::node {
     class ArgumentNode: public NodeBase<T(void)> {
         using ThisType = ArgumentNode;
         using node_instance_type = NodeInterface::node_instance_type;
+        using index_type = NodeInterface::variable_index_type;
     private:
         T evaluationDefinition(utility::EvaluationContext& evaluationContext)const override {
             return evaluationContext.getArgument(n).get<T>();
@@ -20,6 +21,7 @@ namespace gp::node {
         }
         node_instance_type clone()const override {return NodeInterface::createInstance<ThisType>();}
         NodeType getNodeType()const noexcept override final {return NodeType::Argument;}
+        std::any getNodePropertyByAny()const override final {return n;}
     };
 
     template <typename T, node::NodeInterface::variable_index_type n>
@@ -38,6 +40,7 @@ namespace gp::node {
         }
         node_instance_type clone()const override {return NodeInterface::createInstance<ThisType>();}
         NodeType getNodeType()const noexcept override final {return NodeType::Argument;}
+        std::any getNodePropertyByAny()const override final {return n;}
     };
 
     template <typename T, node::NodeInterface::variable_index_type n>
@@ -56,6 +59,7 @@ namespace gp::node {
         }
         node_instance_type clone()const override {return NodeInterface::createInstance<ThisType>();}
         NodeType getNodeType()const noexcept override final {return NodeType::Argument;}
+        std::any getNodePropertyByAny()const override final {return n;}
     };
 }
 
