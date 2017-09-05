@@ -44,7 +44,7 @@ int main() {
     stringToType.setTypeNamePair<int>("int");
     stringToType.setTypeNamePair<utility::LeftHandValue<int>>("lvalue<int>");
 
-
+    tree_operations::StringToNode stringToNode;
     auto subtruct = std::make_unique<node::SubtractNode<int>>();
     auto mult = std::make_unique<node::MultiplyNode<int>>();
     auto progn = std::make_unique<node::PrognNode<int, 2>>();
@@ -56,22 +56,38 @@ int main() {
     auto a1 = std::make_unique<node::ArgumentNode<int, 0>>();
     auto a2 = std::make_unique<node::ArgumentNode<int, 1>>();
     auto c1 = std::make_unique<node::ConstNode<int>>(10);
-    add->setChild(0, std::move(a2));
-    add->setChild(1, std::move(lovalVar));
-    add1->setChild(0, std::move(c1));
-    add1->setChild(1, std::move(add));
-    subst->setChild(0, std::move(localVarL));
-    subst->setChild(1, std::move(a1));
-    progn->setChild(0, std::move(subst));
-    progn->setChild(1, std::move(add1));
 
-    node::NodeInterface::node_instance_type rootNode = std::move(progn);
 
-    std::ofstream fout1("ptr.txt");
-    tree_operations::writeTree(rootNode, fout1);
+    stringToNode.registNode(subtruct->clone());
+    stringToNode.registNode(mult->clone());
+    stringToNode.registNode(progn->clone());
+    stringToNode.registNode(add->clone());
+    stringToNode.registNode(subst->clone());
+    stringToNode.registNode(localVarL->clone());
+    stringToNode.registNode(lovalVar->clone());
+    stringToNode.registNode(a1->clone());
+    stringToNode.registNode(a2->clone());
+    stringToNode.registNode(std::move(c1));
 
-    std::cout<<tree_operations::getDepth(rootNode)<<std::endl;
-    std::cout<<tree_operations::getHeight(rootNode)<<std::endl;
+    std::ifstream fin("ptr.txt");
+    auto rootNode = tree_operations::readTree(stringToNode, tree::TreeProperty{{&utility::typeInfo<int>(), &utility::typeInfo<int>()}, {&utility::typeInfo<int>()}, &utility::typeInfo<int>()}, fin);
+    std::cout<<"read"<<std::endl;
+//    add->setChild(0, std::move(a2));
+//    add->setChild(1, std::move(lovalVar));
+//    add1->setChild(0, std::move(c1));
+//    add1->setChild(1, std::move(add));
+//    subst->setChild(0, std::move(localVarL));
+//    subst->setChild(1, std::move(a1));
+//    progn->setChild(0, std::move(subst));
+//    progn->setChild(1, std::move(add1));
+//
+//    node::NodeInterface::node_instance_type rootNode = std::move(progn);
+//
+//    std::ofstream fout1("ptr.txt");
+//    tree_operations::writeTree(rootNode, fout1);
+//
+//    std::cout<<tree_operations::getDepth(rootNode)<<std::endl;
+//    std::cout<<tree_operations::getHeight(rootNode)<<std::endl;
 
     tree::Tree tree(typeid(int), std::vector<const std::type_info*>{&typeid(int), &typeid(int)}, std::vector<const std::type_info*>{&typeid(int)}, std::move(rootNode));
     auto ans = tree.evaluate(std::vector<utility::Variable>{1, 2});

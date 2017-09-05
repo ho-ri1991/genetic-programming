@@ -28,4 +28,4 @@ namespace gp::tree_operations {
     struct is_string_to_node_type<StringToNode> : public std::true_type {};
 }
 
-#endif //GP_TREE_OPERATIONS_STRING_TO_NODE_TRAITS
+#endif //GP_TREE_OPERATIONS_STRING_TO_NODE_TRAIT

@@ -40,6 +40,8 @@ namespace gp::tree_operations {
         const type_info& get_return_type(const adapt_type& property){return *property.returnType;}
         const type_info& get_argument_type(const adapt_type& property, std::size_t n){return *property.argumentTypes[n];}
         std::size_t get_argument_num(const adapt_type& property){return std::size(property.argumentTypes);}
+        const type_info & get_local_variable_type(const adapt_type& property, std::size_t n){return *property.localVariableTypes[n];}
+        std::size_t get_local_variable_num(const adapt_type& property){return std::size(property.localVariableTypes);}
     };
 
     template <>
