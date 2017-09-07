@@ -9,6 +9,10 @@ namespace gp {
         constexpr const char OFFSET_CHAR = ' ';
         constexpr std::size_t OFFSET_NUM = 4;
     }
+    namespace tree {
+        constexpr utility::EvaluationContext::EvaluationCount defaultMaxEvaluationCount = 10000;
+        constexpr utility::EvaluationContext::StackCount defaultMaxStackCount = 10000;
+    }
 }
 
 #endif

@@ -4,6 +4,7 @@
 #include <gp/utility/evaluation_context.hpp>
 #include <gp/node/node_interface.hpp>
 #include <exception>
+#include <gp/gp_config.hpp>
 
 namespace gp::tree {
     struct TreeProperty {
@@ -22,8 +23,6 @@ namespace gp::tree {
     private:
         using EvaluationCount = utility::EvaluationContext::EvaluationCount;
         using StackCount = utility::EvaluationContext::StackCount;
-        static constexpr EvaluationCount defaultMaxEvaluationCount = 10000;
-        static constexpr StackCount defaultMaxStackCount = 10000;
     private:
         std::unique_ptr<node::NodeInterface> rootNode;
         const std::type_info* returnType;
