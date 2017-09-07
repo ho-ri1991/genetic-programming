@@ -8,5 +8,6 @@
 #include "progn_node.hpp"
 #include "basic_operation_node.hpp"
 #include "subroutine_node.hpp"
+#include "string_to_node.hpp"
 
 #endif

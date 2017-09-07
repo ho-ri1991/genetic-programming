@@ -8,8 +8,9 @@
 namespace gp::node {
     class SubroutineEntitySet {
     private:
+        using node_instance_type = NodeInterface::const_node_instance_type;
         using LocalVariableTypes = std::vector<const std::type_info*>;
-        using SubroutineEntity = std::pair<std::shared_ptr<const NodeInterface>, const LocalVariableTypes>;
+        using SubroutineEntity = std::pair<node_instance_type, const LocalVariableTypes>;
         std::unordered_map<std::string, SubroutineEntity> subroutineEntities;
     public:
         template <typename Key>
@@ -18,10 +19,17 @@ namespace gp::node {
         decltype(auto) find(Key&& key)const {return subroutineEntities.find(std::forward<Key>(key));}
         template <typename Key, typename Val>
         void insert(Key&& key, Val&& val) {subroutineEntities.insert(std::forward<Key>(key), std::forward<Val>(val));}
+        decltype(auto) begin(){return std::begin(subroutineEntities);}
+        decltype(auto) begin()const{return std::begin(subroutineEntities);}
+        decltype(auto) end(){return std::end(subroutineEntities);}
+        decltype(auto) end()const{return std::end(subroutineEntities);}
     };
 
+    template <typename>
+    class SubroutineNode;
+
     template <typename T, typename ...Args>
-    class SubroutineNode: public NodeBase<T(Args...)> {
+    class SubroutineNode<T(Args...)>: public NodeBase<T(Args...)> {
     private:
         using ThisType = SubroutineNode;
         using node_instance_type = NodeInterface::node_instance_type;
@@ -33,7 +41,27 @@ namespace gp::node {
                 : subroutineEntitySet(subroutineEntitySet_)
                 , name(std::forward<Name>(nodeName)){}
     private:
-        T evaluationDefinition(utility::EvaluationContext* evaluationContext)const override;
+        T evaluationDefinition(utility::EvaluationContext& evaluationContext)const override {
+            auto childReturnVal = evaluateChildren(this->children, evaluationContext);
+            if(evaluationContext.getEvaluationStatus() != utility::EvaluationStatus::Evaluating)return utility::getDefaultValue<T>();
+            auto itr = subroutineEntitySet.find(name);
+            if(itr == std::end(subroutineEntitySet))throw std::runtime_error("subroutine entity not found");
+            auto& [entity, localVariebleTypes] = itr->second;
+            auto subroutineEvaluationContext = utility::EvaluationContext(childReturnVal,
+                                                                          std::vector<utility::Variable>(std::size(localVariebleTypes)),
+                                                                          tree::defaultMaxEvaluationCount,
+                                                                          tree::defaultMaxStackCount);
+
+            auto ans = entity->evaluateByAny(subroutineEvaluationContext);
+            if(subroutineEvaluationContext.getEvaluationStatus() == utility::EvaluationStatus::ValueReturned){
+                return std::any_cast<T>(subroutineEvaluationContext.getReturnValue());
+            }else if(subroutineEvaluationContext.getEvaluationStatus() == utility::EvaluationStatus::Evaluating){
+                return std::any_cast<T>(ans);
+            }else {
+                evaluationContext.setEvaluationStatusWithoutUpdate(subroutineEvaluationContext.getEvaluationStatus());
+                return utility::getDefaultValue<T>();
+            }
+        }
     public:
         std::string getNodeName()const override {return name;}
         node_instance_type clone()const override {return NodeInterface::createInstance<ThisType>(name, subroutineEntitySet);}
