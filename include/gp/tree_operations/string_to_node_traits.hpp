@@ -1,7 +1,7 @@
 #ifndef GP_TREE_OPERATIONS_STRING_TO_NODE_TRAITS
 #define GP_TREE_OPERATIONS_STRING_TO_NODE_TRAITS
 
-#include "string_to_node.hpp"
+#include <gp/node/string_to_node.hpp>
 
 
 namespace gp::tree_operations {

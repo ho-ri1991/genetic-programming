@@ -3,7 +3,7 @@
 
 #include <type_traits>
 #include <gp/tree/tree.hpp>
-#include "string_to_node.hpp"
+#include <gp/node/string_to_node.hpp>
 
 namespace gp::tree_operations {
     template <typename tree>
