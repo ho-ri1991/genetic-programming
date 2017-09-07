@@ -5,7 +5,10 @@
 #include <any>
 #include <cassert>
 #include <exception>
+#include <tuple>
 #include "variable.hpp"
+#include "reference.hpp"
+#include "left_hand_value.hpp"
 
 namespace gp::utility {
     enum class EvaluationStatus {
@@ -22,7 +25,7 @@ namespace gp::utility {
 
     class EvaluationContext {
     public:
-        using VariableTable = std::vector<utility::Variable>;
+        using VariableTable = std::vector<Variable>;
         using EvaluationCount = long long;
         using StackCount = long long;
     private:
@@ -34,6 +37,58 @@ namespace gp::utility {
         const EvaluationCount maxEvaluationCount;
         const StackCount maxStackCount;
         std::any returnValue;
+    private:
+        template <typename T>
+        struct SetArgumentHelper {
+            static_assert(!std::is_same_v<T, LeftHandValue<T>>);
+            static void set(T& val, Variable& var) {var.set(val);}
+        };
+        template <typename T>
+        struct SetArgumentHelper<Reference<T>>{
+            static void set(Reference<T>& val, Variable& var) {var.set(&val.getRef());}
+        };
+        template <std::size_t, typename ...>
+        struct SetArgumentsHelper;
+        template <std::size_t offset,
+                  template <typename ...> typename Tpl,
+                  typename ...Args>
+        struct SetArgumentsHelper<offset, Tpl<Args...>> {
+            static void set(Tpl<Args...>& tpl, VariableTable& argumentTable) {
+                if(std::size(argumentTable) != sizeof...(Args))throw std::runtime_error("the number of arguments mismatch");
+                if constexpr (sizeof...(Args) <= offset) return;
+                else {
+                    SetArgumentHelper<std::tuple_element_t<offset, Tpl<Args...>>>::set(std::get<offset>(tpl), argumentTable[offset]);
+                    return SetArgumentsHelper<offset + 1, Tpl<Args...>>::set(tpl, argumentTable);
+                }
+            }
+        };
+
+        template <typename T>
+        struct CreateVariableTableHelper {
+            template <typename Arguments>
+            static VariableTable create(Arguments&& vars) {
+                return VariableTable(std::forward<Arguments>(vars));
+            }
+        };
+
+        template <typename ...Args>
+        struct CreateVariableTableHelper<std::tuple<Args...>> {
+            static VariableTable create(std::tuple<Args...>& tpl) {
+                auto variableTable = VariableTable(sizeof...(Args));
+                SetArgumentsHelper<0, std::tuple<Args...>>::set(tpl, variableTable);
+                return variableTable;
+            }
+            static VariableTable create(std::tuple<Args...>&& tpl) {
+                auto variableTable = VariableTable(sizeof...(Args));
+                SetArgumentsHelper<0, std::tuple<Args...>>::set(tpl, variableTable);
+                return variableTable;
+            }
+        };
+
+        template <typename VariableTable_>
+        static VariableTable createVariableTable(VariableTable_&& variableTable) {
+            return CreateVariableTableHelper<std::decay_t<VariableTable_>>::create(std::forward<VariableTable_>(variableTable));
+        }
     public:
         void incrementEvaluationCount()noexcept {
             if(evaluationCount < maxEvaluationCount) {
@@ -81,19 +136,15 @@ namespace gp::utility {
             return localVariables[n];
         }
         template <typename T>
-        void setArgument(std::size_t n, T&& val) {
+        void setArgument(std::size_t n, T& val) {
             assert(n < std::size(arguments));
-            arguments[n] = std::forward<T>(val);
+            SetArgumentHelper<T>::set(val, arguments[n]);
         }
-        template <typename Arguments>
-        void setArguments(Arguments&& arguments_) {arguments = std::forward<Arguments>(arguments_);}
         template <typename T>
         void setLocalVariable(std::size_t n, T&& val){
             assert(n < std::size(localVariables));
             localVariables[n] = std::forward<T>(val);
         }
-        template <typename LocalVariables>
-        void setLocalVariables(LocalVariables&& localVariables_) {localVariables_ = std::forward<LocalVariables>(localVariables_);}
         template <typename T>
         void setReturnValue(T&& val){
             if(evaluationStatus == EvaluationStatus::Evaluating){
@@ -108,8 +159,8 @@ namespace gp::utility {
                           LocalVariables&& localVariables_,
                           EvaluationCount maxEvaluationCount_,
                           StackCount maxStackCount_)
-                : arguments(std::forward<Arguments>(arguments_))
-                , localVariables(std::forward<LocalVariables>(localVariables_))
+                : arguments(createVariableTable(std::forward<Arguments>(arguments_)))
+                , localVariables(createVariableTable(std::forward<LocalVariables>(localVariables_)))
                 , evaluationCount(0)
                 , stackCount(0)
                 , maxEvaluationCount(maxEvaluationCount_)
