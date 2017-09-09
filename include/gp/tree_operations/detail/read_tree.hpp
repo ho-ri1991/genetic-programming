@@ -41,6 +41,8 @@ namespace gp::tree_operations::detail {
                     //check the validity of the return type of child
                     if constexpr (is_input_node_ptr_type_v<std::decay_t<decltype(nextNode)>>) {
                         if(!node_trait::is_valid_child(node_, i, *nextNode, treeProperty)) {
+                            std::cout<<node_.getNodeName()<<std::endl;
+                            std::cout<<nextName<<std::endl;
                             throw std::runtime_error("invalid child return type");
                         }
                     } else {

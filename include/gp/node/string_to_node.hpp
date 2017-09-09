@@ -5,7 +5,7 @@
 #include <unordered_map>
 #include <gp/node/const_node.hpp>
 
-namespace gp::tree_operations {
+namespace gp::node {
     class StringToNode {
     public:
         using node_instance_type = node::NodeInterface::node_instance_type;
