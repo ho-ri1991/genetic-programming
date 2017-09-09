@@ -21,7 +21,7 @@ namespace gp::node {
 
     public:
         std::string getNodeName()const override {
-            return std::string("LocalVariable<") + utility::typeInfo<T>().name() + std::string(",") + std::to_string(n) + std::string(">");
+            return std::string("LocalVariable[") + utility::typeInfo<T>().name() + std::string(",") + std::to_string(n) + std::string("]");
         }
         node_instance_type clone()const override {return NodeInterface::createInstance<ThisType>();}
         NodeType getNodeType()const noexcept override final {return NodeType::LocalVariable;}
@@ -43,7 +43,7 @@ namespace gp::node {
         }
     public:
         std::string getNodeName()const override {
-            return std::string("LocalVariable<") + utility::typeInfo<ReturnType>().name() + std::string(",") + std::to_string(n) + std::string(">");
+            return std::string("LocalVariable[") + utility::typeInfo<ReturnType>().name() + std::string(",") + std::to_string(n) + std::string("]");
         }
         node_instance_type clone()const override {return NodeInterface::createInstance<ThisType>();}
         NodeType getNodeType()const noexcept override final {return NodeType::LocalVariable;}
@@ -66,7 +66,7 @@ namespace gp::node {
         }
     public:
         std::string getNodeName()const override {
-            return std::string("LocalVariable<") + utility::typeInfo<ReturnType>().name() + std::string(",") + std::to_string(n) + std::string(">");
+            return std::string("LocalVariable[") + utility::typeInfo<ReturnType>().name() + std::string(",") + std::to_string(n) + std::string("]");
         }
         node_instance_type clone()const override {return NodeInterface::createInstance<ThisType>();}
         NodeType getNodeType()const noexcept override final {return NodeType::LocalVariable;}

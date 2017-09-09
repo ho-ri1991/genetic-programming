@@ -6,8 +6,8 @@
 
 namespace gp::node {
     namespace const_node {
-        constexpr const char* nameHeader = "Const<";
-        constexpr char nameDelimiter = '>';
+        constexpr const char* nameHeader = "Const[";
+        constexpr char nameDelimiter = ']';
         constexpr char propertySeparator = ',';
     }
 
@@ -30,8 +30,8 @@ namespace gp::node {
         node_instance_type clone()const override {return NodeInterface::createInstance<ThisType>();}
         NodeType getNodeType()const noexcept override final {return NodeType::Const;}
         void setNodePropertyByNodeName(const std::string& name) override {
-            auto beg = name.find('<');
-            auto end = name.find('>');
+            auto beg = name.find('[');
+            auto end = name.find(']');
             if(beg == std::string::npos || end == std::string::npos || end < beg) throw std::invalid_argument("invalid node name of const node");
             auto sep = name.find(',', beg);
             if(sep == std::string::npos || end < sep) throw std::invalid_argument("invalid node name of const node");

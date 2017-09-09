@@ -21,7 +21,7 @@ namespace gp::node {
         }
     public:
         std::string getNodeName()const override {
-            return std::string("Substitute<") + utility::typeInfo<T>().name() + std::string(">");
+            return std::string("Substitute[") + utility::typeInfo<T>().name() + std::string("]");
         }
         node_instance_type clone()const override {return NodeInterface::createInstance<ThisType>();}
     };
@@ -37,7 +37,7 @@ namespace gp::node {
         }
     public:
         std::string getNodeName()const override {
-            return std::string("Add<") + utility::typeInfo<T>().name() + std::string(">");
+            return std::string("Add[") + utility::typeInfo<T>().name() + std::string("]");
         }
         node_instance_type clone()const override {return NodeInterface::createInstance<ThisType>();}
     };
@@ -53,7 +53,7 @@ namespace gp::node {
         }
     public:
         std::string getNodeName()const override {
-            return std::string("Sub<") + utility::typeInfo<T>().name() + std::string(">");
+            return std::string("Sub[") + utility::typeInfo<T>().name() + std::string("]");
         }
         node_instance_type clone()const override {return NodeInterface::createInstance<ThisType>();}
     };
@@ -69,7 +69,7 @@ namespace gp::node {
         }
     public:
         std::string getNodeName()const override {
-            return std::string("Mult<") + utility::typeInfo<T>().name() + std::string(">");
+            return std::string("Mult[") + utility::typeInfo<T>().name() + std::string("]");
         }
         node_instance_type clone()const override {return NodeInterface::createInstance<ThisType>();}
     };
@@ -92,7 +92,7 @@ namespace gp::node {
         }
     public:
         std::string getNodeName()const override {
-            return std::string("Div<") + utility::typeInfo<T>().name() + std::string(">");
+            return std::string("Div[") + utility::typeInfo<T>().name() + std::string("]");
         }
         node_instance_type clone()const override {return NodeInterface::createInstance<ThisType>();}
     };
@@ -150,7 +150,7 @@ namespace gp::node {
         }
     public:
         std::string getNodeName()const override {
-            return std::string("If<") + utility::typeInfo<T>().name() + std::string(">");
+            return std::string("If[") + utility::typeInfo<T>().name() + std::string("]");
         }
         node_instance_type clone()const override {return NodeInterface::createInstance<ThisType>();}
     };

@@ -83,7 +83,7 @@ namespace gp::node {
         }
         NodeType getNodeType()const noexcept override final {return NodeType::Progn;}
         std::string getNodeName()const override {
-            return std::string("Progn<") + utility::typeInfo<T>().name() + std::string(",") + std::to_string(n) + std::string(">");
+            return std::string("Progn[") + utility::typeInfo<T>().name() + std::string(",") + std::to_string(n) + std::string("]");
         }
         node_instance_type clone()const override {return NodeInterface::createInstance<PrognNode>();}
         std::any getNodePropertyByAny()const override {return n;}

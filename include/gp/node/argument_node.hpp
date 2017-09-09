@@ -17,7 +17,7 @@ namespace gp::node {
         }
     public:
         std::string getNodeName()const override {
-            return std::string("Argument<") + utility::typeInfo<T>().name() + std::string(",") + std::to_string(n) + std::string(">");
+            return std::string("Argument[") + utility::typeInfo<T>().name() + std::string(",") + std::to_string(n) + std::string("]");
         }
         node_instance_type clone()const override {return NodeInterface::createInstance<ThisType>();}
         NodeType getNodeType()const noexcept override final {return NodeType::Argument;}
@@ -36,7 +36,7 @@ namespace gp::node {
         }
     public:
         std::string getNodeName()const override {
-            return std::string("Argument<") + utility::typeInfo<ReturnType>().name() + std::string(",") + std::to_string(n) + std::string(">");
+            return std::string("Argument[") + utility::typeInfo<ReturnType>().name() + std::string(",") + std::to_string(n) + std::string("]");
         }
         node_instance_type clone()const override {return NodeInterface::createInstance<ThisType>();}
         NodeType getNodeType()const noexcept override final {return NodeType::Argument;}
@@ -55,7 +55,7 @@ namespace gp::node {
         }
     public:
         std::string getNodeName()const override {
-            return std::string("Argument<") + utility::typeInfo<ReturnType>().name() + std::string(",") + std::to_string(n) + std::string(">");
+            return std::string("Argument[") + utility::typeInfo<ReturnType>().name() + std::string(",") + std::to_string(n) + std::string("]");
         }
         node_instance_type clone()const override {return NodeInterface::createInstance<ThisType>();}
         NodeType getNodeType()const noexcept override final {return NodeType::Argument;}
