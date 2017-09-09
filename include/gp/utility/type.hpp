@@ -149,9 +149,9 @@ namespace gp::utility {
         ContainerType container;
     public:
         template <typename String>
-        Type operator()(String&& name)const {return container[name];}
+        Type operator()(String&& name)const {return *container.find(std::forward<String>(name))->second;}
         template <typename String>
-        bool hasType(String&& name)const {return container.find(name) != std::end(container);}
+        bool hasType(String&& name)const {return container.find(std::forward<String>(name)) != std::end(container);}
         template <typename T, typename String>
         void setTypeNamePair(String&& name) {
             auto& type = TypeInfoImpl<T>::get();
