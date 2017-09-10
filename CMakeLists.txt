@@ -5,7 +5,7 @@ project(genetic_programming)
 set(CMAKE_CXX_FLAGS "-stdlib=libc++")
 set(CMAKE_CXX_FLAGS "-nostdinc++")
 
-include_directories(/usr/local/Cellar/boost/1.63.0/include)
+include_directories(/usr/local/Cellar/boost/1.65.0/include)
 include_directories(~/llvm/build/include/c++/v1)
 include_directories(./include)
 link_directories(~/llvm/build/lib)

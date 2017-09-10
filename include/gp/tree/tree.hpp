@@ -13,6 +13,7 @@ namespace gp::tree {
         container_type argumentTypes;
         container_type localVariableTypes;
         const type_info* returnType;
+        std::string name;
     };
 
     class Tree {

@@ -12,6 +12,7 @@ namespace gp {
     namespace tree {
         constexpr utility::EvaluationContext::EvaluationCount defaultMaxEvaluationCount = 10000;
         constexpr utility::EvaluationContext::StackCount defaultMaxStackCount = 10000;
+        constexpr std::size_t MAX_SUBROUTINE_ARGUMENT_NUM = 3;
     }
 }
 

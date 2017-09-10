@@ -1,9 +1,10 @@
 #include <iostream>
+#include <fstream>
 #include <gp/tree/tree.hpp>
 #include <boost/type_index.hpp>
 #include <gp/node/node.hpp>
-#include <gp/io/tree_io.hpp>
 #include <gp/tree_operations/tree_operations.hpp>
+#include <gp/tree/io.hpp>
 using namespace gp;
 
 template <std::size_t n, typename ...> struct acc;
@@ -42,9 +43,18 @@ void func(){
 int main() {
     utility::StringToType stringToType;
     stringToType.setTypeNamePair<int>("int");
-    stringToType.setTypeNamePair<utility::LeftHandValue<int>>("lvalue<int>");
+    stringToType.setTypeNamePair<utility::LeftHandValue<int>>("lvalue[int]");
 
-    tree_operations::StringToNode stringToNode;
+    node::SubroutineEntitySet subroutineEntitySet;
+
+    node::SubroutineNode<int(int,int)> subroutine("test", subroutineEntitySet);
+
+    tree::TypesToSubroutineNode typesToSubroutineNode;
+    typesToSubroutineNode.registerSubroutineNodeType<int, int, int>();
+
+    tree::SubroutineIO<int> subroutineIO;
+
+    node::StringToNode stringToNode;
     auto subtruct = std::make_unique<node::SubtractNode<int>>();
     auto mult = std::make_unique<node::MultiplyNode<int>>();
     auto progn = std::make_unique<node::PrognNode<int, 2>>();
@@ -58,20 +68,31 @@ int main() {
     auto c1 = std::make_unique<node::ConstNode<int>>(10);
 
 
-    stringToNode.registNode(subtruct->clone());
-    stringToNode.registNode(mult->clone());
-    stringToNode.registNode(progn->clone());
-    stringToNode.registNode(add->clone());
-    stringToNode.registNode(subst->clone());
-    stringToNode.registNode(localVarL->clone());
-    stringToNode.registNode(lovalVar->clone());
-    stringToNode.registNode(a1->clone());
-    stringToNode.registNode(a2->clone());
-    stringToNode.registNode(std::move(c1));
+    stringToNode.registerNode(subtruct->clone());
+    stringToNode.registerNode(mult->clone());
+    stringToNode.registerNode(progn->clone());
+    stringToNode.registerNode(add->clone());
+    stringToNode.registerNode(subst->clone());
+    stringToNode.registerNode(localVarL->clone());
+    stringToNode.registerNode(lovalVar->clone());
+    stringToNode.registerNode(a1->clone());
+    stringToNode.registerNode(a2->clone());
+    stringToNode.registerNode(c1->clone());
 
-    std::ifstream fin("ptr.txt");
-    auto rootNode = tree_operations::readTree(stringToNode, tree::TreeProperty{{&utility::typeInfo<int>(), &utility::typeInfo<int>()}, {&utility::typeInfo<int>()}, &utility::typeInfo<int>()}, fin);
-    std::cout<<"read"<<std::endl;
+//    std::ifstream fin("ptr.txt");
+//    auto rootNode = tree_operations::readTree(stringToNode, tree::TreeProperty{{&utility::typeInfo<int>(), &utility::typeInfo<int>()}, {&utility::typeInfo<int>()}, &utility::typeInfo<int>()}, fin);
+//    std::cout<<"read"<<std::endl;
+    std::ifstream fin("tree.xml");
+    auto treeProperty = subroutineIO.load(fin, stringToType, stringToNode);
+
+    auto rootNode = stringToNode(treeProperty.name);
+
+    rootNode->setChild(0, a1->clone());
+    rootNode->setChild(1, a2->clone());
+
+    std::ofstream fout1("tree_.xml");
+    subroutineIO.write(*rootNode, treeProperty, fout1);
+    fout1.close();
 //    add->setChild(0, std::move(a2));
 //    add->setChild(1, std::move(lovalVar));
 //    add1->setChild(0, std::move(c1));

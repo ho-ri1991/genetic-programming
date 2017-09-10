@@ -9,7 +9,7 @@ namespace gp::node {
     class SubroutineEntitySet {
     private:
         using node_instance_type = NodeInterface::const_node_instance_type;
-        using LocalVariableTypes = std::vector<const std::type_info*>;
+        using LocalVariableTypes = std::vector<const NodeInterface::type_info*>;
         using SubroutineEntity = std::pair<node_instance_type, const LocalVariableTypes>;
         std::unordered_map<std::string, SubroutineEntity> subroutineEntities;
     public:
@@ -17,8 +17,8 @@ namespace gp::node {
         decltype(auto) find(Key&& key) {return subroutineEntities.find(std::forward<Key>(key));}
         template <typename Key>
         decltype(auto) find(Key&& key)const {return subroutineEntities.find(std::forward<Key>(key));}
-        template <typename Key, typename Val>
-        void insert(Key&& key, Val&& val) {subroutineEntities.insert(std::forward<Key>(key), std::forward<Val>(val));}
+        template <typename Key>
+        void insert(Key&& key, SubroutineEntity&& val) {subroutineEntities.insert(std::make_pair(std::forward<Key>(key), std::move(val)));}
         decltype(auto) begin(){return std::begin(subroutineEntities);}
         decltype(auto) begin()const{return std::begin(subroutineEntities);}
         decltype(auto) end(){return std::end(subroutineEntities);}

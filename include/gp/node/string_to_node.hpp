@@ -39,8 +39,13 @@ namespace gp::node {
             }
         }
     public:
-        void registNode(node_instance_type node) {
+        void registerNode(node_instance_type node) {
             container[formatNodeName(node->getNodeName())] = std::move(node);
+        }
+        template <typename String>
+        void deleteNode(String&& name) {
+            auto itr = container.find(std::forward<String>(name));
+            if(itr != std::end(container))container.erase(itr);
         }
     };
 }
