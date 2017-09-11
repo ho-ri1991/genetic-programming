@@ -10,8 +10,6 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 
-#include <boost/type_index.hpp>
-
 namespace gp::tree {
     class TypesToSubroutineNode{
     private:
@@ -190,8 +188,7 @@ namespace gp::tree {
         struct acc<n, Tpl<Args1...>, Tpl<T, Args2...>, Tpl<Args...>>{
             static void registerSubroutineType(TypesToSubroutineNode& typesToSubroutineNode) {
                 if constexpr (n == 0){
-                    std::cout<< boost::typeindex::type_id_with_cvr<Tpl<Args1...>>().pretty_name() <<std::endl;
-                        typesToSubroutineNode.registerSubroutineNodeType<Args1...>();
+                    typesToSubroutineNode.registerSubroutineNodeType<Args1...>();
                 } else {
                     acc<n - 1, Tpl<Args1..., T>, Tpl<Args...>, Tpl<Args...>>::registerSubroutineType(typesToSubroutineNode);
                     if constexpr (sizeof...(Args2) > 0) {
