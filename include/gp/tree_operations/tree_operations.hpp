@@ -58,12 +58,12 @@ namespace gp::tree_operations {
         static_assert(is_tree_property_type_v<tree_property>);
         using node_type = typename string_to_node_traits<string_to_node>::node_instance_type;
         static_assert(is_input_node_type_v<node_type> || is_input_node_ptr_type_v<node_type>);
-//        if constexpr (is_input_node_type_v<node_type>) {
-//            //check is same node_traies<node>::tree_properry and tree_property
-//            static_assert(std::is_same_v<input_node_traits<typename std::decay_t<decltype(*std::declval<node_type>())>>::tree_property, tree_property>);
-//        } else {
-//            static_assert(std::is_same_v<input_node_traits<node_type>::tree_property, tree_property>);
-//        }
+        if constexpr (is_input_node_ptr_type_v<node_type>) {
+            //check is same node_traies<node>::tree_properry and tree_property
+            static_assert(std::is_same_v<typename input_node_traits<typename std::decay_t<decltype(*std::declval<node_type>())>>::tree_property, tree_property>);
+        } else {
+            static_assert(std::is_same_v<typename input_node_traits<node_type>::tree_property, tree_property>);
+        }
         return detail::ReadTreeHelper::readTreeHelper(stringToNode, treeProperty, in);
     }
 }
