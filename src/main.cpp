@@ -45,6 +45,12 @@ int main() {
     stringToNode.registerNode(a1->clone());
     stringToNode.registerNode(a2->clone());
     stringToNode.registerNode(c1->clone());
+    stringToNode.registerNode(std::make_unique<node::GreaterNode<int>>());
+    stringToNode.registerNode(std::make_unique<node::GreaterEqNode<int>>());
+    stringToNode.registerNode(std::make_unique<node::LessThanEqNode<int>>());
+    stringToNode.registerNode(std::make_unique<node::LessThanNode<int>>());
+    stringToNode.registerNode(std::make_unique<node::EqualNode<int>>());
+    stringToNode.registerNode(std::make_unique<node::NotEqualNode<int>>());
 
     std::ifstream fin("tree.xml");
     auto treeProperty = subroutineIO.load(fin, stringToType, stringToNode);

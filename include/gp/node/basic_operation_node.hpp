@@ -154,6 +154,102 @@ namespace gp::node {
         }
         node_instance_type clone()const override {return NodeInterface::createInstance<ThisType>();}
     };
+
+    template <typename T>
+    class GreaterNode: public NodeBase<bool(T, T)> {
+        using ThisType = GreaterNode;
+        using node_instance_type = NodeInterface::node_instance_type;
+    private:
+        bool evaluationDefinition(utility::EvaluationContext& evaluationContext)const override {
+            auto [a1, a2] = evaluateChildren(this->children, evaluationContext);
+            return a1 > a2;
+        }
+    public:
+        std::string getNodeName()const override {
+            return std::string("Greater[") + utility::typeInfo<T>().name() + std::string("]");
+        }
+        node_instance_type clone()const override {return NodeInterface::createInstance<ThisType>();}
+    };
+
+    template <typename T>
+    class GreaterEqNode: public NodeBase<bool(T, T)> {
+        using ThisType = GreaterEqNode;
+        using node_instance_type = NodeInterface::node_instance_type;
+    private:
+        bool evaluationDefinition(utility::EvaluationContext& evaluationContext)const override {
+            auto [a1, a2] = evaluateChildren(this->children, evaluationContext);
+            return a1 >= a2;
+        }
+    public:
+        std::string getNodeName()const override {
+            return std::string("GreaterEq[") + utility::typeInfo<T>().name() + std::string("]");
+        }
+        node_instance_type clone()const override {return NodeInterface::createInstance<ThisType>();}
+    };
+
+    template <typename T>
+    class LessThanNode: public NodeBase<bool(T, T)> {
+        using ThisType = LessThanNode;
+        using node_instance_type = NodeInterface::node_instance_type;
+    private:
+        bool evaluationDefinition(utility::EvaluationContext& evaluationContext)const override {
+            auto [a1, a2] = evaluateChildren(this->children, evaluationContext);
+            return a1 < a2;
+        }
+    public:
+        std::string getNodeName()const override {
+            return std::string("Less[") + utility::typeInfo<T>().name() + std::string("]");
+        }
+        node_instance_type clone()const override {return NodeInterface::createInstance<ThisType>();}
+    };
+
+    template <typename T>
+    class LessThanEqNode: public NodeBase<bool(T, T)> {
+        using ThisType = LessThanEqNode;
+        using node_instance_type = NodeInterface::node_instance_type;
+    private:
+        bool evaluationDefinition(utility::EvaluationContext& evaluationContext)const override {
+            auto [a1, a2] = evaluateChildren(this->children, evaluationContext);
+            return a1 <= a2;
+        }
+    public:
+        std::string getNodeName()const override {
+            return std::string("LessEq[") + utility::typeInfo<T>().name() + std::string("]");
+        }
+        node_instance_type clone()const override {return NodeInterface::createInstance<ThisType>();}
+    };
+
+    template <typename T>
+    class EqualNode: public NodeBase<bool(T, T)> {
+        using ThisType = EqualNode;
+        using node_instance_type = NodeInterface::node_instance_type;
+    private:
+        bool evaluationDefinition(utility::EvaluationContext& evaluationContext)const override {
+            auto [a1, a2] = evaluateChildren(this->children, evaluationContext);
+            return a1 == a2;
+        }
+    public:
+        std::string getNodeName()const override {
+            return std::string("Eq[") + utility::typeInfo<T>().name() + std::string("]");
+        }
+        node_instance_type clone()const override {return NodeInterface::createInstance<ThisType>();}
+    };
+
+    template <typename T>
+    class NotEqualNode: public NodeBase<bool(T, T)> {
+        using ThisType = NotEqualNode;
+        using node_instance_type = NodeInterface::node_instance_type;
+    private:
+        bool evaluationDefinition(utility::EvaluationContext& evaluationContext)const override {
+            auto [a1, a2] = evaluateChildren(this->children, evaluationContext);
+            return a1 != a2;
+        }
+    public:
+        std::string getNodeName()const override {
+            return std::string("NotEq[") + utility::typeInfo<T>().name() + std::string("]");
+        }
+        node_instance_type clone()const override {return NodeInterface::createInstance<ThisType>();}
+    };
 }
 
 #endif
