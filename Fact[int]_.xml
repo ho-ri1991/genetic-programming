@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<tree>
+  <name>Fact[int]</name>
+  <return_type>int</return_type>
+  <arguments>
+    <type>int</type>
+  </arguments>
+  <local_variables/>
+  <tree_entity>
++--Fact[int]
+    |
+    +--Argument[int,0]
+    
+</tree_entity>
+</tree>
