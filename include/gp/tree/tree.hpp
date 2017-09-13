@@ -9,26 +9,37 @@
 namespace gp::tree {
     struct TreeProperty {
         using type_info = node::NodeInterface::type_info;
-        using container_type = std::vector<const type_info*>;
+        using container_type = std::vector<const type_info *>;
+        const type_info *returnType;
         container_type argumentTypes;
         container_type localVariableTypes;
-        const type_info* returnType;
         std::string name;
     };
+}
 
+namespace std {
+    template <>
+    void swap<gp::tree::TreeProperty>(gp::tree::TreeProperty& treeProperty1, gp::tree::TreeProperty& treeProperty2) noexcept {
+        using std::swap;
+        swap(treeProperty1.returnType, treeProperty2.returnType);
+        swap(treeProperty1.argumentTypes, treeProperty2.argumentTypes);
+        swap(treeProperty1.localVariableTypes, treeProperty2.localVariableTypes);
+        swap(treeProperty1.name, treeProperty2.name);
+    }
+}
+
+namespace gp::tree{
     class Tree {
     public:
         using NodeType = node::NodeInterface;
-        using ArgumentTypes = std::vector<const std::type_info*>;
-        using LocalVariableTypes = std::vector<const std::type_info*>;
+        using type_info = node::NodeInterface::type_info;
+        using node_instance_type = node::NodeInterface::node_instance_type;
     private:
         using EvaluationCount = utility::EvaluationContext::EvaluationCount;
         using StackCount = utility::EvaluationContext::StackCount;
     private:
         std::unique_ptr<node::NodeInterface> rootNode;
-        const std::type_info* returnType;
-        ArgumentTypes argumentTypes;
-        LocalVariableTypes localVariableTypes;
+        TreeProperty treeProperty;
     private:
         static std::unique_ptr<node::NodeInterface> copyTreeStructure(const node::NodeInterface& rootNode) {
             std::unique_ptr<node::NodeInterface> targetRootNode = rootNode.clone();
@@ -39,29 +50,14 @@ namespace gp::tree {
             return targetRootNode;
         }
     public:
-        template <typename ArgumentTypes_, typename LocalVariableTypes_>
-        Tree(const std::type_info& returnType_,
-             ArgumentTypes_&& argumentTypes_,
-             LocalVariableTypes_&& localVariableTypes_,
-             std::unique_ptr<node::NodeInterface> rootNode_):
-                rootNode(std::move(rootNode_)),
-                returnType(&returnType_),
-                argumentTypes(std::forward<ArgumentTypes_>(argumentTypes_)),
-                localVariableTypes(std::forward<LocalVariableTypes_>(localVariableTypes_)){
-
-            for(const auto ptr: argumentTypes) {
-                if(ptr == nullptr) throw std::invalid_argument("the argument type must not be null");
-            }
-
-            for(const auto ptr: localVariableTypes) {
-                if(ptr == nullptr) throw std::invalid_argument("the local variable type must not be null");
-            }
-        }
+        template <typename TreeProperty_, typename = std::enable_if_t<std::is_same_v<TreeProperty, std::decay_t<TreeProperty_>>>>
+        Tree(TreeProperty_&& treeProperty_, node_instance_type rootNode_):
+                treeProperty(std::forward<TreeProperty_>(treeProperty_)),
+                rootNode(std::move(rootNode_)){}
         virtual ~Tree() = default;
-        Tree(const Tree& other): rootNode(copyTreeStructure(*other.rootNode))
-                         , returnType(other.returnType)
-                         , argumentTypes(other.argumentTypes)
-                         , localVariableTypes(other.localVariableTypes) {}
+        Tree(const Tree& other):
+                rootNode(copyTreeStructure(*other.rootNode)),
+                treeProperty(other.treeProperty){}
         Tree(Tree&&) = default;
         Tree& operator=(const Tree& rhs) {
             Tree tmp(rhs);
@@ -80,22 +76,20 @@ namespace gp::tree {
             if(!rootNode) throw std::runtime_error("the root node of tree is nullptr");
             else return *rootNode;
         }
-        auto getArgumentNum()const noexcept {return std::size(argumentTypes);}
-        auto getLocalVariableNum()const noexcept {return std::size(localVariableTypes);}
-        const std::type_info& getArgumentType(std::size_t n)const noexcept {
-            if(std::size(argumentTypes) <= n || argumentTypes[n] == nullptr)return typeid(void);
-            else return *argumentTypes[n];
+        auto getArgumentNum()const noexcept {return std::size(treeProperty.argumentTypes);}
+        auto getLocalVariableNum()const noexcept {return std::size(treeProperty.localVariableTypes);}
+        const type_info& getArgumentType(std::size_t n)const noexcept {
+            if(std::size(treeProperty.argumentTypes) <= n || treeProperty.argumentTypes[n] == nullptr)return utility::typeInfo<utility::error>();
+            else return *treeProperty.argumentTypes[n];
         }
-        const std::type_info& getLocalVariableType(std::size_t n)const noexcept {
-            if(std::size(localVariableTypes) <= n || localVariableTypes[n] == nullptr)return typeid(void);
-            else return *localVariableTypes[n];
+        const type_info& getLocalVariableType(std::size_t n)const noexcept {
+            if(std::size(treeProperty.localVariableTypes) <= n || treeProperty.localVariableTypes[n] == nullptr)return utility::typeInfo<utility::error>();
+            else return *treeProperty.localVariableTypes[n];
         }
         void swap(Tree& other)noexcept {
             using std::swap;
             swap(this->rootNode, other.rootNode);
-            swap(this->returnType, other.returnType);
-            swap(this->argumentTypes, other.argumentTypes);
-            swap(this->localVariableTypes, other.localVariableTypes);
+            swap(this->treeProperty, other.treeProperty);
         }
     private:
         bool isValidArguments(const std::vector<std::any>& arguments);
@@ -106,7 +100,7 @@ namespace gp::tree {
                                             StackCount maxStackCount = defaultMaxStackCount)const {
 
             utility::EvaluationContext evaluationContext(std::forward<Arguments>(arguments),
-                                                         utility::EvaluationContext::VariableTable(std::size(localVariableTypes)),
+                                                         utility::EvaluationContext::VariableTable(std::size(treeProperty.localVariableTypes)),
                                                          maxEvaluationCount,
                                                          maxStackCount);
 
@@ -117,7 +111,7 @@ namespace gp::tree {
             return evaluationContext;
         }
     public:
-        void pushBackLocalVariableType(const std::type_info& type) {localVariableTypes.push_back(&type);}
+        void pushBackLocalVariableType(const type_info& type) {treeProperty.localVariableTypes.push_back(&type);}
         void eraseRedundantLocalVariableType();
     };
 }
