@@ -142,9 +142,9 @@ namespace gp::tree {
                     auto entity = tree_operations::readTree(stringToNode, treeProperty, sstream);
                     //regist subroutine entity
                     subroutineEntitySet.insert(treeProperty.name, std::make_pair(std::move(entity), treeProperty.localVariableTypes));
-                } catch (std::exception& e) {//the case where we failed to read tree, delete the registed subroutine node
+                } catch (std::exception&) {//the case where we failed to read tree, delete the registed subroutine node
                     stringToNode.deleteNode(treeProperty.name);
-                    throw e;
+                    throw;
                 } catch (...) {
                     stringToNode.deleteNode(treeProperty.name);
                     throw std::runtime_error("unexpected exception was thrown");
