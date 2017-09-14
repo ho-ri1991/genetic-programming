@@ -66,6 +66,11 @@ namespace gp::tree{
         }
         Tree& operator=(Tree&&) = default;
     public:
+        node_instance_type getRootNodeInstance()&& noexcept{return std::move(rootNode);}
+        TreeProperty& getTreeProperty()& noexcept {return treeProperty;}
+        const TreeProperty& getTreeProperty()const& noexcept {return treeProperty;}
+        TreeProperty&& getTreeProperty()&& noexcept { return std::move(treeProperty);}
+
         node::NodeInterface& getRootNode(){
             assert(rootNode);
             if(!rootNode) throw std::runtime_error("the root node of tree is nullptr");
@@ -86,6 +91,7 @@ namespace gp::tree{
             if(std::size(treeProperty.localVariableTypes) <= n || treeProperty.localVariableTypes[n] == nullptr)return utility::typeInfo<utility::error>();
             else return *treeProperty.localVariableTypes[n];
         }
+        std::string getName()const {return treeProperty.name;}
         void swap(Tree& other)noexcept {
             using std::swap;
             swap(this->rootNode, other.rootNode);
