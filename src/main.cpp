@@ -12,49 +12,33 @@ int main() {
     stringToType.setTypeNamePair<int>("int");
     stringToType.setTypeNamePair<utility::LeftHandValue<int>>("lvalue[int]");
 
-    node::SubroutineEntitySet subroutineEntitySet;
+    tree::TreeIO<int> treeIO;
 
-    node::SubroutineNode<int(int,int)> subroutine("test", subroutineEntitySet);
+    treeIO.registerNode(std::make_unique<node::PrognNode<int,2>>());
+    treeIO.registerNode(std::make_unique<node::AddNode<int>>());
+    treeIO.registerNode(std::make_unique<node::SubstitutionNode<int>>());
+    treeIO.registerNode(std::make_unique<node::LocalVariableNode<int,0>>());
+    treeIO.registerNode(std::make_unique<node::LocalVariableNode<utility::LeftHandValue<int>,0>>());
+    treeIO.registerNode(std::make_unique<node::ArgumentNode<int,0>>());
+    treeIO.registerNode(std::make_unique<node::ArgumentNode<int,1>>());
+    treeIO.registerNode(std::make_unique<node::ConstNode<int>>(0));
+    treeIO.registerNode(std::make_unique<node::GreaterNode<int>>());
+    treeIO.registerNode(std::make_unique<node::GreaterEqNode<int>>());
+    treeIO.registerNode(std::make_unique<node::LessThanEqNode<int>>());
+    treeIO.registerNode(std::make_unique<node::LessThanNode<int>>());
+    treeIO.registerNode(std::make_unique<node::EqualNode<int>>());
+    treeIO.registerNode(std::make_unique<node::NotEqualNode<int>>());
+    treeIO.registerNode(std::make_unique<node::IfNode<int>>());
+    treeIO.registerNode(std::make_unique<node::MultiplyNode<int>>());
+    treeIO.registerNode(std::make_unique<node::SubtractNode<int>>());
 
-    tree::TypesToSubroutineNode typesToSubroutineNode;
-    typesToSubroutineNode.registerSubroutineNodeType<int, int, int>();
-
-    tree::SubroutineIO<int> subroutineIO;
-
-    node::StringToNode stringToNode;
-
-    stringToNode.registerNode(std::make_unique<node::PrognNode<int,2>>());
-    stringToNode.registerNode(std::make_unique<node::AddNode<int>>());
-    stringToNode.registerNode(std::make_unique<node::SubstitutionNode<int>>());
-    stringToNode.registerNode(std::make_unique<node::LocalVariableNode<int,0>>());
-    stringToNode.registerNode(std::make_unique<node::LocalVariableNode<utility::LeftHandValue<int>,0>>());
-    stringToNode.registerNode(std::make_unique<node::ArgumentNode<int,0>>());
-    stringToNode.registerNode(std::make_unique<node::ArgumentNode<int,1>>());
-    stringToNode.registerNode(std::make_unique<node::ConstNode<int>>(0));
-    stringToNode.registerNode(std::make_unique<node::GreaterNode<int>>());
-    stringToNode.registerNode(std::make_unique<node::GreaterEqNode<int>>());
-    stringToNode.registerNode(std::make_unique<node::LessThanEqNode<int>>());
-    stringToNode.registerNode(std::make_unique<node::LessThanNode<int>>());
-    stringToNode.registerNode(std::make_unique<node::EqualNode<int>>());
-    stringToNode.registerNode(std::make_unique<node::NotEqualNode<int>>());
-    stringToNode.registerNode(std::make_unique<node::IfNode<int>>());
-    stringToNode.registerNode(std::make_unique<node::MultiplyNode<int>>());
-    stringToNode.registerNode(std::make_unique<node::SubtractNode<int>>());
-
-    std::ifstream fin("Fact[int].xml");
-    auto treeProperty = subroutineIO.load(fin, stringToType, stringToNode);
-
-    auto rootNode = stringToNode(treeProperty.name);
-
-    rootNode->setChild(0, std::make_unique<node::ArgumentNode<int,0>>());
-
-    std::ofstream fout1("Fact[int]_.xml");
-    subroutineIO.write(*rootNode, treeProperty, fout1);
+    std::ifstream fin("tree.xml");
+    auto tree = treeIO.readTree(fin, stringToType);
+    std::ofstream fout1("treeOut.xml");
+    treeIO.writeTree(tree, fout1);
     fout1.close();
-
-    tree::Tree tree(tree::TreeProperty{&utility::typeInfo<int>(), {&utility::typeInfo<int>()}, {}, ""}, std::move(rootNode));
     for(int i = 0; i < 10; ++i) {
-        auto ans = tree.evaluate(std::vector<utility::Variable>{i});
+        auto ans = tree.evaluate(std::vector<utility::Variable>{i, i});
         std::cout << std::any_cast<int>(ans.getReturnValue()) << std::endl;
     }
 

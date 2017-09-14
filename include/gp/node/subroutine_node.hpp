@@ -19,6 +19,13 @@ namespace gp::node {
         decltype(auto) find(Key&& key)const {return subroutineEntities.find(std::forward<Key>(key));}
         template <typename Key>
         void insert(Key&& key, SubroutineEntity&& val) {subroutineEntities.insert(std::make_pair(std::forward<Key>(key), std::move(val)));}
+        template <typename Key>
+        void deleteEntity(Key&& key)noexcept {
+            auto itr = subroutineEntities.find(std::forward<Key>(key));
+            if(itr != std::end(subroutineEntities)){
+                subroutineEntities.erase(itr);
+            }
+        }
         decltype(auto) begin(){return std::begin(subroutineEntities);}
         decltype(auto) begin()const{return std::begin(subroutineEntities);}
         decltype(auto) end(){return std::end(subroutineEntities);}
