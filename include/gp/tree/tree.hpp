@@ -104,7 +104,7 @@ namespace gp::tree{
         utility::EvaluationContext evaluate(Arguments&& arguments,
                                             EvaluationCount maxEvaluationCount = defaultMaxEvaluationCount,
                                             StackCount maxStackCount = defaultMaxStackCount)const {
-
+            assert(std::size(treeProperty.argumentTypes) == std::size(arguments));
             utility::EvaluationContext evaluationContext(std::forward<Arguments>(arguments),
                                                          utility::EvaluationContext::VariableTable(std::size(treeProperty.localVariableTypes)),
                                                          maxEvaluationCount,
