@@ -165,11 +165,11 @@ namespace gp::tree_operations {
             if(child.getNodeType() == node::NodeType::Argument) {
                 auto argument_idx = std::any_cast<adapt_type::variable_index_type>(child.getNodePropertyByAny());
                 if(std::size(treeProperty.argumentTypes) <= argument_idx) return false;
-                return *treeProperty.argumentTypes[argument_idx] == child.getReturnType().removeReferenceType().removeLeftHandValueType();
+                return treeProperty.argumentTypes[argument_idx]->removeReferenceType().removeLeftHandValueType() == child.getReturnType().removeReferenceType().removeLeftHandValueType();
             } else if(child.getNodeType() == node::NodeType::LocalVariable){
                 auto localVariableIdx = std::any_cast<adapt_type::variable_index_type>(child.getNodePropertyByAny());
                 if(std::size(treeProperty.localVariableTypes) <= localVariableIdx)return false;
-                return *treeProperty.localVariableTypes[localVariableIdx] == child.getReturnType().removeReferenceType().removeLeftHandValueType();
+                return treeProperty.localVariableTypes[localVariableIdx]->removeReferenceType().removeLeftHandValueType() == child.getReturnType().removeReferenceType().removeLeftHandValueType();
             } else {
                 return true;
             }
