@@ -50,6 +50,39 @@ namespace gp::tree {
                 Container[createSubroutineString<T, Args...>()] = node::NodeInterface::createInstance<node::SubroutineNode<T(Args...)>, const std::string&, const node::SubroutineEntitySet&>;
             };
         };
+
+        template <typename ptree>
+        TreeProperty getTreeProperty(const ptree& tree, const utility::StringToType& stringToType) {
+            using namespace gp::io;
+            using namespace boost::property_tree;
+            TreeProperty treeProperty;
+            //get tree name
+            if(auto treeName = tree.template get_optional<std::string>(std::string(ROOT_FIELD) + "." + NAME_FIELD)){
+                treeProperty.name = *treeName;
+            }else throw std::runtime_error("name field not found in reading tree");
+            //get return type
+            if(auto returnTypeStr = tree.template get_optional<std::string>(std::string(ROOT_FIELD) + "." + RETURN_TYPE_FIELD)){
+                if(!stringToType.hasType(*returnTypeStr)) throw std::runtime_error("return type name not found in reading tree");
+                treeProperty.returnType = &stringToType(*returnTypeStr);
+            } else throw std::runtime_error("the root field must be tree");
+            //get arguments
+            for(const auto& [key, val]: tree.get_child(std::string(ROOT_FIELD) + "." + ARGUMENT_TYPE_FIELD)){
+                if(key == VARIABLE_TYPE_FIELD){
+                    const auto& typeStr = val.data();
+                    if(!stringToType.hasType(typeStr)) throw std::runtime_error("argument type name not found in reading tree");
+                    treeProperty.argumentTypes.push_back(&stringToType(typeStr));
+                }
+            }
+            //get local variables
+            for(const auto& [key, val]: tree.get_child(std::string(ROOT_FIELD) + "." + LOCAL_VARIABLE_FIELD)){
+                if(key == VARIABLE_TYPE_FIELD){
+                    const auto& typeStr = val.data();
+                    if(!stringToType.hasType(typeStr)) throw std::runtime_error("argument type name not found in reading tree");
+                    treeProperty.localVariableTypes.push_back(&stringToType(typeStr));
+                }
+            }
+            return treeProperty;
+        }
     }
 
     template <typename ...SupportTypes>
@@ -100,33 +133,8 @@ namespace gp::tree {
             using namespace boost::property_tree;
             using namespace gp::io;
             ptree tree;
-            TreeProperty treeProperty;
             xml_parser::read_xml(in, tree);
-            //get tree name
-            if(auto treeName = tree.get_optional<std::string>(std::string(ROOT_FIELD) + "." + NAME_FIELD)){
-                treeProperty.name = *treeName;
-            }else throw std::runtime_error("name field not found in reading tree");
-            //get return type
-            if(auto returnTypeStr = tree.get_optional<std::string>(std::string(ROOT_FIELD) + "." + RETURN_TYPE_FIELD)){
-                if(!stringToType.hasType(*returnTypeStr)) throw std::runtime_error("return type name not found in reading tree");
-                treeProperty.returnType = &stringToType(*returnTypeStr);
-            } else throw std::runtime_error("the root field must be tree");
-            //get arguments
-            for(const auto& [key, val]: tree.get_child(std::string(ROOT_FIELD) + "." + ARGUMENT_TYPE_FIELD)){
-                if(key == VARIABLE_TYPE_FIELD){
-                    const auto& typeStr = val.data();
-                    if(!stringToType.hasType(typeStr)) throw std::runtime_error("argument type name not found in reading tree");
-                    treeProperty.argumentTypes.push_back(&stringToType(typeStr));
-                }
-            }
-            //get local variables
-            for(const auto& [key, val]: tree.get_child(std::string(ROOT_FIELD) + "." + LOCAL_VARIABLE_FIELD)){
-                if(key == VARIABLE_TYPE_FIELD){
-                    const auto& typeStr = val.data();
-                    if(!stringToType.hasType(typeStr)) throw std::runtime_error("argument type name not found in reading tree");
-                    treeProperty.localVariableTypes.push_back(&stringToType(typeStr));
-                }
-            }
+            auto treeProperty = detail::getTreeProperty(tree, stringToType);
             //get tree entity
             if(auto treeEntity = tree.get_optional<std::string>(std::string(ROOT_FIELD) + "." + TREE_ENTITY_FIELD)) {
                 //check if the same node name exists
@@ -227,33 +235,9 @@ namespace gp::tree {
             using namespace boost::property_tree;
             using namespace gp::io;
             ptree tree;
-            TreeProperty treeProperty;
             xml_parser::read_xml(in, tree);
-            //get tree name
-            if(auto treeName = tree.get_optional<std::string>(std::string(ROOT_FIELD) + "." + NAME_FIELD)){
-                treeProperty.name = *treeName;
-            }else throw std::runtime_error("name field not found in reading tree");
-            //get return type
-            if(auto returnTypeStr = tree.get_optional<std::string>(std::string(ROOT_FIELD) + "." + RETURN_TYPE_FIELD)){
-                if(!stringToType.hasType(*returnTypeStr)) throw std::runtime_error("return type name not found in reading tree");
-                treeProperty.returnType = &stringToType(*returnTypeStr);
-            } else throw std::runtime_error("the root field must be tree");
-            //get arguments
-            for(const auto& [key, val]: tree.get_child(std::string(ROOT_FIELD) + "." + ARGUMENT_TYPE_FIELD)){
-                if(key == VARIABLE_TYPE_FIELD){
-                    const auto& typeStr = val.data();
-                    if(!stringToType.hasType(typeStr)) throw std::runtime_error("argument type name not found in reading tree");
-                    treeProperty.argumentTypes.push_back(&stringToType(typeStr));
-                }
-            }
-            //get local variables
-            for(const auto& [key, val]: tree.get_child(std::string(ROOT_FIELD) + "." + LOCAL_VARIABLE_FIELD)){
-                if(key == VARIABLE_TYPE_FIELD){
-                    const auto& typeStr = val.data();
-                    if(!stringToType.hasType(typeStr)) throw std::runtime_error("argument type name not found in reading tree");
-                    treeProperty.localVariableTypes.push_back(&stringToType(typeStr));
-                }
-            }
+            //get treeProperty
+            auto treeProperty = detail::getTreeProperty(tree, stringToType);
             node_instance_type rootNode;
             //get tree entity
             if(auto treeEntity = tree.get_optional<std::string>(std::string(ROOT_FIELD) + "." + TREE_ENTITY_FIELD)) {
