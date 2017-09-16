@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<tree>
+    <name>ReferenceTestSub</name>
+    <return_type>int</return_type>
+    <arguments>
+        <type>ref[int]</type>
+    </arguments>
+    <local_variables>
+    </local_variables>
+    <tree_entity>
+        +--Substitute[int]
+             |
+             +--Argument[lvalue[int],0]
+             |
+             +--Add[int]
+                 |
+                 +--Const[int,10]
+                 |
+                 +--Argument[int,0]
+
+    </tree_entity>
+</tree>

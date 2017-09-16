@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<tree>
+    <name>ReferenceTest</name>
+    <return_type>int</return_type>
+    <arguments>
+        <type>int</type>
+    </arguments>
+    <local_variables>
+    </local_variables>
+    <tree_entity>
+    +--Progn[int,2]
+        |
+        +--ReferenceTestSub
+        |   |
+        |   +--Argument[ref[int],0]
+        |
+        +--Argument[int,0]
+
+    </tree_entity>
+</tree>
