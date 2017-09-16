@@ -1,10 +1,9 @@
-#ifndef GP_TREE_OPERATIONS_STRING_TO_NODE_TRAITS
-#define GP_TREE_OPERATIONS_STRING_TO_NODE_TRAITS
+#ifndef GP_TRAITS_STRING_TO_NODE_TRAITS
+#define GP_TRAITS_STRING_TO_NODE_TRAITS
 
 #include <gp/node/string_to_node.hpp>
 
-
-namespace gp::tree_operations {
+namespace gp::traits {
     template <typename string_to_node>
     struct string_to_node_traits;
 

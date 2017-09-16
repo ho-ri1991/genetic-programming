@@ -1,11 +1,11 @@
-#ifndef GP_TREE_OPERATIONS_TREE_TRAITS
-#define GP_TREE_OPERATIONS_TREE_TRAITS
+#ifndef GP_TRAITS_TREE_TRAITS
+#define GP_TRAITS_TREE_TRAITS
 
 #include <type_traits>
 #include <gp/tree/tree.hpp>
 #include <gp/node/string_to_node.hpp>
 
-namespace gp::tree_operations {
+namespace gp::traits {
     template <typename tree>
     struct tree_traits;
 
