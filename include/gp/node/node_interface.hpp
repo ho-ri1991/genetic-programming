@@ -28,6 +28,7 @@ namespace gp::node{
     public:
         using type_info = utility::TypeInfo;
         using type_index = utility::TypeIndex;
+        using any_t = utility::any;
         using node_instance_type = std::unique_ptr<NodeInterface>;
         using const_node_instance_type = std::unique_ptr<const NodeInterface>;
         template <typename NodeType, typename ...Ts>
