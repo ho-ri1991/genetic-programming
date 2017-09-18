@@ -6,6 +6,7 @@
 #include <gp/traits/node_traits.hpp>
 #include <gp/traits/tree_traits.hpp>
 #include <gp/traits/string_to_node_traits.hpp>
+#include <gp/traits/random_node_generator_traits.hpp>
 #include "detail/detail.hpp"
 
 namespace gp::tree_operations {
@@ -67,12 +68,37 @@ namespace gp::tree_operations {
         return detail::ReadTreeHelper::readTreeHelper(stringToNode, treeProperty, in);
     }
 
-    template <typename TreeProperty, typename RandomNodeGenerator>
-    auto generateTreeRandom(const TreeProperty& treeProperty, const RandomNodeGenerator& randomNodeGenerator, std::size_t maxTreeDepth) {
+    //FIXME push back localVariable types when local variable node was added
+    template <typename TreeProperty, typename RandomNodeGenerator, typename RandomEngine>
+    auto generateTreeRandom(const TreeProperty& treeProperty, const RandomNodeGenerator& randomNodeGenerator, RandomEngine& rnd, std::size_t maxTreeDepth) {
+        static_assert(traits::is_random_node_generator_type_v<RandomNodeGenerator>);
+        static_assert(traits::is_tree_property_type_v<TreeProperty>);
+        static_assert(std::is_same_v<
+                          typename traits::random_node_generator_traits<RandomNodeGenerator>::tree_property,
+                          TreeProperty
+                      >
+        );
+        static_assert(std::is_same_v<
+                    typename traits::random_node_generator_traits<RandomNodeGenerator>::type_info,
+                    typename traits::tree_property_traits<TreeProperty>::type_info
+                >
+        );
+        using node_gen_trait = traits::random_node_generator_traits<RandomNodeGenerator>;
+        using tree_property_trait = traits::tree_property_traits<TreeProperty>;
+        using node_type = typename node_gen_trait::node_instance_type;
+        static_assert(traits::is_typed_node_type_v<node_type> || traits::is_typed_node_ptr_type_v<node_type>);
+
+        const auto& returnType = tree_property_trait::get_return_type(treeProperty);
         if(maxTreeDepth == 0) {
-
+            return node_gen_trait::generate_leaf_node(randomNodeGenerator, returnType, treeProperty, rnd);
         } else {
-
+            auto rootNode = node_gen_trait::generate_node(randomNodeGenerator, returnType, treeProperty, rnd);
+            if constexpr (traits::is_typed_node_ptr_type_v<std::decay_t<decltype(rootNode)>>) {
+                detail::generateTreeRandom(*rootNode, treeProperty, randomNodeGenerator, rnd, maxTreeDepth);
+            } else {
+                detail::generateTreeRandom(rootNode, treeProperty, randomNodeGenerator, rnd, maxTreeDepth);
+            }
+            return rootNode;
         }
     };
 }
