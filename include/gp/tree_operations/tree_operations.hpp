@@ -42,6 +42,22 @@ namespace gp::tree_operations {
         }
     }
 
+    template <typename node>
+    std::size_t getSubtreeNodeNum(const node& node_) {
+        static_assert(traits::is_node_type_v<node> || traits::is_node_ptr_type_v<node>);
+        if constexpr (traits::is_node_ptr_type_v<node>){
+            return getSubtreeNodeNum(*node_);
+        } else {
+            using trait = traits::node_traits<node>;
+            std::size_t ans = 1;
+            auto childNum = trait::get_child_num(node_);
+            for(int i = 0; i < childNum; ++i) {
+                ans += getSubtreeNodeNum(trait::get_child(node_, i));
+            }
+            return ans;
+        }
+    }
+
     template <typename output_node>
     void writeTree(const output_node& rootNode, std::ostream& out) {
         static_assert(traits::is_output_node_type_v<output_node> || traits::is_output_node_ptr_type_v<output_node>);
@@ -68,7 +84,6 @@ namespace gp::tree_operations {
         return detail::ReadTreeHelper::readTreeHelper(stringToNode, treeProperty, in);
     }
 
-    //FIXME push back localVariable types when local variable node was added
     template <typename TreeProperty, typename RandomNodeGenerator, typename RandomEngine>
     auto generateTreeRandom(const TreeProperty& treeProperty, const RandomNodeGenerator& randomNodeGenerator, RandomEngine& rnd, std::size_t maxTreeDepth) {
         static_assert(traits::is_random_node_generator_type_v<RandomNodeGenerator>);
@@ -101,6 +116,7 @@ namespace gp::tree_operations {
             return rootNode;
         }
     };
+
 }
 
 #endif
