@@ -250,6 +250,21 @@ namespace gp::node {
         }
         node_instance_type clone()const override {return NodeInterface::createInstance<ThisType>();}
     };
+
+    template <typename T>
+    class NopNode: public NodeBase<T(void)> {
+        using ThisType = NopNode;
+        using node_instance_type = NodeInterface::node_instance_type;
+    private:
+        T evaluationDefinition(utility::EvaluationContext& evaluationContext)const override {
+            return utility::getDefaultValue<T>();
+        }
+    public:
+        std::string getNodeName()const override {
+            return std::string("Nop[") + utility::typeInfo<T>().name() + std::string("]");
+        }
+        node_instance_type clone()const override {return NodeInterface::createInstance<ThisType>();}
+    };
 }
 
 #endif
