@@ -6,6 +6,22 @@
 #include <gp/node/node_interface.hpp>
 
 namespace gp::traits {
+    namespace detail {
+        template <template <typename> class IsTrait, typename Enable, typename T>
+        struct is_adaptable_ptr_type_impl: public std::false_type{};
+        template <template <typename> class IsTrait, typename T>
+        struct is_adaptable_ptr_type_impl<
+                IsTrait,
+                std::void_t<
+                        decltype(*std::declval<T>()),
+                        std::enable_if_t<IsTrait<std::decay_t<decltype(*std::declval<T>())>>::value>
+                >,
+                T
+        >: public std::true_type {};
+        template <template <typename> class IsTrait, typename T>
+        using is_adaptable_ptr_type = is_adaptable_ptr_type_impl<IsTrait, void, T>;
+    }
+
     template <typename node>
     struct node_traits;
 
@@ -16,7 +32,7 @@ namespace gp::traits {
     constexpr bool is_node_type_v = is_node_type<node>::value;
 
     template <typename node_ptr>
-    struct is_node_ptr_type: public std::false_type{};
+    using is_node_ptr_type = detail::is_adaptable_ptr_type<is_node_type, node_ptr>;
 
     template <typename node_ptr>
     constexpr bool is_node_ptr_type_v = is_node_ptr_type<node_ptr>::value;
@@ -42,11 +58,6 @@ namespace gp::traits {
     template <>
     struct is_node_type<node::NodeInterface>: public std::true_type{};
 
-    template <>
-    struct is_node_ptr_type<node::NodeInterface::node_instance_type>: public std::true_type{};
-
-    template <>
-    struct is_node_ptr_type<node::NodeInterface*>: public std::true_type{};
 
     template <typename typed_node>
     struct typed_node_traits;
@@ -58,7 +69,7 @@ namespace gp::traits {
     constexpr bool is_typed_node_type_v = is_typed_node_type<typed_node>::value;
 
     template <typename typed_node_ptr>
-    struct is_typed_node_ptr_type: public std::false_type{};
+    using is_typed_node_ptr_type = detail::is_adaptable_ptr_type<is_typed_node_type, typed_node_ptr>;
 
     template <typename typed_node_ptr>
     constexpr bool is_typed_node_ptr_type_v = is_typed_node_ptr_type<typed_node_ptr>::value;
@@ -85,11 +96,6 @@ namespace gp::traits {
     template <>
     struct is_typed_node_type<node::NodeInterface>: public std::true_type{};
 
-    template <>
-    struct is_typed_node_ptr_type<node::NodeInterface::node_instance_type>: public std::true_type{};
-
-    template <>
-    struct is_typed_node_ptr_type<node::NodeInterface*>: public std::true_type{};
 
     template <typename output_node>
     struct output_node_traits;
@@ -101,7 +107,7 @@ namespace gp::traits {
     constexpr bool is_output_node_type_v = is_output_node_type<output_node>::value;
 
     template <typename output_node_ptr>
-    struct is_output_node_ptr_type: public std::false_type{};
+    using is_output_node_ptr_type = detail::is_adaptable_ptr_type<is_output_node_type, output_node_ptr>;
 
     template <typename output_node_ptr>
     constexpr bool is_output_node_ptr_type_v = is_output_node_ptr_type<output_node_ptr>::value;
@@ -123,11 +129,6 @@ namespace gp::traits {
     template <>
     struct is_output_node_type<node::NodeInterface>: public std::true_type{};
 
-    template <>
-    struct is_output_node_ptr_type<node::NodeInterface::node_instance_type>: public std::true_type{};
-
-    template <>
-    struct is_output_node_ptr_type<node::NodeInterface*>: public std::true_type{};
 
     template <typename node>
     struct input_node_traits;
@@ -139,7 +140,7 @@ namespace gp::traits {
     constexpr bool is_input_node_type_v = is_input_node_type<input_node>::value;
 
     template <typename input_node_ptr>
-    struct is_input_node_ptr_type: public std::false_type{};
+    using is_input_node_ptr_type = detail::is_adaptable_ptr_type<is_input_node_type, input_node_ptr>;
 
     template <typename input_node_ptr>
     constexpr bool is_input_node_ptr_type_v = is_input_node_ptr_type<input_node_ptr>::value;
@@ -178,12 +179,6 @@ namespace gp::traits {
 
     template <>
     struct is_input_node_type<node::NodeInterface>: public std::true_type{};
-
-    template <>
-    struct is_input_node_ptr_type<node::NodeInterface::node_instance_type>: public std::true_type{};
-
-    template <>
-    struct is_input_node_ptr_type<node::NodeInterface*>: public std::true_type{};
 }
 
 #endif
