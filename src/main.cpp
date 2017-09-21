@@ -6,6 +6,8 @@
 #include <gp/node/node.hpp>
 #include <gp/tree_operations/tree_operations.hpp>
 #include <gp/tree/io.hpp>
+#include <gp/genetic_operations/mutation.hpp>
+#include <gp/genetic_operations/default_modules.hpp>
 using namespace gp;
 
 using rnd = std::mt19937;
@@ -25,6 +27,8 @@ int main() {
 
     tree::TreeIO<int> treeIO;
     tree::RandomNodeGenerator<rnd, int, bool> randomNodeGenerator(random_gens);
+    genetic_operations::DefaultRandomTreeGenerator<rnd, decltype(randomNodeGenerator)> defaultRandomTreeGenerator(Rnd, randomNodeGenerator);
+    genetic_operations::DefaultNodeSelector<rnd> defaultNodeSelector(Rnd);
 
     treeIO.registerNode(std::make_unique<node::PrognNode<int,2>>());
     treeIO.registerNode(std::make_unique<node::AddNode<int>>());
@@ -46,6 +50,8 @@ int main() {
     treeIO.registerNode(std::make_unique<node::MultiplyNode<int>>());
     treeIO.registerNode(std::make_unique<node::SubtractNode<int>>());
     treeIO.registerNode(std::make_unique<node::ConstNode<bool>>(false));
+    treeIO.registerNode(std::make_unique<node::NopNode<int>>());
+    treeIO.registerNode(std::make_unique<node::NopNode<bool>>());
 
     randomNodeGenerator.registerNode(std::make_unique<node::PrognNode<int,2>>());
     randomNodeGenerator.registerNode(std::make_unique<node::AddNode<int>>());
@@ -67,33 +73,34 @@ int main() {
     randomNodeGenerator.registerNode(std::make_unique<node::MultiplyNode<int>>());
     randomNodeGenerator.registerNode(std::make_unique<node::SubtractNode<int>>());
     randomNodeGenerator.registerNode(std::make_unique<node::ConstNode<bool>>(false));
+    randomNodeGenerator.registerNode(std::make_unique<node::NopNode<int>>());
+    randomNodeGenerator.registerNode(std::make_unique<node::NopNode<bool>>());
 
-    for(int i=0;i<10;++i) {
-
-        auto treeProperty = tree::TreeProperty{&utility::typeInfo<int>(), {&utility::typeInfo<int>()}, {}, "RandomTree"};
-        std::cout << "generate tree randomly" << std::endl;
-        auto randomTree = tree_operations::generateTreeRandom(treeProperty, randomNodeGenerator, Rnd, 10);
-
-        {
-            std::ofstream fout("RandomTree" + std::to_string(i) + ".xml");
-            std::cout << "write random tree" << std::endl;
-            treeIO.writeTree(*randomTree, treeProperty, fout);
-        }
-    }
-
-
-    {
-        std::ifstream fin("ReferenceTestSub.xml");
-        auto treeProperty = treeIO.loadSubroutine(fin, stringToType);
-    }
-
-    std::ifstream fin("ReferenceTest.xml");
+    std::ifstream fin("tree.xml");
     auto tree = treeIO.readTree(fin, stringToType);
 
     for(int i = 0; i < 10; ++i) {
-        auto ans = tree.evaluate(std::vector<utility::Variable>{i});
+        auto mutationTree = tree;
+
+        auto mutatedTree = tree::Tree(mutationTree.getTreeProperty(),
+                                      genetic_operations::mutation(
+                                              std::move(mutationTree).getRootNodeInstance(),
+                                              defaultRandomTreeGenerator,
+                                              defaultNodeSelector,
+                                              mutationTree.getTreeProperty(),
+                                              5
+                                      )
+        );
+
+        std::ofstream fout("mutation-tree" + std::to_string(i) + ".xml");
+        mutatedTree.getTreeProperty().name = "MutationTree";
+        treeIO.writeTree(mutatedTree, fout);
+        fout.close();
+
+        auto ans = mutatedTree.evaluate(std::make_tuple(1, 2));
         std::cout << std::any_cast<int>(ans.getReturnValue()) << std::endl;
     }
+
 
     return 0;
 }

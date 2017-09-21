@@ -116,7 +116,6 @@ namespace gp::tree_operations {
             return rootNode;
         }
     };
-
 }
 
 #endif

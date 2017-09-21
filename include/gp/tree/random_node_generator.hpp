@@ -93,7 +93,6 @@ namespace gp::tree {
             return ans;
         }
     public:
-        //FIXME treat any_t propery
         node_instance_type generateNode(const type_info& returnType, const TreeProperty& treeProperty, RandomEngine& rnd)const {
             return generateNodeHelper(returnType, treeProperty, nodeMultimap, rnd);
         }
