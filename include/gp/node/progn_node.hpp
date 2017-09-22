@@ -55,7 +55,7 @@ namespace gp::node {
                 return *children[m];
             }
         }
-        void setChild(std::size_t m, std::unique_ptr<NodeInterface> node)override {
+        node_instance_type setChild(std::size_t m, node_instance_type node)override {
             assert((m < n) && "the child index must be smaller than the number of children of the node");
             if(n <= m) throw std::invalid_argument("invalid child index");
             if(m == n - 1){
@@ -63,14 +63,17 @@ namespace gp::node {
                 if(utility::typeInfo<T>() != node->getReturnType()) throw std::invalid_argument("invalied type node was set as a child");
                 if(auto typed_ptr = dynamic_cast<TypedNodeInterface<T>*>(node.get())){
                     node.release();
+                    auto org = lastChild.release();
                     lastChild.reset(typed_ptr);
                     lastChild->setParent(this);
+                    return node::NodeInterface::node_instance_type(org);
                 }else {
                     throw std::invalid_argument("invalied type node was set as a child");
                 }
             }else {
-                children[m] = std::move(node);
+                children[m].swap(node);
                 children[m]->setParent(this);
+                return node;
             }
         }
         NodeInterface& getParent()override {

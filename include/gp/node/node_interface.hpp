@@ -50,7 +50,7 @@ namespace gp::node{
         virtual bool hasChild(std::size_t n)const noexcept = 0;
         virtual NodeInterface& getChildNode(std::size_t n) = 0;
         virtual const NodeInterface& getChildNode(std::size_t n)const = 0;
-        virtual void setChild(std::size_t n, std::unique_ptr<NodeInterface> node) = 0;
+        virtual node_instance_type setChild(std::size_t n, node_instance_type node) = 0;
         //methods for parent
         virtual bool hasParent()const noexcept = 0;
         virtual NodeInterface& getParent() = 0;

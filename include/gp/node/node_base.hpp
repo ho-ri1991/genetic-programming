@@ -65,20 +65,20 @@ namespace gp::node{
         }
 
         template<std::size_t offset, typename ...Ts>
-        void setDynamicHelper(std::size_t n, std::unique_ptr<NodeInterface> node,
+        node::NodeInterface::node_instance_type setDynamicHelper(std::size_t n, std::unique_ptr<NodeInterface> node,
                               std::tuple<std::unique_ptr<TypedNodeInterface<Ts>>...> &t) {
-            if constexpr (offset < sizeof...(Ts))
-            {
+            if constexpr (offset < sizeof...(Ts)) {
                 if (n == 0) {
                     if (auto typed_node = dynamic_cast<typename std::tuple_element<offset, std::tuple<TypedNodeInterface<Ts>...>>::type *>(node.get())) {
+                        auto org = std::get<offset>(t).release();
                         std::get<offset>(t).reset(typed_node);
                         node.release();
-                        return;
+                        return node::NodeInterface::node_instance_type(org);
                     } else {
                         throw std::invalid_argument("invalied type node was set as a child");
                     }
                 } else {
-                    setDynamicHelper<offset + 1, Ts...>(n - 1, std::move(node), t);
+                    return setDynamicHelper<offset + 1, Ts...>(n - 1, std::move(node), t);
                 }
             } else {
                 throw std::invalid_argument("invalid child index");
@@ -86,9 +86,9 @@ namespace gp::node{
         };
 
         template<typename ...Ts>
-        void setDynamic(std::size_t n, std::unique_ptr<NodeInterface> node,
+        node::NodeInterface::node_instance_type setDynamic(std::size_t n, std::unique_ptr<NodeInterface> node,
                         std::tuple<std::unique_ptr<TypedNodeInterface<Ts>>...> &t) {
-            setDynamicHelper<0, Ts...>(n, std::move(node), t);
+            return setDynamicHelper<0, Ts...>(n, std::move(node), t);
         }
 
         template<std::size_t n, typename>
@@ -142,11 +142,12 @@ namespace gp::node{
             assert(n < sizeof...(Args));
             return detail::getDynamic(n, children);
         }
-        void setChild(std::size_t n, std::unique_ptr<NodeInterface> node)override {
+        node_instance_type setChild(std::size_t n, node_instance_type node)override {
             assert((n < sizeof...(Args)) && "the child index must be smaller than the number of children of the node");
             assert(detail::getRTTI<Args...>(n) == node->getReturnType() && "the return type of child must equal to the argument type of the node");
-            detail::setDynamic(n, std::move(node), children);
+            auto org = detail::setDynamic(n, std::move(node), children);
             getChildNode(n).setParent(this);
+            return org;
         }
         NodeInterface& getParent()override {
             if(parent == nullptr) throw std::runtime_error("tried to get paren, but the parent is not set");
@@ -181,9 +182,10 @@ namespace gp::node{
         const type_info& getChildReturnType(std::size_t)const noexcept override{return utility::typeInfo<utility::error>();}
         NodeInterface& getChildNode(std::size_t)override {throw std::invalid_argument("tried to get child, but this child takes no child");}
         const NodeInterface& getChildNode(std::size_t)const override {throw std::invalid_argument("tried to get child, but this child takes no child");}
-        void setChild(std::size_t, std::unique_ptr<NodeInterface>)override {
+        node_instance_type setChild(std::size_t, node_instance_type)override {
             assert("this node takes no child");
             throw std::invalid_argument("the child index must be smaller than the number of children of the node");
+            return nullptr;
         }
         NodeInterface& getParent()override {
             if(parent == nullptr) throw std::runtime_error("tried to get paren, but the parent is not set");
