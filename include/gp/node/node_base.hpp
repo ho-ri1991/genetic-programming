@@ -134,11 +134,11 @@ namespace gp::node{
         const type_info& getChildReturnType(std::size_t n)const noexcept override {
             return detail::getRTTI<Args...>(n);
         }
-        NodeInterface& getChildNode(std::size_t n)override {
+        NodeInterface& getChild(std::size_t n)override {
             assert(n < sizeof...(Args));
             return detail::getDynamic(n, children);
         }
-        const NodeInterface& getChildNode(std::size_t n)const override {
+        const NodeInterface& getChild(std::size_t n)const override {
             assert(n < sizeof...(Args));
             return detail::getDynamic(n, children);
         }
@@ -146,7 +146,7 @@ namespace gp::node{
             assert((n < sizeof...(Args)) && "the child index must be smaller than the number of children of the node");
             assert(detail::getRTTI<Args...>(n) == node->getReturnType() && "the return type of child must equal to the argument type of the node");
             auto org = detail::setDynamic(n, std::move(node), children);
-            getChildNode(n).setParent(this);
+            getChild(n).setParent(this);
             return org;
         }
         NodeInterface& getParent()override {
@@ -180,8 +180,8 @@ namespace gp::node{
     public:
         std::size_t getChildNum()const noexcept override {return 0;}
         const type_info& getChildReturnType(std::size_t)const noexcept override{return utility::typeInfo<utility::error>();}
-        NodeInterface& getChildNode(std::size_t)override {throw std::invalid_argument("tried to get child, but this child takes no child");}
-        const NodeInterface& getChildNode(std::size_t)const override {throw std::invalid_argument("tried to get child, but this child takes no child");}
+        NodeInterface& getChild(std::size_t)override {throw std::invalid_argument("tried to get child, but this child takes no child");}
+        const NodeInterface& getChild(std::size_t)const override {throw std::invalid_argument("tried to get child, but this child takes no child");}
         node_instance_type setChild(std::size_t, node_instance_type)override {
             assert("this node takes no child");
             throw std::invalid_argument("the child index must be smaller than the number of children of the node");

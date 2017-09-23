@@ -33,7 +33,7 @@ namespace gp::genetic_operations {
             else {
                 for(int i = 0; i < rootNode.getChildNum(); ++i) {
                     --num;
-                    const node::NodeInterface* ans = selectHelper(rootNode.getChildNode(i), num);
+                    const node::NodeInterface* ans = selectHelper(rootNode.getChild(i), num);
                     if(ans != nullptr) return ans;
                 }
                 return nullptr;

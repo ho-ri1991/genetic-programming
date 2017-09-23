@@ -33,7 +33,7 @@ namespace gp::node {
             else if(m == n - 1)return utility::typeInfo<T>();
             else return utility::typeInfo<utility::any>();
         }
-        NodeInterface& getChildNode(std::size_t m)override {
+        NodeInterface& getChild(std::size_t m)override {
             if(n <= m)throw std::invalid_argument("the index exceeded the number of children");
             else if(m == n - 1){
                 if(!lastChild)throw std::runtime_error("the specified child is nullptr");
@@ -44,7 +44,7 @@ namespace gp::node {
                 return *children[m];
             }
         }
-        const NodeInterface& getChildNode(std::size_t m)const override {
+        const NodeInterface& getChild(std::size_t m)const override {
             if(n <= m)throw std::invalid_argument("the index exceeded the number of children");
             else if(m == n - 1){
                 if(!lastChild)throw std::runtime_error("the specified child is nullptr");

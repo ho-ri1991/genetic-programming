@@ -46,8 +46,8 @@ namespace gp::traits {
         //methods for children
         static std::size_t get_child_num(const adapt_type& node_) {return node_.getChildNum();}
         static bool has_child(const adapt_type& node_, std::size_t n) {return node_.hasChild(n);}
-        static adapt_type& get_child(adapt_type& node_, std::size_t n) {return node_.getChildNode(n);}
-        static const adapt_type& get_child(const adapt_type& node_, std::size_t n) {return node_.getChildNode(n);}
+        static adapt_type& get_child(adapt_type& node_, std::size_t n) {return node_.getChild(n);}
+        static const adapt_type& get_child(const adapt_type& node_, std::size_t n) {return node_.getChild(n);}
         static void set_child(adapt_type& node_, std::size_t n, node_instance_type child) {node_.setChild(n, std::move(child));}
         //methods for parent
         static bool has_parent(const adapt_type& node_) {return node_.hasParent();}

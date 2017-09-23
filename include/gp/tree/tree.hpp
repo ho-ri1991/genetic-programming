@@ -45,7 +45,7 @@ namespace gp::tree{
             std::unique_ptr<node::NodeInterface> targetRootNode = rootNode.clone();
             for(int i = 0; i < rootNode.getChildNum(); ++i) {
                 if(!rootNode.hasChild(i)) throw std::runtime_error("the copy node must not be null");
-                targetRootNode->setChild(i, copyTreeStructure(rootNode.getChildNode(i)));
+                targetRootNode->setChild(i, copyTreeStructure(rootNode.getChild(i)));
             }
             return targetRootNode;
         }
