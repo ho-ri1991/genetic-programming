@@ -36,7 +36,7 @@ namespace gp::genetic_operations {
         if(selectedNode.hasParent()) {
             auto& parent = const_cast<node::NodeInterface&>(selectedNode.getParent());
             for(int i = 0; i < parent.getChildNum(); ++i) {
-                if(&parent.getChildNode(i) == &selectedNode) {
+                if(parent.hasChild(i) && &parent.getChildNode(i) == &selectedNode) {
                     parent.setChild(i, std::move(newSubtree));
                     return rootNode;
                 }
