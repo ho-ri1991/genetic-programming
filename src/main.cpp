@@ -12,6 +12,8 @@ using namespace gp;
 
 using rnd = std::mt19937;
 
+constexpr std::size_t maxTreeDepth = 5;
+
 int main() {
     utility::StringToType stringToType;
     stringToType.setTypeNamePair<int>("int");
@@ -28,7 +30,7 @@ int main() {
     tree::TreeIO<int> treeIO;
     tree::RandomNodeGenerator<rnd, int, bool> randomNodeGenerator(random_gens);
     genetic_operations::DefaultRandomTreeGenerator<rnd, decltype(randomNodeGenerator)> defaultRandomTreeGenerator(Rnd, randomNodeGenerator);
-    genetic_operations::DefaultNodeSelector<rnd> defaultNodeSelector(Rnd);
+    genetic_operations::DefaultNodeSelector<rnd> defaultNodeSelector(Rnd, maxTreeDepth);
 
     treeIO.registerNode(std::make_unique<node::PrognNode<int,2>>());
     treeIO.registerNode(std::make_unique<node::AddNode<int>>());
@@ -88,7 +90,7 @@ int main() {
                                               defaultRandomTreeGenerator,
                                               defaultNodeSelector,
                                               mutationTree.getTreeProperty(),
-                                              5
+                                              maxTreeDepth
                                       )
         );
 
