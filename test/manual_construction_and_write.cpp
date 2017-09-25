@@ -13,9 +13,8 @@
 using namespace gp;
 
 
-BOOST_AUTO_TEST_SUITE(mylib)
-BOOST_AUTO_TEST_CASE(mylib) {
-//int main() {
+BOOST_AUTO_TEST_SUITE(gplib)
+BOOST_AUTO_TEST_CASE(gplib) {
     utility::StringToType stringToType;
     stringToType.setTypeNamePair<int>("int");
     stringToType.setTypeNamePair<utility::LeftHandValue<int>>("lvalue[int]");
@@ -83,15 +82,11 @@ BOOST_AUTO_TEST_CASE(mylib) {
         int a0 = i;
         int a1 = 2 * i;
         auto ans = tree.evaluate(std::make_tuple(a0, a1));
-//        BOOST_CHECK_EQUAL(ans.getEvaluationStatus(), utility::EvaluationStatus::ValueReturned);
+        BOOST_CHECK_EQUAL(static_cast<int>(ans.getEvaluationStatus()), static_cast<int>(utility::EvaluationStatus::ValueReturned));
         BOOST_CHECK_EQUAL(std::any_cast<int>(ans.getReturnValue()), 10 + a0 + a1);
-        assert(ans.getEvaluationStatus() == utility::EvaluationStatus::ValueReturned);
-//        assert(std::any_cast<int>(ans.getReturnValue()) == (10 + a0 + a1));
     }
 
     std::ofstream fout("TestTree.xml");
     treeIO.writeTree(tree, fout);
-
-//    return 0;
 }
 BOOST_AUTO_TEST_SUITE_END()
