@@ -5,6 +5,7 @@
 #include <type_traits>
 #include <cassert>
 #include <exception>
+#include <typeinfo>
 
 namespace gp::utility {
     class Variable {
@@ -48,12 +49,19 @@ namespace gp::utility {
         }
         const std::type_info& getType()const noexcept{return *type;}
     public:
-        template <typename T>
-        Variable(T&& val):
+        template <typename T,
+                  typename = std::enable_if_t<
+                         !std::is_same_v<
+                                 Variable,
+                                 std::decay_t<T>
+                         >
+                  >
+        >
+        explicit Variable(T&& val):
                 variable(std::forward<T>(val)),
                 hasPointer(std::is_pointer_v<T>),
                 type(&typeid(std::remove_pointer_t<std::remove_cv_t<T>>)){}
-        
+
         Variable(): hasPointer(false), variable(), type(&typeid(void)){};
         ~Variable() = default;
         Variable(const Variable&) = default;
