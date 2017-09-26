@@ -11,7 +11,18 @@ include_directories(./include)
 link_directories(~/llvm/build/lib)
 set(CMAKE_CXX_STANDARD 17)
 
-enable_testing()
 set(SOURCE_FILES src/main.cpp)
-add_subdirectory(test)
 add_executable(genetic_programming ${SOURCE_FILES})
+
+enable_testing()
+add_library(
+        boost_unit_test_framework_static
+        STATIC
+        IMPORTED
+)
+set_target_properties(
+        boost_unit_test_framework_static
+        PROPERTIES
+        IMPORTED_LOCATION /usr/local/lib/libboost_unit_test_framework.a
+)
+add_subdirectory(test)
