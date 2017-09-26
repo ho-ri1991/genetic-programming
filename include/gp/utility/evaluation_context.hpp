@@ -108,6 +108,9 @@ namespace gp::utility {
                 }
             }
         }
+        void decrementStackCount()noexcept {
+            if(stackCount > 0)--stackCount;
+        }
         auto getEvaluationStatus()const noexcept {return evaluationStatus;}
         void setEvaluationStatusWithoutUpdate(EvaluationStatus status){
             if(evaluationStatus == EvaluationStatus::Evaluating) {
@@ -136,14 +139,9 @@ namespace gp::utility {
             return localVariables[n];
         }
         template <typename T>
-        void setArgument(std::size_t n, T& val) {
-            assert(n < std::size(arguments));
-            SetArgumentHelper<T>::set(val, arguments[n]);
-        }
-        template <typename T>
         void setLocalVariable(std::size_t n, T&& val){
             assert(n < std::size(localVariables));
-            localVariables[n] = std::forward<T>(val);
+            localVariables[n].set(std::forward<T>(val));
         }
         template <typename T>
         void setReturnValue(T&& val){
