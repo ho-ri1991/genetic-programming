@@ -18,26 +18,26 @@ namespace gp::utility {
         template <typename T>
         T get() {
             if constexpr (std::is_pointer_v<T>) {
-                assert(typeid(std::remove_pointer_t<std::remove_cv_t <T>>) == *type);
-                if (typeid(std::remove_pointer_t<std::remove_cv_t <T>>) != *type) return nullptr;
+                assert(typeid(std::decay_t<std::remove_pointer_t<T>>) == *type);
+                if (typeid(std::decay_t<std::remove_pointer_t<T>>) != *type) return nullptr;
                 if (hasPointer) {
-                    return std::any_cast<T>(variable);
+                    return std::any_cast<std::add_pointer_t<std::decay_t<std::remove_pointer_t<T>>>>(variable);
                 }else {
                     return &std::any_cast<std::add_lvalue_reference_t<std::remove_pointer_t<T>>>(variable);
                 }
             } else if constexpr (std::is_reference_v<T>) {
-                assert(typeid(std::remove_reference_t<std::remove_cv_t<T>>) == *type);
+                assert(typeid(std::decay_t<T>) == *type);
                 if (hasPointer) {
-                    return *std::any_cast<std::add_pointer_t<std::remove_cv_t<std::remove_reference_t<T>>>>(variable);
+                    return *std::any_cast<std::add_pointer_t<std::decay_t<T>>>(variable);
                 } else {
                     return std::any_cast<T>(variable);
                 }
             } else {
-                assert(typeid(std::remove_cv_t<T>) == *type);
+                assert(typeid(std::decay_t<T>) == *type);
                 if (hasPointer) {
-                    return *std::any_cast<std::add_pointer_t<T>>(variable);
+                    return *std::any_cast<std::add_pointer_t<std::decay_t<T>>>(variable);
                 } else {
-                    return std::any_cast<T>(variable);
+                    return std::any_cast<std::decay_t<T>>(variable);
                 }
             }
         }
