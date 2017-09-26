@@ -7,7 +7,7 @@
 using namespace gp;
 
 BOOST_AUTO_TEST_SUITE(variable)
-BOOST_AUTO_TEST_CASE(variable) {
+    BOOST_AUTO_TEST_CASE(variable) {
         utility::Variable var1;
         BOOST_CHECK(!var1.hasValue());
         BOOST_CHECK(var1.getType() == typeid(void));
@@ -59,5 +59,5 @@ BOOST_AUTO_TEST_CASE(variable) {
         BOOST_CHECK_EQUAL(*var3.get<int* const>(), 1);
         BOOST_CHECK_EQUAL(*var3.get<const int* const>(), 1);
 
-}
+    }
 BOOST_AUTO_TEST_SUITE_END()
