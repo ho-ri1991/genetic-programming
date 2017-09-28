@@ -27,7 +27,7 @@ namespace gp::node {
             sstream << const_node::propertySeparator << data;
             return std::string(const_node::nameHeader) + utility::typeInfo<T>().name() + sstream.str() + std::string(1, const_node::nameDelimiter);
         }
-        node_instance_type clone()const override {return NodeInterface::createInstance<ThisType>();}
+        node_instance_type clone()const override {return NodeInterface::createInstance<ThisType>(data);}
         NodeType getNodeType()const noexcept override final {return NodeType::Const;}
         void setNodePropertyByNodeName(const std::string& name) override {
             auto beg = name.find('[');
