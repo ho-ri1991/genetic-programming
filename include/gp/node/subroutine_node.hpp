@@ -4,6 +4,7 @@
 #include "node_base.hpp"
 #include <tuple>
 #include <unordered_map>
+#include <gp/gp_config.hpp>
 
 namespace gp::node {
     class SubroutineEntitySet {
@@ -59,7 +60,9 @@ namespace gp::node {
                                                                           tree::defaultMaxEvaluationCount,
                                                                           tree::defaultMaxStackCount);
 
+            evaluationContext.incrementStackCount();
             auto ans = entity->evaluateByAny(subroutineEvaluationContext);
+            evaluationContext.decrementStackCount();
             if(subroutineEvaluationContext.getEvaluationStatus() == utility::EvaluationStatus::ValueReturned){
                 return std::any_cast<T>(subroutineEvaluationContext.getReturnValue());
             }else if(subroutineEvaluationContext.getEvaluationStatus() == utility::EvaluationStatus::Evaluating){
