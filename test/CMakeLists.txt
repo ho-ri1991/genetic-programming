@@ -10,3 +10,5 @@ add_test(
 set_property(TEST manual_construction_and_write_test PROPERTY LABELS manual_construction_and_write)
 
 add_subdirectory(utility)
+add_subdirectory(node)
+add_subdirectory(tree)
