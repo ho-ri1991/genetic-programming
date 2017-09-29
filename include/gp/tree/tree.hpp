@@ -83,6 +83,10 @@ namespace gp::tree{
         }
         auto getArgumentNum()const noexcept {return std::size(treeProperty.argumentTypes);}
         auto getLocalVariableNum()const noexcept {return std::size(treeProperty.localVariableTypes);}
+        const type_info& getReturnType()const noexcept {
+            if(treeProperty.returnType == nullptr) return utility::typeInfo<utility::error>();
+            else return *treeProperty.returnType;
+        }
         const type_info& getArgumentType(std::size_t n)const noexcept {
             if(std::size(treeProperty.argumentTypes) <= n || treeProperty.argumentTypes[n] == nullptr)return utility::typeInfo<utility::error>();
             else return *treeProperty.argumentTypes[n];
