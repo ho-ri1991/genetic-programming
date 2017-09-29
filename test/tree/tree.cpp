@@ -6,8 +6,8 @@
 #include <boost/test/unit_test.hpp>
 using namespace gp;
 
-BOOST_AUTO_TEST_SUITE(gplib)
-    BOOST_AUTO_TEST_CASE(gplib) {
+BOOST_AUTO_TEST_SUITE(tree_test)
+    BOOST_AUTO_TEST_CASE(tree_test) {
         auto var0 = node::NodeInterface::createInstance<node::LocalVariableNode<int, 0>>();
         auto arg1 = node::NodeInterface::createInstance<node::ArgumentNode<int, 1>>();
         auto add1 = node::NodeInterface::createInstance<node::AddNode<int>>();

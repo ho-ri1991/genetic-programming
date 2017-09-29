@@ -12,3 +12,4 @@ set_property(TEST manual_construction_and_write_test PROPERTY LABELS manual_cons
 add_subdirectory(utility)
 add_subdirectory(node)
 add_subdirectory(tree)
+add_subdirectory(tree_operations)

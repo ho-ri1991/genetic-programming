@@ -98,5 +98,26 @@ BOOST_AUTO_TEST_SUITE(gplib)
 
         std::ofstream fout("TestTree.xml");
         treeIO.writeTree(tree, fout);
+        fout.close();
+
+        std::ifstream fin("TestTree.xml");
+        auto inTree = treeIO.readTree(fin, stringToType);
+        BOOST_CHECK_EQUAL(inTree.getArgumentNum(), tree.getArgumentNum());
+        BOOST_CHECK_EQUAL(inTree.getLocalVariableNum(), tree.getLocalVariableNum());
+        BOOST_CHECK(tree.getReturnType() == inTree.getReturnType());
+        for(int i = 0; i < tree.getArgumentNum(); ++i) {
+            BOOST_CHECK(tree.getArgumentType(i) == inTree.getArgumentType(i));
+        }
+        for(int i = 0; i < tree.getLocalVariableNum(); ++i) {
+            BOOST_CHECK(tree.getLocalVariableType(i) == inTree.getLocalVariableType(i));
+        }
+
+        for(int i = -10; i < 10; ++i) {
+            int a0 = i;
+            int a1 = 2 * i;
+            auto ans = inTree.evaluate(std::make_tuple(a0, a1));
+            BOOST_CHECK_EQUAL(static_cast<int>(ans.getEvaluationStatus()), static_cast<int>(utility::EvaluationStatus::ValueReturned));
+            BOOST_CHECK_EQUAL(std::any_cast<int>(ans.getReturnValue()), 10 + a0 + a1);
+        }
     }
 BOOST_AUTO_TEST_SUITE_END()
