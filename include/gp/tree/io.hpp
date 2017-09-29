@@ -9,6 +9,7 @@
 #include <gp/tree_operations/tree_operations.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
+#include <tuple>
 
 namespace gp::tree {
     namespace detail{
@@ -129,7 +130,7 @@ namespace gp::tree {
 
             xml_parser::write_xml(out, root, xml_parser::xml_writer_make_settings<std::string>(' ' , 2));
         }
-        TreeProperty load(std::istream& in, const utility::StringToType& stringToType, node::StringToNode& stringToNode) {
+        std::tuple<node_instance_type, TreeProperty> load(std::istream& in, const utility::StringToType& stringToType, node::StringToNode& stringToNode) {
             using namespace boost::property_tree;
             using namespace gp::io;
             ptree tree;
@@ -151,7 +152,7 @@ namespace gp::tree {
                     throw;
                 }
             }else throw std::runtime_error("tree_entity field not found in reading tree");
-            return treeProperty;
+            return std::make_tuple(stringToNode(treeProperty.name), treeProperty);
         }
         template <typename Tree_, typename = std::enable_if_t<std::is_same_v<Tree, std::decay_t<Tree_>>>>
         void registerTreeAsSubroutine(Tree_&& tree, node::StringToNode& stringToNode) {
@@ -225,7 +226,7 @@ namespace gp::tree {
         using node_instance_type = node::NodeInterface::node_instance_type;
     public:
         //wrapper methods of SubroutineIO
-        TreeProperty loadSubroutine(std::istream& in, const utility::StringToType& stringToType){return subroutineIO.load(in, stringToType, stringToNode);}
+        auto loadSubroutine(std::istream& in, const utility::StringToType& stringToType){return subroutineIO.load(in, stringToType, stringToNode);}
         template <typename Tree_, typename = std::enable_if_t<std::is_same_v<Tree, std::decay_t<Tree_>>>>
         void registerTreeAsSubroutine(Tree_&& tree){subroutineIO.registerTreeAsSubroutine(std::forward<Tree_>(tree), stringToNode);};
         void writeTree(const node::NodeInterface& rootNode, const TreeProperty& property, std::ostream& out)const {subroutineIO.write(rootNode, property, out);}
