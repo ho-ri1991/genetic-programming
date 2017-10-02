@@ -6,6 +6,12 @@
 #include <gp/utility/reference.hpp>
 
 namespace gp::node {
+    namespace local_variable_node {
+        constexpr const char *nameHeader = "LocalVariable[";
+        constexpr char nameDelimiter = ']';
+        constexpr char propertySeparator = ',';
+    }
+
     template <typename T, node::NodeInterface::variable_index_type n>
     class LocalVariableNode: public NodeBase<T(void)> {
         using ThisType = LocalVariableNode;
@@ -21,7 +27,11 @@ namespace gp::node {
 
     public:
         std::string getNodeName()const override {
-            return std::string("LocalVariable[") + utility::typeInfo<T>().name() + std::string(",") + std::to_string(n) + std::string("]");
+            return std::string(local_variable_node::nameHeader)
+                   + utility::typeInfo<T>().name()
+                   + local_variable_node::propertySeparator
+                   + std::to_string(n)
+                   + local_variable_node::nameDelimiter;
         }
         node_instance_type clone()const override {return NodeInterface::createInstance<ThisType>();}
         NodeType getNodeType()const noexcept override final {return NodeType::LocalVariable;}
@@ -43,7 +53,11 @@ namespace gp::node {
         }
     public:
         std::string getNodeName()const override {
-            return std::string("LocalVariable[") + utility::typeInfo<ReturnType>().name() + std::string(",") + std::to_string(n) + std::string("]");
+            return std::string(local_variable_node::nameHeader)
+                   + utility::typeInfo<ReturnType>().name()
+                   + local_variable_node::propertySeparator
+                   + std::to_string(n)
+                   + local_variable_node::nameDelimiter;
         }
         node_instance_type clone()const override {return NodeInterface::createInstance<ThisType>();}
         NodeType getNodeType()const noexcept override final {return NodeType::LocalVariable;}
@@ -66,7 +80,11 @@ namespace gp::node {
         }
     public:
         std::string getNodeName()const override {
-            return std::string("LocalVariable[") + utility::typeInfo<ReturnType>().name() + std::string(",") + std::to_string(n) + std::string("]");
+            return std::string(local_variable_node::nameHeader)
+                   + utility::typeInfo<ReturnType>().name()
+                   + local_variable_node::propertySeparator
+                   + std::to_string(n)
+                   + local_variable_node::nameDelimiter;
         }
         node_instance_type clone()const override {return NodeInterface::createInstance<ThisType>();}
         NodeType getNodeType()const noexcept override final {return NodeType::LocalVariable;}
