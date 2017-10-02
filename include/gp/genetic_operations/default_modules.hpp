@@ -75,27 +75,31 @@ namespace gp::genetic_operations {
                             treeProperty.argumentTypes[argumentIdx]->removeReferenceType());
                 }
                 case node::NodeType::LocalVariable: {
-                    auto localVariableIdx = std::any_cast<node::NodeInterface::variable_index_type>(
-                            node.getNodePropertyByAny());
-                    return (localVariableIdx < size(treeProperty.localVariableTypes) &&
-                            node.getReturnType().removeReferenceType().removeLeftHandValueType() ==
-                            *treeProperty.localVariableTypes[localVariableIdx]);
+                    auto itr = std::find_if(treeProperty.localVariableTypes.begin(),
+                                            treeProperty.localVariableTypes.end(),
+                                            [&type = node.getReturnType()](auto x){return *x == type.removeLeftHandValueType().removeReferenceType();});
+                    return itr != std::end(treeProperty.localVariableTypes);
                 }
                 default:
                     return true;
             }
         }
-
-        node_instance_type generateNodeHelper(const type_info &returnType, const tree::TreeProperty &treeProperty,
-                                              const container_type &container, RandomEngine &rnd) const {
-            auto[begin, end] = returnType == utility::typeInfo<any_t>() ? std::make_pair(std::begin(container),
-                                                                                         std::end(container))
-                                                                        : container.equal_range(
-                            utility::TypeIndex(returnType));
+        static void setLocalVariableIndexRandm(node::NodeInterface& node, const tree::TreeProperty& treeProperty, RandomEngine& rnd){
+            std::size_t size = std::count_if(std::begin(treeProperty.localVariableTypes),
+                                             std::end(treeProperty.localVariableTypes),
+                                             [&type = node.getReturnType()](auto x){return *x == type.removeReferenceType().removeLeftHandValueType();});
+            if (size == 0)throw std::runtime_error("try to set local variable index, but the local variable type does not match tree property");
+            std::uniform_int_distribution<node::NodeInterface::variable_index_type> dist(0, size - 1);
+            node.setNodePropertyByAny(dist(rnd));
+        }
+        node_instance_type generateNodeHelper(const type_info &returnType,
+                                              const tree::TreeProperty &treeProperty,
+                                              const container_type &container,
+                                              RandomEngine &rnd) const {
+            auto[begin, end] = returnType == utility::typeInfo<any_t>() ? std::make_pair(std::begin(container), std::end(container))
+                                                                        : container.equal_range(utility::TypeIndex(returnType));
             auto size = std::distance(begin, end);
-            if (size == 0)
-                throw std::runtime_error(
-                        "tryied to generate spesified type rondomly, but nodes whose retrun type is the specified type node registered");
+            if (size == 0)throw std::runtime_error("tryied to generate spesified type rondomly, but nodes whose retrun type is the specified type node registered");
             std::uniform_int_distribution<int> dist(0, size - 1);
             auto itr = begin;
             do {
@@ -105,18 +109,18 @@ namespace gp::genetic_operations {
             auto ans = itr->second->clone();
             if (ans->getNodeType() == node::NodeType::Const) {
                 randomConstValueGenerator.setConstRandom(*ans, rnd);
+            } else if (ans->getNodeType() == node::NodeType::LocalVariable) {
+                setLocalVariableIndexRandm(*ans, treeProperty, rnd);
             }
             return ans;
         }
 
     public:
-        node_instance_type
-        generateNode(const type_info &returnType, const tree::TreeProperty &treeProperty, RandomEngine &rnd) const {
+        node_instance_type generateNode(const type_info &returnType, const tree::TreeProperty &treeProperty, RandomEngine &rnd) const {
             return generateNodeHelper(returnType, treeProperty, nodeMultimap, rnd);
         }
 
-        node_instance_type
-        generateLeafNode(const type_info &returnType, const tree::TreeProperty &treeProperty, RandomEngine &rnd) const {
+        node_instance_type generateLeafNode(const type_info &returnType, const tree::TreeProperty &treeProperty, RandomEngine &rnd) const {
             return generateNodeHelper(returnType, treeProperty, leafNodeMultiMap, rnd);
         }
 
@@ -254,7 +258,7 @@ namespace gp::genetic_operations {
     template <typename RandomEngine, std::size_t MAX_LOCAL_VARIABLE_NUM>
     class DefaultLocalVariableAdapter {
     private:
-        RandomEngine rnd;
+        RandomEngine& rnd;
     public:
         DefaultLocalVariableAdapter(RandomEngine& rnd_): rnd(rnd_) {}
     };

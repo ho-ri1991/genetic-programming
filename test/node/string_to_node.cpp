@@ -20,9 +20,9 @@ BOOST_AUTO_TEST_SUITE(string_to_node)
         const auto& arg0 = *pArg0;
         auto pArgRef0 = NodeInterface::createInstance<ArgumentNode<utility::Reference<int>, 0>>();
         const auto& argRef0 = *pArgRef0;
-        auto pLocalVar0 = NodeInterface::createInstance<LocalVariableNode<int, 0>>();
+        auto pLocalVar0 = NodeInterface::createInstance<LocalVariableNode<int>>(0);
         const auto& localVar0 = *pLocalVar0;
-        auto pLocalVarRef0 = NodeInterface::createInstance<LocalVariableNode<utility::Reference<int>, 0>>();
+        auto pLocalVarRef0 = NodeInterface::createInstance<LocalVariableNode<utility::Reference<int>>>(0);
         const auto& localVarRef0 = *pLocalVarRef0;
         auto pProgn = NodeInterface::createInstance<PrognNode<int, 3>>();
         const auto& progn = *pProgn;

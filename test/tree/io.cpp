@@ -27,8 +27,8 @@ BOOST_AUTO_TEST_SUITE(io_test)
         treeIO.registerNode(std::make_unique<node::PrognNode<int,2>>());
         treeIO.registerNode(std::make_unique<node::AddNode<int>>());
         treeIO.registerNode(std::make_unique<node::SubstitutionNode<int>>());
-        treeIO.registerNode(std::make_unique<node::LocalVariableNode<int,0>>());
-        treeIO.registerNode(std::make_unique<node::LocalVariableNode<utility::LeftHandValue<int>,0>>());
+        treeIO.registerNode(std::make_unique<node::LocalVariableNode<int>>());
+        treeIO.registerNode(std::make_unique<node::LocalVariableNode<utility::LeftHandValue<int>>>());
         treeIO.registerNode(std::make_unique<node::ArgumentNode<int,0>>());
         treeIO.registerNode(std::make_unique<node::ArgumentNode<int,1>>());
         treeIO.registerNode(std::make_unique<node::ArgumentNode<utility::Reference<int>, 0>>());
@@ -47,7 +47,7 @@ BOOST_AUTO_TEST_SUITE(io_test)
         treeIO.registerNode(std::make_unique<node::NopNode<int>>());
         treeIO.registerNode(std::make_unique<node::NopNode<bool>>());
 
-        auto var0 = node::NodeInterface::createInstance<node::LocalVariableNode<int, 0>>();
+        auto var0 = node::NodeInterface::createInstance<node::LocalVariableNode<int>>(0);
         auto arg1 = node::NodeInterface::createInstance<node::ArgumentNode<int, 1>>();
         auto add1 = node::NodeInterface::createInstance<node::AddNode<int>>();
 
@@ -60,7 +60,7 @@ BOOST_AUTO_TEST_SUITE(io_test)
         add2->setChild(0, std::move(c1));
         add2->setChild(1, std::move(add1));
 
-        auto lvar0 = node::NodeInterface::createInstance<node::LocalVariableNode<utility::LeftHandValue<int>, 0>>();
+        auto lvar0 = node::NodeInterface::createInstance<node::LocalVariableNode<utility::LeftHandValue<int>>>(0);
         auto arg0 = node::NodeInterface::createInstance<node::ArgumentNode<int, 0>>();
         auto subst = node::NodeInterface::createInstance<node::SubstitutionNode<int>>();
 
@@ -124,8 +124,8 @@ BOOST_AUTO_TEST_SUITE(io_test)
         treeIO.registerNode(std::make_unique<node::PrognNode<int,2>>());
         treeIO.registerNode(std::make_unique<node::AddNode<int>>());
         treeIO.registerNode(std::make_unique<node::SubstitutionNode<int>>());
-        treeIO.registerNode(std::make_unique<node::LocalVariableNode<int,0>>());
-        treeIO.registerNode(std::make_unique<node::LocalVariableNode<utility::LeftHandValue<int>,0>>());
+        treeIO.registerNode(std::make_unique<node::LocalVariableNode<int>>());
+        treeIO.registerNode(std::make_unique<node::LocalVariableNode<utility::LeftHandValue<int>>>());
         treeIO.registerNode(std::make_unique<node::ArgumentNode<int,0>>());
         treeIO.registerNode(std::make_unique<node::ArgumentNode<int,1>>());
         treeIO.registerNode(std::make_unique<node::ArgumentNode<utility::Reference<int>, 0>>());
@@ -208,8 +208,8 @@ BOOST_AUTO_TEST_SUITE(io_test)
         treeIO.registerNode(std::make_unique<node::PrognNode<int,2>>());
         treeIO.registerNode(std::make_unique<node::AddNode<int>>());
         treeIO.registerNode(std::make_unique<node::SubstitutionNode<int>>());
-        treeIO.registerNode(std::make_unique<node::LocalVariableNode<int,0>>());
-        treeIO.registerNode(std::make_unique<node::LocalVariableNode<utility::LeftHandValue<int>,0>>());
+        treeIO.registerNode(std::make_unique<node::LocalVariableNode<int>>());
+        treeIO.registerNode(std::make_unique<node::LocalVariableNode<utility::LeftHandValue<int>>>());
         treeIO.registerNode(std::make_unique<node::ArgumentNode<int,0>>());
         treeIO.registerNode(std::make_unique<node::ArgumentNode<int,1>>());
         treeIO.registerNode(std::make_unique<node::ArgumentNode<utility::Reference<int>, 0>>());

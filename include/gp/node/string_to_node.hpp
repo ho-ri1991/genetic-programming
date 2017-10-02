@@ -18,10 +18,18 @@ namespace gp::node {
         //this method is for formatting ConstNodeName
         static std::string formatNodeName(std::string name) {
             auto begin = name.find(node::const_node::nameHeader);
-            if(begin == std::string::npos || begin != 0)return name;
-            auto end = name.find(node::const_node::propertySeparator);
-            if(end == std::string::npos) return name;
-            return name.substr(0, end) + node::const_node::nameDelimiter;
+            if(begin == 0){//in case of const node
+                auto end = name.find(node::const_node::propertySeparator);
+                if(end == std::string::npos) return name;
+                return name.substr(0, end) + node::const_node::nameDelimiter;
+            }
+            begin = name.find(node::local_variable_node::nameHeader);
+            if(begin == 0){//in case of local variable node
+                auto end = name.rfind(node::local_variable_node::propertySeparator);
+                if(end == std::string::npos) return name;
+                return name.substr(0, end) + node::local_variable_node::nameDelimiter;
+            }
+            return name;
         }
     public:
         template <typename String>

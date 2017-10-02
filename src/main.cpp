@@ -28,15 +28,16 @@ int main() {
     );
 
     tree::TreeIO<int> treeIO;
-    tree::RandomNodeGenerator<rnd, int, bool> randomNodeGenerator(random_gens);
+    genetic_operations::DefaultRandomNodeGenerator<rnd, int, bool> randomNodeGenerator(random_gens);
     genetic_operations::DefaultRandomTreeGenerator<rnd, decltype(randomNodeGenerator)> defaultRandomTreeGenerator(Rnd, randomNodeGenerator);
     genetic_operations::DefaultNodeSelector<rnd> defaultNodeSelector(Rnd, maxTreeDepth);
 
     treeIO.registerNode(std::make_unique<node::PrognNode<int,2>>());
     treeIO.registerNode(std::make_unique<node::AddNode<int>>());
     treeIO.registerNode(std::make_unique<node::SubstitutionNode<int>>());
-    treeIO.registerNode(std::make_unique<node::LocalVariableNode<int,0>>());
-    treeIO.registerNode(std::make_unique<node::LocalVariableNode<utility::LeftHandValue<int>,0>>());
+    treeIO.registerNode(std::make_unique<node::LocalVariableNode<int>>());
+    treeIO.registerNode(std::make_unique<node::LocalVariableNode<utility::LeftHandValue<int>>>());
+    treeIO.registerNode(std::make_unique<node::LocalVariableNode<utility::Reference<int>>>());
     treeIO.registerNode(std::make_unique<node::ArgumentNode<int,0>>());
     treeIO.registerNode(std::make_unique<node::ArgumentNode<int,1>>());
     treeIO.registerNode(std::make_unique<node::ArgumentNode<utility::Reference<int>, 0>>());
@@ -55,11 +56,12 @@ int main() {
     treeIO.registerNode(std::make_unique<node::NopNode<int>>());
     treeIO.registerNode(std::make_unique<node::NopNode<bool>>());
 
-    randomNodeGenerator.registerNode(std::make_unique<node::PrognNode<int,2>>());
+//    randomNodeGenerator.registerNode(std::make_unique<node::PrognNode<int,2>>());
     randomNodeGenerator.registerNode(std::make_unique<node::AddNode<int>>());
     randomNodeGenerator.registerNode(std::make_unique<node::SubstitutionNode<int>>());
-    randomNodeGenerator.registerNode(std::make_unique<node::LocalVariableNode<int,0>>());
-    randomNodeGenerator.registerNode(std::make_unique<node::LocalVariableNode<utility::LeftHandValue<int>,0>>());
+    randomNodeGenerator.registerNode(std::make_unique<node::LocalVariableNode<int>>());
+    randomNodeGenerator.registerNode(std::make_unique<node::LocalVariableNode<utility::LeftHandValue<int>>>());
+    randomNodeGenerator.registerNode(std::make_unique<node::LocalVariableNode<utility::Reference<int>>>());
     randomNodeGenerator.registerNode(std::make_unique<node::ArgumentNode<int,0>>());
     randomNodeGenerator.registerNode(std::make_unique<node::ArgumentNode<int,1>>());
     randomNodeGenerator.registerNode(std::make_unique<node::ArgumentNode<utility::Reference<int>, 0>>());
