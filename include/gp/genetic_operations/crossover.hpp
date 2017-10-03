@@ -15,7 +15,7 @@ namespace gp::genetic_operations {
             return parent.getChildNum();
         }
     }
-    template <typename NodeSelector,
+    template <typename CrossoverNodeSelector,
               typename LocalVariableAdapter>
     auto crossover(tree::Tree tree1,
                    tree::Tree tree2,
@@ -60,7 +60,7 @@ namespace gp::genetic_operations {
             if(node2.hasParent()){
                 const auto idx2 = detail::getChildIndex(node2.getParent(), node2);
                 localVariableAdapter(rootNode1, treeProperty2);
-                auto org2 = node2.getParent().setChild(idex2, std::move(rootNode1));
+                auto org2 = node2.getParent().setChild(idx2, std::move(rootNode1));
                 localVariableAdapter(org2, treeProperty1);
                 rootNode1 = std::move(org2);
             } else {
@@ -69,7 +69,7 @@ namespace gp::genetic_operations {
                 rootNode1.swap(rootNode2);
             }
         }
-        return std::make_pair(tree::Tree(std::move(rootNode1), std::move(treeProperty1)), tree::Tree(std::move(rootNode2), std::move(treeProperty2)));
+        return std::make_pair(tree::Tree(std::move(treeProperty1), std::move(rootNode1)), tree::Tree(std::move(treeProperty2), std::move(rootNode2)));
     }
 }
 
