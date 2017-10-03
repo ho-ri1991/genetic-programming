@@ -30,7 +30,7 @@ namespace gp::genetic_operations {
         static_assert(
                 std::is_same_v<
                         void,
-                        decltype(std::declval<LocalVariableAdapter>()(std::declval<node::NodeInterface::node_instance_type&>(), std::declval<tree::TreeProperty&>()))
+                        decltype(std::declval<LocalVariableAdapter>()(std::declval<node::NodeInterface&>(), std::declval<tree::TreeProperty&>()))
                 >
         );
         auto rootNode1 = std::move(tree1).getRootNodeInstance();

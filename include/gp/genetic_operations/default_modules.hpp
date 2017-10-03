@@ -261,6 +261,31 @@ namespace gp::genetic_operations {
         RandomEngine& rnd;
     public:
         DefaultLocalVariableAdapter(RandomEngine& rnd_): rnd(rnd_) {}
+    public:
+        void operator()(node::NodeInterface& subtreeRoot, tree::TreeProperty& treeProperty) {
+            if(subtreeRoot.getNodeType() == node::NodeType::LocalVariable) {
+                const auto& type = subtreeRoot.getReturnType().removeLeftHandValueType().removeReferenceType();
+                auto size = std::count_if(std::begin(treeProperty.localVariableTypes),
+                                          std::end(treeProperty.localVariableTypes),
+                                          [&type = type](auto x){return *x == type;});
+                if (size == 0){
+                    treeProperty.localVariableTypes.push_back(&type);
+                } else {
+                    std::uniform_int_distribution<node::NodeInterface::variable_index_type> dist(0, size - 1);
+                    auto n = dist(rnd);
+                    for(decltype(n) i = 0; i < std::size(treeProperty.localVariableTypes); ++i){
+                        if(n == 0) {
+                            subtreeRoot.setNodePropertyByAny(i);
+                            break;
+                        }
+                        if(*treeProperty.localVariableTypes[i] == type) --n;
+                    }
+                }
+            }
+            for(int i = 0; i < subtreeRoot.getChildNum(); ++i) {
+                (*this)(subtreeRoot.getChild(i), treeProperty);
+            }
+        }
     };
 }
 
