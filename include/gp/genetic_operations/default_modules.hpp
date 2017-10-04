@@ -247,7 +247,7 @@ namespace gp::genetic_operations {
                     for(const auto& info: nodeInfo2) {
                         if(info.node.getReturnType() == node1.getReturnType() && info.depth <= maxSwapDepth) {
                             --i;
-                            if(i < 0) return std::make_pair(node1, info.node);
+                            if(i < 0) return std::pair<const node::NodeInterface&, const node::NodeInterface&>(node1, info.node);
                         }
                     }
                 }
@@ -255,7 +255,7 @@ namespace gp::genetic_operations {
         };
     };
 
-    template <typename RandomEngine, std::size_t MAX_LOCAL_VARIABLE_NUM>
+    template <typename RandomEngine>
     class DefaultLocalVariableAdapter {
     private:
         RandomEngine& rnd;
@@ -268,17 +268,21 @@ namespace gp::genetic_operations {
                 auto size = std::count_if(std::begin(treeProperty.localVariableTypes),
                                           std::end(treeProperty.localVariableTypes),
                                           [&type = type](auto x){return *x == type;});
+
                 if (size == 0){
                     treeProperty.localVariableTypes.push_back(&type);
+                    subtreeRoot.setNodePropertyByAny(std::size(treeProperty.localVariableTypes) - 1);
                 } else {
                     std::uniform_int_distribution<node::NodeInterface::variable_index_type> dist(0, size - 1);
                     auto n = dist(rnd);
                     for(decltype(n) i = 0; i < std::size(treeProperty.localVariableTypes); ++i){
-                        if(n == 0) {
-                            subtreeRoot.setNodePropertyByAny(i);
-                            break;
+                        if(*treeProperty.localVariableTypes[i] == type){
+                            if(n == 0){
+                                subtreeRoot.setNodePropertyByAny(i);
+                                break;
+                            }
+                            --n;
                         }
-                        if(*treeProperty.localVariableTypes[i] == type) --n;
                     }
                 }
             }

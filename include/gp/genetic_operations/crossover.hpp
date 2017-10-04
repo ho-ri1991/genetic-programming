@@ -41,31 +41,37 @@ namespace gp::genetic_operations {
         const auto& [cnode1, cnode2] = crossoverNodeSelector(*rootNode1, *rootNode2);
         auto& node1 = const_cast<node::NodeInterface&>(cnode1);
         auto& node2 = const_cast<node::NodeInterface&>(cnode2);
+        std::cout<<node1.getNodeName()<<std::endl;
+        std::cout<<node2.getNodeName()<<std::endl;
         if(node1.hasParent()){
             const auto idx1 = detail::getChildIndex(node1.getParent(), node1);
             if(node2.hasParent()){
                 const auto idx2 = detail::getChildIndex(node2.getParent(), node2);
-                auto org1 = node1.getParent().setChild(idx1, nullptr);
-                localVariableAdapter(org1, treeProperty2);
-                auto org2 = node2.getParent().setChild(idx2, std::move(org1));
-                localVariableAdapter(org2, treeProperty1);
-                node1.getParent().setChild(idx1, std::move(org2));
+                auto& parent1 = node1.getParent();
+                auto& parent2 = node2.getParent();
+                auto org1 = parent1.setChild(idx1, nullptr);
+                localVariableAdapter(*org1, treeProperty2);
+                auto org2 = parent2.setChild(idx2, std::move(org1));
+                localVariableAdapter(*org2, treeProperty1);
+                parent1.setChild(idx1, std::move(org2));
             } else {
-                localVariableAdapter(rootNode2, treeProperty1);
-                auto org1 = node1.getParent().setChild(idx1, std::move(rootNode2));
-                localVariableAdapter(org1, treeProperty2);
+                localVariableAdapter(*rootNode2, treeProperty1);
+                auto& parent1 = node1.getParent();
+                auto org1 = parent1.setChild(idx1, std::move(rootNode2));
+                localVariableAdapter(*org1, treeProperty2);
                 rootNode2 = std::move(org1);
             }
         } else {
             if(node2.hasParent()){
                 const auto idx2 = detail::getChildIndex(node2.getParent(), node2);
-                localVariableAdapter(rootNode1, treeProperty2);
-                auto org2 = node2.getParent().setChild(idx2, std::move(rootNode1));
-                localVariableAdapter(org2, treeProperty1);
+                localVariableAdapter(*rootNode1, treeProperty2);
+                auto& parent2 = node2.getParent();
+                auto org2 = parent2.setChild(idx2, std::move(rootNode1));
+                localVariableAdapter(*org2, treeProperty1);
                 rootNode1 = std::move(org2);
             } else {
-                localVariableAdapter(rootNode1, treeProperty2);
-                localVariableAdapter(rootNode2, treeProperty1);
+                localVariableAdapter(*rootNode1, treeProperty2);
+                localVariableAdapter(*rootNode2, treeProperty1);
                 rootNode1.swap(rootNode2);
             }
         }
