@@ -1,15 +1,9 @@
 #define BOOST_TEST_NO_LIB
 #define BOOST_TEST_MAIN
-#include <iostream>
 #include <fstream>
-#include <random>
 #include <gp/tree/tree.hpp>
-#include <boost/type_index.hpp>
 #include <gp/node/node.hpp>
-#include <gp/tree_operations/tree_operations.hpp>
 #include <gp/tree/io.hpp>
-#include <gp/genetic_operations/mutation.hpp>
-#include <gp/genetic_operations/default_modules.hpp>
 #include <boost/test/unit_test.hpp>
 using namespace gp;
 
