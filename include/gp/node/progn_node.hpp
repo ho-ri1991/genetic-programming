@@ -65,14 +65,14 @@ namespace gp::node {
                     node.release();
                     auto org = lastChild.release();
                     lastChild.reset(typed_ptr);
-                    lastChild->setParent(this);
+                    if(lastChild)lastChild->setParent(this);
                     return node::NodeInterface::node_instance_type(org);
                 }else {
                     throw std::invalid_argument("invalied type node was set as a child");
                 }
             }else {
                 children[m].swap(node);
-                children[m]->setParent(this);
+                if(children[m])children[m]->setParent(this);
                 return node;
             }
         }

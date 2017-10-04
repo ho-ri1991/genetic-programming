@@ -146,7 +146,7 @@ namespace gp::node{
             assert((n < sizeof...(Args)) && "the child index must be smaller than the number of children of the node");
             assert(detail::getRTTI<Args...>(n) == node->getReturnType() && "the return type of child must equal to the argument type of the node");
             auto org = detail::setDynamic(n, std::move(node), children);
-            getChild(n).setParent(this);
+            if(hasChild(n))getChild(n).setParent(this);
             return org;
         }
         NodeInterface& getParent()override {
