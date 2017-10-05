@@ -210,14 +210,14 @@ namespace gp::genetic_operations {
         };
         static std::size_t collectNodeInfoHelper(const node::NodeInterface& node, std::vector<NodeInfo>& nodeInfo, std::size_t currentDepth) {
             if(node.getChildNum() == 0) {
-                nodeInfo.emplace_back(node, 0, currentDepth);
+                nodeInfo.push_back({node, 0, currentDepth});
                 return 0;
             } else {
                 std::size_t height = 0;
                 for(int i = 0; i < node.getChildNum(); ++i){
                     height = std::max(height, collectNodeInfoHelper(node.getChild(i), nodeInfo, currentDepth + 1) + 1);
                 }
-                nodeInfo.emplace_back(node, height, currentDepth);
+                nodeInfo.push_back({node, height, currentDepth});
                 return height;
             }
         }
@@ -225,7 +225,7 @@ namespace gp::genetic_operations {
             auto size = tree_operations::getSubtreeNodeNum(rootNode);
             std::vector<NodeInfo> nodeInfo;
             nodeInfo.reserve(size);
-            collectNodeInfoHelper(rootNode, nodeInfo);
+            collectNodeInfoHelper(rootNode, nodeInfo, 0);
             return nodeInfo;
         }
     public:
@@ -237,15 +237,18 @@ namespace gp::genetic_operations {
             while(true) {
                 const auto& node1 = (*this)(rootNode1);
                 auto depth1 = tree_operations::getDepth(node1);
-                auto maxSwapDepth = maxTreeDepth - depth1;
-                auto num = std::count_if(std::begin(nodeInfo2),
-                                         std::end(nodeInfo2),
-                                         [&type = node1.getReturnType(), maxDepth = maxSwapDepth](auto info){return info.node.getReturnType() == type && info.depth <= maxDepth;});
+                auto height1 = tree_operations::getHeight(node1);
+                auto cond = [&type = node1.getReturnType(), depth = depth1, height = height1, maxTreeDepth = maxTreeDepth](auto info){
+                    return info.node.getReturnType() == type
+                           && depth + info.height <= maxTreeDepth
+                           && info.depth + height <= maxTreeDepth;
+                };
+                auto num = std::count_if(std::begin(nodeInfo2), std::end(nodeInfo2), cond);
                 if(num > 0) {
                     std::uniform_int_distribution<int> dist(0, num - 1);
                     auto i = dist(rnd);
                     for(const auto& info: nodeInfo2) {
-                        if(info.node.getReturnType() == node1.getReturnType() && info.depth <= maxSwapDepth) {
+                        if(cond(info)){
                             --i;
                             if(i < 0) return std::pair<const node::NodeInterface&, const node::NodeInterface&>(node1, info.node);
                         }
