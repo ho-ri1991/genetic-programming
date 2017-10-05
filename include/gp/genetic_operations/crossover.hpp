@@ -41,8 +41,6 @@ namespace gp::genetic_operations {
         const auto& [cnode1, cnode2] = crossoverNodeSelector(*rootNode1, *rootNode2);
         auto& node1 = const_cast<node::NodeInterface&>(cnode1);
         auto& node2 = const_cast<node::NodeInterface&>(cnode2);
-        std::cout<<node1.getNodeName()<<std::endl;
-        std::cout<<node2.getNodeName()<<std::endl;
         if(node1.hasParent()){
             const auto idx1 = detail::getChildIndex(node1.getParent(), node1);
             if(node2.hasParent()){
