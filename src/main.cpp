@@ -84,17 +84,7 @@ int main() {
     auto tree = treeIO.readTree(fin, stringToType);
 
     for(int i = 0; i < 10; ++i) {
-        auto mutationTree = tree;
-
-        auto mutatedTree = tree::Tree(mutationTree.getTreeProperty(),
-                                      genetic_operations::mutation(
-                                              std::move(mutationTree).getRootNodeInstance(),
-                                              defaultRandomTreeGenerator,
-                                              defaultNodeSelector,
-                                              mutationTree.getTreeProperty(),
-                                              maxTreeDepth
-                                      )
-        );
+        auto mutatedTree = genetic_operations::mutation(tree, defaultRandomTreeGenerator, defaultNodeSelector, maxTreeDepth);
 
         std::ofstream fout("mutation-tree" + std::to_string(i) + ".xml");
         mutatedTree.getTreeProperty().name = "MutationTree";

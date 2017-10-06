@@ -23,27 +23,27 @@ namespace gp::genetic_operations {
                       >
               >
     >
-    auto mutation(node::NodeInterface::node_instance_type rootNode,
+    auto mutation(tree::Tree tree,
                   RandomTreeGenerator& randomTreeGenerator,
                   NodeSelector& nodeSelector,
-                  tree::TreeProperty treeProperty,
-                  std::size_t maxTreeDepth) -> node::NodeInterface::node_instance_type {
-        const auto& selectedNode = nodeSelector(*rootNode);
+                  std::size_t maxTreeDepth) -> tree::Tree {
+        const auto& selectedNode = nodeSelector(tree.getRootNode());
         auto depth = tree_operations::getDepth(selectedNode);
         assert(depth <= maxTreeDepth);
-        treeProperty.returnType = &selectedNode.getReturnType();
-        auto newSubtree = randomTreeGenerator(treeProperty, maxTreeDepth - depth);
+        auto subtreeProperty = tree.getTreeProperty();
+        subtreeProperty.returnType = &selectedNode.getReturnType();
+        auto newSubtree = randomTreeGenerator(subtreeProperty, maxTreeDepth - depth);
         if(selectedNode.hasParent()) {
             auto& parent = const_cast<node::NodeInterface&>(selectedNode.getParent());
             for(int i = 0; i < parent.getChildNum(); ++i) {
                 if(parent.hasChild(i) && &parent.getChild(i) == &selectedNode) {
                     parent.setChild(i, std::move(newSubtree));
-                    return rootNode;
+                    return tree;
                 }
             }
-            return nullptr;
+            return tree;
         } else {
-            return newSubtree;
+            return tree::Tree(std::move(tree).getTreeProperty(), std::move(newSubtree));
         }
     };
 }
