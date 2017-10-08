@@ -86,7 +86,7 @@ namespace gp::tree {
         }
     }
 
-    template <typename ...SupportTypes>
+    template <std::size_t MAX_SUBROUTINE_ARGUMENT_NUM, typename ...SupportTypes>
     class SubroutineIO {
     private:
         using node_instance_type = node::NodeInterface::node_instance_type;
@@ -218,11 +218,11 @@ namespace gp::tree {
 
     };
 
-    template <typename ...SupportTypes>
+    template <std::size_t MAX_SUBROUTINE_ARGUMENT_NUM, typename ...SupportTypes>
     class TreeIO {
     private:
         node::StringToNode stringToNode;
-        SubroutineIO<SupportTypes...> subroutineIO;
+        SubroutineIO<MAX_SUBROUTINE_ARGUMENT_NUM, SupportTypes...> subroutineIO;
         using node_instance_type = node::NodeInterface::node_instance_type;
     public:
         //wrapper methods of SubroutineIO

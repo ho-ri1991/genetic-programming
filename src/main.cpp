@@ -13,6 +13,7 @@ using namespace gp;
 using rnd = std::mt19937;
 
 constexpr std::size_t maxTreeDepth = 5;
+constexpr std::size_t maxSubroutnieArgNum = 3;
 
 int main() {
     utility::StringToType stringToType;
@@ -27,7 +28,7 @@ int main() {
             std::function<bool(rnd&)>([](rnd& RND){return static_cast<bool>(std::uniform_int_distribution<int>(0, 1)(RND));})
     );
 
-    tree::TreeIO<int> treeIO;
+    tree::TreeIO<maxSubroutnieArgNum, int> treeIO;
     genetic_operations::DefaultRandomNodeGenerator<rnd, int, bool> randomNodeGenerator(random_gens);
     genetic_operations::DefaultRandomTreeGenerator<rnd, decltype(randomNodeGenerator)> defaultRandomTreeGenerator(Rnd, randomNodeGenerator);
     genetic_operations::DefaultNodeSelector<rnd> defaultNodeSelector(Rnd, maxTreeDepth);
