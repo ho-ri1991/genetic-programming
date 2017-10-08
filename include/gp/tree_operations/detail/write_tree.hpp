@@ -1,6 +1,7 @@
 #ifndef GP_TREE_OPERATIONS_DETAIL_WRITE_TREE
 #define GP_TREE_OPERATIONS_DETAIL_WRITE_TREE
 
+#include "defines.hpp"
 #include <gp/traits/node_traits.hpp>
 
 namespace gp::tree_operations::detail {

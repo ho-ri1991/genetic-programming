@@ -12,6 +12,15 @@
 #include <tuple>
 
 namespace gp::tree {
+    namespace io {
+        constexpr const char* ROOT_FIELD = "tree";
+        constexpr const char* NAME_FIELD = "name";
+        constexpr const char* RETURN_TYPE_FIELD = "return_type";
+        constexpr const char* ARGUMENT_TYPE_FIELD = "arguments";
+        constexpr const char* LOCAL_VARIABLE_FIELD = "local_variables";
+        constexpr const char* TREE_ENTITY_FIELD = "tree_entity";
+        constexpr const char* VARIABLE_TYPE_FIELD = "type";
+    }
     namespace detail{
         class TypesToSubroutineNode{
         private:
@@ -54,7 +63,7 @@ namespace gp::tree {
 
         template <typename ptree>
         TreeProperty getTreeProperty(const ptree& tree, const utility::StringToType& stringToType) {
-            using namespace gp::io;
+            using namespace gp::tree::io;
             using namespace boost::property_tree;
             TreeProperty treeProperty;
             //get tree name
@@ -95,7 +104,7 @@ namespace gp::tree {
     public:
         void write(const node::NodeInterface& rootNode, const TreeProperty& property, std::ostream& out)const {
             using namespace boost::property_tree;
-            using namespace gp::io;
+            using namespace gp::tree::io;
             ptree tree;
 
             tree.put(NAME_FIELD, property.name);
@@ -132,7 +141,7 @@ namespace gp::tree {
         }
         std::tuple<node_instance_type, TreeProperty> load(std::istream& in, const utility::StringToType& stringToType, node::StringToNode& stringToNode) {
             using namespace boost::property_tree;
-            using namespace gp::io;
+            using namespace gp::tree::io;
             ptree tree;
             xml_parser::read_xml(in, tree);
             auto treeProperty = detail::getTreeProperty(tree, stringToType);
@@ -234,7 +243,7 @@ namespace gp::tree {
     public:
         Tree readTree(std::istream& in, const utility::StringToType& stringToType)const {
             using namespace boost::property_tree;
-            using namespace gp::io;
+            using namespace gp::tree::io;
             ptree tree;
             xml_parser::read_xml(in, tree);
             //get treeProperty

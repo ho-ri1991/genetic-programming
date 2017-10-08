@@ -1,6 +1,7 @@
 #ifndef GP_TREE_OPERATIONS_DETAIL_READ_TREE
 #define GP_TREE_OPERATIONS_DETAIL_READ_TREE
 
+#include "defines.hpp"
 #include <gp/traits/node_traits.hpp>
 #include <gp/traits/string_to_node_traits.hpp>
 
