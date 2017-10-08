@@ -42,6 +42,18 @@ namespace gp::utility {
             }
         }
         template <typename T>
+        decltype(auto) get() const {
+            if constexpr (std::is_pointer_v<T>){
+                return static_cast<std::add_pointer_t<std::add_const_t<std::remove_pointer_t<T>>>>((const_cast<Variable &>(*this)).get<T>());
+            } else if constexpr (std::is_lvalue_reference_v<T>) {
+                return static_cast<std::add_lvalue_reference_t<std::add_const_t<std::decay_t<T>>>>((const_cast<Variable &>(*this)).get<T>());
+            } else if constexpr (std::is_rvalue_reference_v<T>) {
+                return static_cast<std::add_rvalue_reference_t<std::add_const_t<std::decay_t<T>>>>((const_cast<Variable &>(*this)).get<T>());
+            } else {
+                return (const_cast<Variable &>(*this)).get<T>();
+            }
+        }
+        template <typename T>
         void set(T&& val) {
             variable = std::forward<T>(val);
             hasPointer = std::is_pointer_v<T>;

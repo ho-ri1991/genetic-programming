@@ -59,5 +59,8 @@ BOOST_AUTO_TEST_SUITE(variable)
         BOOST_CHECK_EQUAL(*var3.get<int* const>(), 1);
         BOOST_CHECK_EQUAL(*var3.get<const int* const>(), 1);
 
+        const auto& cRefVar3 = var3;
+        BOOST_CHECK_EQUAL(cRefVar3.get<int&>(), 1);
+
     }
 BOOST_AUTO_TEST_SUITE_END()
