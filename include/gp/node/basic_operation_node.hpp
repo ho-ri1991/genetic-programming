@@ -86,11 +86,8 @@ namespace gp::node {
         node_instance_type clone()const override {return NodeInterface::createInstance<ThisType>();}
     };
 
-    template <typename T, bool is_arithmetic = std::is_arithmetic_v<T>>
-    class DivisionNode;
-
-    template <typename T>
-    class DivisionNode<T, true>: public NodeBase<T(T, T)> {
+    template <typename T, typename = std::enable_if_t<std::is_arithmetic_v<T>>>
+    class DivisionNode: public NodeBase<T(T, T)> {
         using ThisType = DivisionNode;
         using node_instance_type = NodeInterface::node_instance_type;
     private:
