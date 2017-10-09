@@ -26,7 +26,11 @@ namespace gp::node {
         node_instance_type clone()const override {return NodeInterface::createInstance<ThisType>();}
     };
 
-    template <typename T>
+    template <typename T,
+              typename = std::enable_if_t<
+                      std::is_convertible_v<T, decltype(std::declval<T>() + std::declval<T>())>
+              >
+    >
     class AddNode: public NodeBase<T(T, T)> {
         using ThisType = AddNode;
         using node_instance_type = NodeInterface::node_instance_type;
@@ -42,7 +46,11 @@ namespace gp::node {
         node_instance_type clone()const override {return NodeInterface::createInstance<ThisType>();}
     };
 
-    template <typename T>
+    template <typename T,
+            typename = std::enable_if_t<
+                    std::is_convertible_v<T, decltype(std::declval<T>() - std::declval<T>())>
+            >
+    >
     class SubtractNode: public NodeBase<T(T, T)> {
         using ThisType = SubtractNode;
         using node_instance_type = NodeInterface::node_instance_type;
@@ -58,7 +66,11 @@ namespace gp::node {
         node_instance_type clone()const override {return NodeInterface::createInstance<ThisType>();}
     };
 
-    template <typename T>
+    template <typename T,
+            typename = std::enable_if_t<
+                    std::is_convertible_v<T, decltype(std::declval<T>() * std::declval<T>())>
+            >
+    >
     class MultiplyNode: public NodeBase<T(T, T)> {
         using ThisType = MultiplyNode;
         using node_instance_type = NodeInterface::node_instance_type;
@@ -155,7 +167,11 @@ namespace gp::node {
         node_instance_type clone()const override {return NodeInterface::createInstance<ThisType>();}
     };
 
-    template <typename T>
+    template <typename T,
+            typename = std::enable_if_t<
+                    std::is_convertible_v<bool, decltype(std::declval<T>() > std::declval<T>())>
+            >
+    >
     class GreaterNode: public NodeBase<bool(T, T)> {
         using ThisType = GreaterNode;
         using node_instance_type = NodeInterface::node_instance_type;
@@ -171,7 +187,11 @@ namespace gp::node {
         node_instance_type clone()const override {return NodeInterface::createInstance<ThisType>();}
     };
 
-    template <typename T>
+    template <typename T,
+            typename = std::enable_if_t<
+                    std::is_convertible_v<bool, decltype(std::declval<T>() >= std::declval<T>())>
+            >
+    >
     class GreaterEqNode: public NodeBase<bool(T, T)> {
         using ThisType = GreaterEqNode;
         using node_instance_type = NodeInterface::node_instance_type;
@@ -187,7 +207,11 @@ namespace gp::node {
         node_instance_type clone()const override {return NodeInterface::createInstance<ThisType>();}
     };
 
-    template <typename T>
+    template <typename T,
+            typename = std::enable_if_t<
+                    std::is_convertible_v<bool, decltype(std::declval<T>() < std::declval<T>())>
+            >
+    >
     class LessThanNode: public NodeBase<bool(T, T)> {
         using ThisType = LessThanNode;
         using node_instance_type = NodeInterface::node_instance_type;
@@ -203,7 +227,11 @@ namespace gp::node {
         node_instance_type clone()const override {return NodeInterface::createInstance<ThisType>();}
     };
 
-    template <typename T>
+    template <typename T,
+            typename = std::enable_if_t<
+                    std::is_convertible_v<bool, decltype(std::declval<T>() <= std::declval<T>())>
+            >
+    >
     class LessThanEqNode: public NodeBase<bool(T, T)> {
         using ThisType = LessThanEqNode;
         using node_instance_type = NodeInterface::node_instance_type;
@@ -219,7 +247,11 @@ namespace gp::node {
         node_instance_type clone()const override {return NodeInterface::createInstance<ThisType>();}
     };
 
-    template <typename T>
+    template <typename T,
+            typename = std::enable_if_t<
+                    std::is_convertible_v<bool, decltype(std::declval<T>() == std::declval<T>())>
+            >
+    >
     class EqualNode: public NodeBase<bool(T, T)> {
         using ThisType = EqualNode;
         using node_instance_type = NodeInterface::node_instance_type;
@@ -235,7 +267,11 @@ namespace gp::node {
         node_instance_type clone()const override {return NodeInterface::createInstance<ThisType>();}
     };
 
-    template <typename T>
+    template <typename T,
+            typename = std::enable_if_t<
+                    std::is_convertible_v<bool, decltype(std::declval<T>() != std::declval<T>())>
+            >
+    >
     class NotEqualNode: public NodeBase<bool(T, T)> {
         using ThisType = NotEqualNode;
         using node_instance_type = NodeInterface::node_instance_type;
