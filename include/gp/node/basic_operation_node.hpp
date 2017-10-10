@@ -95,7 +95,7 @@ namespace gp::node {
             auto [c1, c2] = evaluateChildren(this->children, evaluationContext);
             if(c2 == 0){
                 evaluationContext.setEvaluationStatusWithoutUpdate(utility::EvaluationStatus::InvalidValue);
-                return utility::DefaultInitializer<T>();
+                return utility::getDefaultValue<T>();
             }
             return c1 / c2;
         }
