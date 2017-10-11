@@ -4,54 +4,61 @@
 #include <gp/node/node_interface.hpp>
 #include <gp/tree/tree.hpp>
 #include <gp/tree_operations/tree_operations.hpp>
+#include <gp/utility/is_detected.hpp>
 #include <random>
 #include <vector>
 #include <algorithm>
 
 namespace gp::genetic_operations {
-    template<typename RandomEngine, typename ...SupportConstNodeTypes>
-    class RandomConstValueGenerator {
-    public:
-        template<typename T>
-        using generate_function = std::function<T(RandomEngine &)>;
-        using generate_functions = std::tuple<generate_function<SupportConstNodeTypes>...>;
-        const generate_functions &generateFunctions;
-    private:
-        template<std::size_t offset>
-        void setConstHelper(node::NodeInterface &constNode, RandomEngine &rnd) const {
-            using type = typename std::tuple_element_t<offset, generate_functions>::result_type;
-            if (constNode.getReturnType() == utility::typeInfo<type>()) {
-                constNode.setNodePropertyByAny(std::get<offset>(generateFunctions)(rnd));
-            } else {
-                if constexpr (offset + 1 < std::tuple_size_v<generate_functions>)
-                {
-                    setConstHelper<offset + 1>(constNode, rnd);
+    namespace detail {
+        template<typename RandomEngine, typename ...SupportConstNodeTypes>
+        class RandomConstValueGenerator {
+        public:
+            template<typename T>
+            using generate_function = std::function<T(RandomEngine &)>;
+            using generate_functions = std::tuple<generate_function<SupportConstNodeTypes>...>;
+            const generate_functions &generateFunctions;
+        private:
+            template<std::size_t offset>
+            void setConstHelper(node::NodeInterface &constNode, RandomEngine &rnd) const {
+                using type = typename std::tuple_element_t<offset, generate_functions>::result_type;
+                if (constNode.getReturnType() == utility::typeInfo<type>()) {
+                    constNode.setNodePropertyByAny(std::get<offset>(generateFunctions)(rnd));
                 } else {
-                    throw std::runtime_error(
-                            "tried to set const value randomly, but proper type of geenrator not found");
+                    if constexpr (offset + 1 < std::tuple_size_v<generate_functions>)
+                    {
+                        setConstHelper<offset + 1>(constNode, rnd);
+                    } else {
+                        throw std::runtime_error(
+                                "tried to set const value randomly, but proper type of geenrator not found");
+                    }
                 }
             }
-        }
 
-    public:
-        void setConstRandom(node::NodeInterface &constNode, RandomEngine &rnd) const {
-            if (constNode.getNodeType() != node::NodeType::Const)
-                throw std::runtime_error("tried to set const value randomly, but the passed node was not const node");
-            setConstHelper<0>(constNode, rnd);
-        }
+        public:
+            void setConstRandom(node::NodeInterface &constNode, RandomEngine &rnd) const {
+                if (constNode.getNodeType() != node::NodeType::Const)
+                    throw std::runtime_error(
+                            "tried to set const value randomly, but the passed node was not const node");
+                setConstHelper<0>(constNode, rnd);
+            }
 
-    public:
-        RandomConstValueGenerator(const generate_functions &generateFunctions_)
-                : generateFunctions(generateFunctions_) {}
-    };
+        public:
+            RandomConstValueGenerator(const generate_functions &generateFunctions_)
+                    : generateFunctions(generateFunctions_) {}
+        };
+    }
 
-    template<typename RandomEngine, typename ...SupportConstNodeTypes>
-    class DefaultRandomNodeGenerator {
+    template <typename, typename>
+    class DefaultRandomNodeGenerator;
+
+    template<typename RandomEngine, template <typename...> class Tpl, typename ...SupportConstNodeTypes>
+    class DefaultRandomNodeGenerator<RandomEngine, Tpl<SupportConstNodeTypes...>> {
     public:
         using node_instance_type = node::NodeInterface::node_instance_type;
         using type_info = node::NodeInterface::type_info;
         using tree_property = tree::TreeProperty;
-        using random_const_generator = RandomConstValueGenerator<RandomEngine, SupportConstNodeTypes...>;
+        using random_const_generator = detail::RandomConstValueGenerator<RandomEngine, SupportConstNodeTypes...>;
         using const_generators = typename random_const_generator::generate_functions;
         using random_engine = RandomEngine;
     private:
@@ -124,6 +131,23 @@ namespace gp::genetic_operations {
             return generateNodeHelper(returnType, treeProperty, leafNodeMultiMap, rnd);
         }
 
+    private:
+        template <template <typename...> class, typename>
+        struct RegisterNodeHelper;
+        template <template <typename...> class Node, template <typename...> class Tpl_, typename T, typename... Args>
+        struct RegisterNodeHelper<Node, Tpl_<T, Args...>> {
+            static void registerNodes(container_type& nodeSet, container_type& leafNodeSet) {
+                auto node = node::NodeInterface::createInstance<Node<T>>();
+                if(node->getChildNum() == 0) {
+                    leafNodeSet.emplace(utility::TypeIndex(node->getReturnType()), node->clone());
+                }
+                nodeSet.emplace(utility::TypeIndex(node->getReturnType()), std::move(node));
+
+                if constexpr (sizeof...(Args) > 0) {
+                    RegisterNodeHelper<Node, Tpl_<Args...>>::registerNodes(nodeSet, leafNodeSet);
+                }
+            }
+        };
     public:
         void registerNode(node_instance_type node) {
             if (node->getChildNum() == 0) {
@@ -131,7 +155,12 @@ namespace gp::genetic_operations {
             }
             nodeMultimap.emplace(utility::TypeIndex(node->getReturnType()), std::move(node));
         }
-
+        template <typename Node>
+        void registerNode(){registerNode(node::NodeInterface::createInstance<Node>());}
+        template <template <typename ...> class Node, typename Tpl_>
+        void registerNodes() {
+            RegisterNodeHelper<Node, Tpl_>::registerNodes(nodeMultimap, leafNodeMultiMap);
+        }
     public:
         DefaultRandomNodeGenerator(const const_generators &generateFunctions)
                 : randomConstValueGenerator(generateFunctions) {}

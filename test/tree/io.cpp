@@ -9,6 +9,8 @@ using namespace gp;
 
 constexpr std::size_t MAX_SUBROUTINE_ARG_NUM = 3;
 
+using TypeList = std::tuple<int>;
+
 BOOST_AUTO_TEST_SUITE(io_test)
     BOOST_AUTO_TEST_CASE(io_test) {
         utility::StringToType stringToType;
@@ -17,7 +19,7 @@ BOOST_AUTO_TEST_SUITE(io_test)
         stringToType.setTypeNamePair<utility::Reference<int>>("ref[int]");
         stringToType.setTypeNamePair<bool>("bool");
 
-        tree::TreeIO<MAX_SUBROUTINE_ARG_NUM, int> treeIO;
+        tree::TreeIO<MAX_SUBROUTINE_ARG_NUM, TypeList> treeIO;
 
         treeIO.registerNode(std::make_unique<node::PrognNode<int,2>>());
         treeIO.registerNode(std::make_unique<node::AddNode<int>>());
@@ -114,7 +116,7 @@ BOOST_AUTO_TEST_SUITE(io_test)
         stringToType.setTypeNamePair<utility::Reference<int>>("ref[int]");
         stringToType.setTypeNamePair<bool>("bool");
 
-        tree::TreeIO<MAX_SUBROUTINE_ARG_NUM, int> treeIO;
+        tree::TreeIO<MAX_SUBROUTINE_ARG_NUM, TypeList> treeIO;
 
         treeIO.registerNode(std::make_unique<node::PrognNode<int,2>>());
         treeIO.registerNode(std::make_unique<node::AddNode<int>>());
@@ -198,7 +200,7 @@ BOOST_AUTO_TEST_SUITE(io_test)
         stringToType.setTypeNamePair<utility::Reference<int>>("ref[int]");
         stringToType.setTypeNamePair<bool>("bool");
 
-        tree::TreeIO<MAX_SUBROUTINE_ARG_NUM, int> treeIO;
+        tree::TreeIO<MAX_SUBROUTINE_ARG_NUM, TypeList> treeIO;
 
         treeIO.registerNode(std::make_unique<node::PrognNode<int,2>>());
         treeIO.registerNode(std::make_unique<node::AddNode<int>>());
