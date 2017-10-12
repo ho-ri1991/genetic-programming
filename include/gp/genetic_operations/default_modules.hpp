@@ -4,7 +4,6 @@
 #include <gp/node/node_interface.hpp>
 #include <gp/tree/tree.hpp>
 #include <gp/tree_operations/tree_operations.hpp>
-#include <gp/utility/is_detected.hpp>
 #include <random>
 #include <vector>
 #include <algorithm>
