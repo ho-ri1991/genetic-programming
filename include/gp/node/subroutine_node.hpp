@@ -7,6 +7,32 @@
 #include <gp/gp_config.hpp>
 
 namespace gp::node {
+    namespace detail {
+        template <typename T>
+        struct is_check_validity_type: public std::false_type{};
+        template <typename T>
+        struct is_check_validity_type<utility::Reference<T>>: public std::true_type{};
+        template <typename T>
+        struct is_check_validity_type<utility::LeftHandValue<T>>: public std::true_type{};
+
+        template <std::size_t offset, typename ...Args>
+        bool checkValidValue(const std::tuple<Args...>& values) {
+            if constexpr (is_check_validity_type<std::tuple_element_t<offset, std::tuple<Args...>>>::value) {
+                return static_cast<bool>(std::get<offset>(values));
+            } else {
+                return true;
+            }
+        }
+        template <std::size_t offset, typename ...Args>
+        bool isValidValues(const std::tuple<Args...>& values) {
+            if constexpr (offset < std::tuple_size_v<std::tuple<Args...>>) {
+                return checkValidValue<offset>(values) && isValidValues<offset + 1>(values);
+            } else {
+                return true;
+            }
+        }
+    }
+
     class SubroutineEntitySet {
     private:
         using node_instance_type = NodeInterface::const_node_instance_type;
@@ -51,6 +77,12 @@ namespace gp::node {
     private:
         T evaluationDefinition(utility::EvaluationContext& evaluationContext)const override {
             auto childReturnVal = evaluateChildren(this->children, evaluationContext);
+            if constexpr (std::disjunction_v<detail::is_check_validity_type<Args>...>) {
+                if(!detail::isValidValues<0>(childReturnVal)) {
+                    evaluationContext.setEvaluationStatusWithoutUpdate(utility::EvaluationStatus::InvalidValue);
+                    return utility::getDefaultValue<T>();
+                }
+            }
             if(evaluationContext.getEvaluationStatus() != utility::EvaluationStatus::Evaluating)return utility::getDefaultValue<T>();
             auto itr = subroutineEntitySet.find(name);
             if(itr == std::end(subroutineEntitySet))throw std::runtime_error("subroutine entity not found");
