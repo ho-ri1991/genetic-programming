@@ -224,6 +224,7 @@ BOOST_AUTO_TEST_SUITE(io_test)
         treeIO.registerNode(std::make_unique<node::ConstNode<bool>>(false));
         treeIO.registerNode(std::make_unique<node::NopNode<int>>());
         treeIO.registerNode(std::make_unique<node::NopNode<bool>>());
+        treeIO.registerNode(std::make_unique<node::NopNode<utility::Reference<int>>>());
 
         std::stringstream referenceTestSubStr(std::string("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n")
                                                       + "<tree>\n"
@@ -254,32 +255,62 @@ BOOST_AUTO_TEST_SUITE(io_test)
         BOOST_CHECK_EQUAL(referenceTestSubProperty.localVariableTypes.size(), 0);
         BOOST_CHECK_EQUAL(referenceTestSubProperty.name, "ReferenceTestSub");
 
-        std::stringstream referenceTestStr(std::string("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n")
-                                                   + "<tree>\n"
-                                                   + "    <name>ReferenceTest</name>\n"
-                                                   + "    <return_type>int</return_type>\n"
-                                                   + "    <arguments>\n"
-                                                   + "        <type>int</type>\n"
-                                                   + "    </arguments>\n"
-                                                   + "    <local_variables>\n"
-                                                   + "    </local_variables>\n"
-                                                   + "    <tree_entity>\n"
-                                                   + "    +--Progn[int,2]\n"
-                                                   + "        |\n"
-                                                   + "        +--ReferenceTestSub\n"
-                                                   + "        |   |\n"
-                                                   + "        |   +--Argument[ref[int],0]\n"
-                                                   + "        |\n"
-                                                   + "        +--Argument[int,0]\n"
-                                                   + "    </tree_entity>\n"
-                                                   + "</tree>");
+        {
+            std::stringstream referenceTestStr(std::string("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n")
+                                               + "<tree>\n"
+                                               + "    <name>ReferenceTest</name>\n"
+                                               + "    <return_type>int</return_type>\n"
+                                               + "    <arguments>\n"
+                                               + "        <type>int</type>\n"
+                                               + "    </arguments>\n"
+                                               + "    <local_variables>\n"
+                                               + "    </local_variables>\n"
+                                               + "    <tree_entity>\n"
+                                               + "    +--Progn[int,2]\n"
+                                               + "        |\n"
+                                               + "        +--ReferenceTestSub\n"
+                                               + "        |   |\n"
+                                               + "        |   +--Argument[ref[int],0]\n"
+                                               + "        |\n"
+                                               + "        +--Argument[int,0]\n"
+                                               + "    </tree_entity>\n"
+                                               + "</tree>");
 
-        auto tree = treeIO.readTree(referenceTestStr, stringToType);
+            auto tree = treeIO.readTree(referenceTestStr, stringToType);
 
-        for(int i = 0; i < 10; ++i) {
-            auto ans = tree.evaluate(std::make_tuple(i));
-            BOOST_CHECK(ans.getEvaluationStatus() == utility::EvaluationStatus::ValueReturned);
-            BOOST_CHECK_EQUAL(std::any_cast<int>(ans.getReturnValue()), i + 10);
+            for (int i = 0; i < 10; ++i) {
+                auto ans = tree.evaluate(std::make_tuple(i));
+                BOOST_CHECK(ans.getEvaluationStatus() == utility::EvaluationStatus::ValueReturned);
+                BOOST_CHECK_EQUAL(std::any_cast<int>(ans.getReturnValue()), i + 10);
+            }
+        }
+        {//illeagal reference is passed to the subroutine node
+            std::stringstream referenceTestStr(std::string("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n")
+                                               + "<tree>\n"
+                                               + "    <name>ReferenceTest</name>\n"
+                                               + "    <return_type>int</return_type>\n"
+                                               + "    <arguments>\n"
+                                               + "        <type>int</type>\n"
+                                               + "    </arguments>\n"
+                                               + "    <local_variables>\n"
+                                               + "    </local_variables>\n"
+                                               + "    <tree_entity>\n"
+                                               + "    +--Progn[int,2]\n"
+                                               + "        |\n"
+                                               + "        +--ReferenceTestSub\n"
+                                               + "        |   |\n"
+                                               + "        |   +--Nop[ref[int]]\n"
+                                               + "        |\n"
+                                               + "        +--Argument[int,0]\n"
+                                               + "    </tree_entity>\n"
+                                               + "</tree>");
+
+            auto tree = treeIO.readTree(referenceTestStr, stringToType);
+
+            for (int i = 0; i < 10; ++i) {
+                auto ans = tree.evaluate(std::make_tuple(i));
+                BOOST_CHECK(ans.getEvaluationStatus() == utility::EvaluationStatus::InvalidValue);
+            }
         }
     }
 BOOST_AUTO_TEST_SUITE_END()
