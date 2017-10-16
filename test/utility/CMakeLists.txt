@@ -31,3 +31,11 @@ add_test(
         COMMAND $<TARGET_FILE:evaluation_context>
 )
 set_property(TEST evaluation_context_test PROPERTY LABELS evaluation_context)
+
+add_executable(result result.cpp)
+target_link_libraries(result boost_unit_test_framework_static)
+add_test(
+        NAME result_test
+        COMMAND $<TARGET_FILE:result>
+)
+set_property(TEST result_test PROPERTY LABELS result)
