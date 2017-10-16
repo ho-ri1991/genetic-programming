@@ -24,14 +24,10 @@ namespace gp::utility {
     private:
         std::variant<Ok<T>, Err> data;
     public:
-        Result(const T& data_): data(Ok<T>{data_}){}
-        Result(T&& data_): data(Ok<T>{std::move(data_)}){}
+        Result(const Ok<T>& ok): data(ok){}
+        Result(Ok<T>&& ok): data(std::move(ok)){}
         Result(const Err& err): data(Err{err}){}
         Result(Err&& err): data(Err{std::move(err)}){}
-        static Result ok(const T& data){ return Result(data);}
-        static Result ok(T&& data){return Result(std::move(data));}
-        static Result err(const std::string& msg){ return Result{Err{msg}};}
-        static Result err(std::string&& msg){ return Result{Err{std::move(msg)}};}
     public:
         Result(const Result&) = default;
         Result(Result&&) = default;
@@ -55,23 +51,23 @@ namespace gp::utility {
         }
         template <typename Fn, typename U = std::decay_t<decltype(std::declval<Fn>()(std::declval<const T&>()))>>
         Result<U> map(Fn fn)const & {
-            if(*this) return Result<U>{fn(std::get<Ok<T>>(data).data)};
+            if(*this) return Result<U>{Ok<U>{fn(std::get<Ok<T>>(data).data)}};
             else return Result<U>{std::get<Err>(data)};
         };
         template <typename Fn, typename U = std::decay_t<decltype(std::declval<Fn>()(std::declval<T&&>()))>>
         Result<U> map(Fn fn)&& {
-            if(*this) return Result<U>{fn(std::move(std::get<Ok<T>>(data).data))};
+            if(*this) return Result<U>{Ok<U>{fn(std::move(std::get<Ok<T>>(data).data))}};
             else return Result<U>{std::move(std::get<Err>(data))};
         };
         template <typename Fn, typename U = typename decltype(std::declval<Fn>()(std::declval<const T&>()))::wrap_type>
         Result<U> flatMap(Fn fn)const & {
-            if(*this) return Result<U>{fn(std::get<Ok<T>>(data).data)};
-            else return Result<U>{std::get<Err>(data)};
+            if(*this) return fn(std::get<Ok<T>>(data).data);
+            else return std::get<Err>(data);
         };
         template<typename Fn, typename U = typename decltype(std::declval<Fn>()(std::declval<T&&>()))::wrap_type>
         Result<U> flatMap(Fn fn)&& {
-            if(*this) return Result<U>{fn(std::move(std::get<Ok<T>>(data).data))};
-            else return Result<U>{std::move(std::get<Err>(data))};
+            if(*this) return fn(std::move(std::get<Ok<T>>(data).data));
+            else return std::move(std::get<Err>(data));
         };
     public:
         template <typename Matcher>
@@ -79,6 +75,13 @@ namespace gp::utility {
         template <typename Matcher>
         decltype(auto) match(Matcher&& matcher)&& {return std::visit(std::forward<Matcher>(matcher), std::move(data));}
     };
+
+    namespace result {
+        template <typename T>
+        auto ok(T&& data){return Result<std::decay_t<T>>{Ok<std::decay_t<T>>{std::forward<T>(data)}};}
+        template <typename T, typename String>
+        Result<T> err(String&& err){return Result<T>{Err{std::forward<String>(err)}};}
+    }
 }
 
 #endif
