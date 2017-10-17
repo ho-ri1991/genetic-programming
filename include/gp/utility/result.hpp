@@ -26,8 +26,8 @@ namespace gp::utility {
     public:
         Result(const Ok<T>& ok): data(ok){}
         Result(Ok<T>&& ok): data(std::move(ok)){}
-        Result(const Err& err): data(Err{err}){}
-        Result(Err&& err): data(Err{std::move(err)}){}
+        Result(const Err& err): data(err){}
+        Result(Err&& err): data(std::move(err)){}
     public:
         Result(const Result&) = default;
         Result(Result&&) = default;
