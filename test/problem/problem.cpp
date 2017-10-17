@@ -1,6 +1,6 @@
 #define BOOST_TEST_NO_LIB
 #define BOOST_TEST_MAIN
-#include <gp/probrem/probrem.hpp>
+#include <gp/problem/problem.hpp>
 #include <boost/lexical_cast.hpp>
 #include <sstream>
 #include <boost/test/unit_test.hpp>
