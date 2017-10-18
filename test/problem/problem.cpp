@@ -62,7 +62,6 @@ BOOST_AUTO_TEST_SUITE(problem_test)
         );
 
         auto problemResult = problem::load(sstream, stringToType, stringToValues);
-        if(!problemResult)std::cout<<problemResult.errMessage()<<std::endl;
         BOOST_CHECK(problemResult);
         auto& problem1 = problemResult.unwrap();
 
