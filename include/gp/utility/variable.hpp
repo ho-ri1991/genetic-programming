@@ -15,6 +15,7 @@ namespace gp::utility {
         const std::type_info* type;
     public:
         bool hasValue()const noexcept {return *type != typeid(void);}
+        explicit operator bool()const noexcept {return variable.has_value();}
         template <typename T>
         T get() {
             if constexpr (std::is_pointer_v<T>) {
