@@ -4,6 +4,9 @@
 #include <variant>
 #include <string>
 #include <type_traits>
+#include <optional>
+#include <functional>
+#include <boost/optional.hpp>
 
 namespace gp::utility {
     template <typename T>
@@ -39,6 +42,9 @@ namespace gp::utility {
         T& unwrap()& {return std::get<Ok<T>>(data).data;}
         const T& unwrap()const &{return std::get<Ok<T>>(data).data;}
         T&& unwrap()&&{return std::move(std::get<Ok<T>>(data).data);}
+        std::string& errMessage()& {return std::get<Err>(data).message;}
+        const std::string& errMessage()const &{return std::get<Err>(data).message;}
+        std::string&& errMessage()&& {return std::move(std::get<Err>(data).message);}
         template <typename Fn>
         T ok_or(Fn fn)const &{
             if(*this) return std::get<Ok<T>>(data).data;
@@ -81,6 +87,36 @@ namespace gp::utility {
         auto ok(T&& data){return Result<std::decay_t<T>>{Ok<std::decay_t<T>>{std::forward<T>(data)}};}
         template <typename T, typename String>
         Result<T> err(String&& err){return Result<T>{Err{std::forward<String>(err)}};}
+        template <typename T, typename String>
+        Result<T> fromOptional(const std::optional<T>& option, String&& errMsg){
+            if(option) return ok(*option);
+            else return err<T>(std::forward<String>(errMsg));
+        }
+        template <typename T, typename String>
+        Result<T> fromOptional(std::optional<T>&& option, String&& errMsg) {
+            if(option) return ok(std::move(*option));
+            else return err<T>(std::forward<String>(errMsg));
+        }
+        template <typename T, typename String>
+        auto fromOptional(const boost::optional<T>& option, String&& errMsg) {
+            if constexpr (std::is_reference_v<T>) {
+                if(option) return ok(std::ref(*option));
+                else return err<decltype(std::ref(*option))>(std::forward<String>(errMsg));
+            } else {
+                if(option) return ok(*option);
+                else return err<T>(std::forward<String>(errMsg));
+            }
+        }
+        template <typename T, typename String>
+        auto fromOptional(boost::optional<T>&& option, String&& errMsg) {
+            if constexpr (std::is_reference_v<T>) {
+                if(option) return ok(std::ref(*option));
+                else return err<decltype(std::ref(*option))>(std::forward<String>(errMsg));
+            } else {
+                if(option) return ok(std::move(*option));
+                else return err<T>(std::forward<String>(errMsg));
+            }
+        }
     }
 }
 
