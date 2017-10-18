@@ -61,7 +61,10 @@ BOOST_AUTO_TEST_SUITE(problem_test)
                             + "</problem>"
         );
 
-        auto problem1 = problem::load(sstream, stringToType, stringToValues);
+        auto problemResult = problem::load(sstream, stringToType, stringToValues);
+        if(!problemResult)std::cout<<problemResult.errMessage()<<std::endl;
+        BOOST_CHECK(problemResult);
+        auto& problem1 = problemResult.unwrap();
 
         BOOST_CHECK_EQUAL(problem1.name, "test");
         BOOST_CHECK(*problem1.returnType == utility::typeInfo<int>());

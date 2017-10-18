@@ -2,31 +2,36 @@
 #define GP_PROBLEM_PROBLEM
 
 #include <any>
+#include <algorithm>
 #include <gp/utility/type.hpp>
 #include <gp/utility/variable.hpp>
+#include <gp/utility/result.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
+#include <climits>
+
+#include <iostream>
 
 namespace gp::problem {
     namespace detail {
         template <std::size_t offset, typename ...Ts>
-        utility::Variable stringToVariableHelper(const std::string& str,
-                                                const utility::TypeInfo& type,
-                                                const std::tuple<std::function<Ts(const std::string&)>...>& stringToValues){
+        utility::Result<utility::Variable> stringToVariableHelper(const std::string& str,
+                                                                  const utility::TypeInfo& type,
+                                                                  const std::tuple<std::function<Ts(const std::string&)>...>& stringToValues){
             if(type == utility::typeInfo<
                                 typename std::tuple_element_t<offset, std::decay_t<decltype(stringToValues)>>::result_type
-                            >()) return utility::Variable(std::get<offset>(stringToValues)(str));
+                            >()) return utility::result::ok(utility::Variable(std::get<offset>(stringToValues)(str)));
             if constexpr (offset + 1 < std::tuple_size_v<std::decay_t<decltype(stringToValues)>>) {
                 return stringToVariableHelper<offset + 1>(str, type, stringToValues);
             } else {
-                throw std::runtime_error("unknown string to value conversion is called in reading problem file");
+                return utility::result::err<utility::Variable>("failed to load problem, string to value conversion function of " + type.name() + "not registerd");
             }
         };
 
         template <typename ...Ts>
-        utility::Variable stringToVariable(const std::string& str,
-                                           const utility::TypeInfo& type,
-                                           const std::tuple<std::function<Ts(const std::string&)>...>& stringToValues) {
+        utility::Result<utility::Variable> stringToVariable(const std::string& str,
+                                                            const utility::TypeInfo& type,
+                                                            const std::tuple<std::function<Ts(const std::string&)>...>& stringToValues) {
             return stringToVariableHelper<0>(str, type, stringToValues);
         }
     }
@@ -42,6 +47,15 @@ namespace gp::problem {
         constexpr const char* TEACHER_DATA_ARGUMENT_FIELD = "argument";
         constexpr const char* TEACHER_DATA_ARGUMENT_INDEX_ARRIBUTE = "idx";
         constexpr const char* TEACHER_DATA_ANSWER_FIELD = "answer";
+        constexpr int MAX_NUM_DIGITS = [](){
+            int x = INT_MAX;
+            int cnt = 0;
+            while(x > 0){
+                ++cnt;
+                x /= 10;
+            }
+            return cnt;
+        }();
     }
 
     struct Problem {
@@ -53,50 +67,107 @@ namespace gp::problem {
     };
 
     template <typename ...SupportTypes>
-    inline Problem load(std::istream& in,
+    utility::Result<Problem> load(std::istream& in,
                         const utility::StringToType& stringToType,
                         const std::tuple<std::function<SupportTypes(const std::string&)>...>& stringToValues){
         using namespace boost::property_tree;
         ptree tree;
-        xml_parser::read_xml(in, tree);
+        try {
+            xml_parser::read_xml(in, tree);
+        } catch (const std::exception& ex) {
+            return utility::result::err<Problem>(std::string("failed to load problem\n") + ex.what());
+        }
         Problem problem1;
         //get problem name
-        if(auto name = tree.template get_optional<std::string>(std::string(io::ROOT_FIELD) + "." + io::NAME_FIELD)){
-            problem1.name = std::move(*name);
-        } else {
-            throw std::runtime_error("name field not found in the problem file");
-        }
-        //get return type
-        if(auto returnTypeStr = tree.template get_optional<std::string>(std::string(io::ROOT_FIELD) + "." + io::RETURN_TYPE_FIELD)){
-            if(!stringToType.hasType(*returnTypeStr)) throw std::runtime_error("unknown return type name found in the problem file");
-            problem1.returnType = &stringToType(*returnTypeStr);
-        }
-        //get argument types
-        for(const auto& [key, val]: tree.get_child(std::string(io::ROOT_FIELD) + "." + io::ARGUMENTS_FIELD)){
-            if(key == io::VARIABLE_TYPE_FIELD){
-                const auto& typeStr = val.data();
-                if(!stringToType.hasType(typeStr)) throw std::runtime_error("unknown argument type name found in the problem file");
-                problem1.argumentTypes.push_back(&stringToType(typeStr));
-            }
-        }
-        //get teacher data set
-        for(const auto& [key, value]: tree.get_child(std::string(io::ROOT_FIELD) + "." + io::TEACHER_DATA_SET_FIELD)) {
-            if(key == io::TEACHER_DATA_FIELD) {
-                std::vector<utility::Variable> args(std::size(problem1.argumentTypes));
-                utility::Variable ans;
-                for(const auto& [dataKey, dataValue]: value) {
-                    if(dataKey == io::TEACHER_DATA_ARGUMENT_FIELD) {
-                        auto idx = std::stoi(dataValue.get<std::string>(std::string("<xmlattr>.") + io::TEACHER_DATA_ARGUMENT_INDEX_ARRIBUTE));
-                        args[idx] = detail::stringToVariable(dataValue.data(), *problem1.argumentTypes[idx], stringToValues);
-                    } else if (dataKey == io::TEACHER_DATA_ANSWER_FIELD) {
-                        ans = detail::stringToVariable(dataValue.data(), *problem1.returnType, stringToValues);
-                    }
-                }
-                problem1.ansArgList.push_back(std::make_tuple(std::move(ans), std::move(args)));
-            }
-        }
+        auto nameResult = utility::result::fromOptional(tree.template get_optional<std::string>(std::string(io::ROOT_FIELD) + "." + io::NAME_FIELD),
+                                                        "failed to load problem, name field not found.");
+        if(!nameResult) return utility::result::err<Problem>(std::move(nameResult).errMessage());
+        problem1.name = std::move(nameResult).unwrap();
 
-        return problem1;
+        //get return type
+        auto returnTypeResult = utility::result::fromOptional(tree.template get_optional<std::string>(std::string(io::ROOT_FIELD) + "." + io::RETURN_TYPE_FIELD),
+                                                             "failed to load problem, return_type field not found.")
+                .flatMap([&stringToType](const std::string& typeName){
+                    using ResultType = const utility::TypeInfo*;
+                    if(!stringToType.hasType(typeName)) return utility::result::err<ResultType>("failed to load problem, unknown type name \"" + typeName + "\"");
+                    else return utility::result::ok(&stringToType(typeName));
+                });
+
+        if(!returnTypeResult) return utility::result::err<Problem>(std::move(returnTypeResult).errMessage());
+        problem1.returnType = std::move(returnTypeResult).unwrap();
+
+        //get argument types
+        auto argsResult = utility::result::fromOptional(tree.get_child_optional(std::string(io::ROOT_FIELD) + "." + io::ARGUMENTS_FIELD),
+                                                        "failed to load problem, arguments field not found")
+                .flatMap([&stringToType](ptree& child){
+                    using ResultType = decltype(Problem{}.argumentTypes);
+                    ResultType argumentTypes;
+                    for(const auto& [key, val]: child) {
+                        if(key != io::VARIABLE_TYPE_FIELD) continue;
+                        const auto& typeStr = val.data();
+                        if(!stringToType.hasType(typeStr)) return utility::result::err<ResultType>(std::string("failed to load problem, unknown argument type name \"") + typeStr + "\"");
+                        argumentTypes.push_back(&stringToType(typeStr));
+                    }
+                    return utility::result::ok(std::move(argumentTypes));
+                });
+
+        if(!argsResult) return utility::result::err<Problem>(std::move(argsResult).errMessage());
+        problem1.argumentTypes = std::move(argsResult).unwrap();
+
+        //get teacher data set
+        auto teacherDataResult = utility::result::fromOptional(tree.get_child_optional(std::string(io::ROOT_FIELD) + "." + io::TEACHER_DATA_SET_FIELD),
+                                                               "failed to load problem, teacher_data_set field not found")
+                .flatMap([&problem1, &stringToValues, argNum = std::size(problem1.argumentTypes)](ptree& child){
+                    using ResultType = decltype(Problem{}.ansArgList);
+                    ResultType ansArgList;
+                    for(const auto& [key, value]: child) {
+                        if(key != io::TEACHER_DATA_FIELD)continue;
+
+                        auto dataResult = utility::result::fromOptional(value.template get_optional<std::string>(io::TEACHER_DATA_ANSWER_FIELD),
+                                                                        "failed to load problem, answer field not found in the data field.")
+                                .flatMap([&stringToValues, &problem1](auto&& answerStr){
+                                    return detail::stringToVariable(answerStr, *problem1.returnType, stringToValues);
+                                });
+
+                        if(!dataResult) return utility::result::err<ResultType>(std::move(dataResult).errMessage());
+                        auto ans = std::move(dataResult).unwrap();
+
+                        std::vector<utility::Variable> args(argNum);
+                        for(const auto& [dataKey, dataValue]: value) {
+                            if(dataKey != io::TEACHER_DATA_ARGUMENT_FIELD) continue;
+
+                            auto idxResult = utility::result::fromOptional(dataValue.template get_optional<std::string>(std::string("<xmlattr>.") + io::TEACHER_DATA_ARGUMENT_INDEX_ARRIBUTE),
+                                                                               "failed to load problem, idx attribute not found int the argument field")
+                                    .flatMap([](auto&& idxStr){
+                                        if(idxStr.empty()
+                                           || !std::all_of(std::begin(idxStr), std::end(idxStr), [](auto c){return '0' <= c && c <= '9';})
+                                           || (1 < std::size(idxStr)  && idxStr[0] == '0')
+                                           || io::MAX_NUM_DIGITS < std::size(idxStr)) return utility::result::err<int>("failed to load problem, invalid idx \"" + idxStr + "\"");
+
+                                        auto idx = std::stoll(idxStr);
+                                        if (static_cast<long long>(INT_MAX) < idx) return utility::result::err<int>("failed to load problem, invalid idx \"" + idxStr + "\"");
+                                        return utility::result::ok(static_cast<int>(idx));
+                                    }).flatMap([argNum = std::size(problem1.argumentTypes)](int idx){
+                                        if(idx < 0 || argNum <= idx) return utility::result::err<int>("failed to load problem, invalid idx \"" + std::to_string(idx) + "\"");
+                                        else return utility::result::ok(idx);
+                                    });
+                            if(!idxResult) return utility::result::err<ResultType>(std::move(idxResult).errMessage());
+                            auto idx = idxResult.unwrap();
+
+                            auto argResult = detail::stringToVariable(dataValue.data(), *problem1.argumentTypes[idx], stringToValues);
+                            if(!argResult) return utility::result::err<ResultType>(std::move(argResult).errMessage());
+                            args[idx] = std::move(argResult).unwrap();
+                        }
+                        if(!std::all_of(std::begin(args), std::end(args), [](auto x)->bool{return static_cast<bool>(x);})) return utility::result::err<ResultType>("failed to load problem, some argument is lacking");
+                        ansArgList.push_back(std::make_tuple(std::move(ans), std::move(args)));
+                    }
+                    return utility::result::ok(std::move(ansArgList));
+                });
+
+        if(!teacherDataResult) return utility::result::err<Problem>(std::move(teacherDataResult).errMessage());
+        problem1.ansArgList = std::move(teacherDataResult).unwrap();
+
+        return utility::result::ok(std::move(problem1));
     }
 }
 
