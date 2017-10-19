@@ -117,6 +117,40 @@ namespace gp::utility {
                 else return err<T>(std::forward<String>(errMsg));
             }
         }
+
+        namespace detail {
+            template <typename... Ts>
+            struct TypeTuple{};
+
+            template <typename... Ts1, typename T2, typename... Ts2>
+            Result<std::tuple<T2, Ts2...>> sequenceHelper(const std::tuple<Result<Ts1>...>& results, TypeTuple<T2, Ts2...>, const char* msgSeparator) {
+                using AnsType = std::tuple<T2, Ts2...>;
+                if constexpr (sizeof...(Ts2) > 0) {
+                    auto nextResults = sequenceHelper(results, TypeTuple<Ts2...>{}, msgSeparator);
+                    const auto& result = std::get<sizeof...(Ts1) - sizeof...(Ts2) - 1>(results);
+                    if(!nextResults) return result ? err<AnsType>(std::move(nextResults).errMessage()) : err<AnsType>(result.errMessage() + msgSeparator + std::move(nextResults).errMessage());
+                    else return result ? ok(std::tuple_cat(std::make_tuple(result.unwrap()), std::move(nextResults).unwrap())) : err<AnsType>(result.errMessage());
+                } else {
+                    const auto& result = std::get<std::tuple_size_v<std::tuple<Ts1...>> - 1>(results);
+                    return result ? ok(std::make_tuple(result.unwrap())) : err<std::tuple<T2>>(result.errMessage());
+                }
+            }
+        }
+
+        template <typename... Ts>
+        Result<std::tuple<Ts...>> sequence(const std::tuple<Result<Ts>...>& results, const char* msgSeparator = "\n") {
+            return detail::sequenceHelper(results, detail::TypeTuple<Ts...>{}, msgSeparator);
+        }
+
+        template <typename... Ts>
+        Result<std::tuple<Ts...>> sequence(const Result<Ts>... results) {
+            return sequence(std::make_tuple(results...));
+        }
+
+//        template <typename Ts...>
+//        Result<std::tuple<Ts...>> sequence(std::tuple<Result<Ts>...>&& results) {
+//            return detail::sequenceHelper<0>(std::move(results));
+//        }
     }
 }
 

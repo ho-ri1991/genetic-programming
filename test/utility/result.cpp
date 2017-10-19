@@ -18,6 +18,7 @@ BOOST_AUTO_TEST_SUITE(result)
         auto result2 = utility::result::err<int>("err");
         BOOST_CHECK(!result2);
         BOOST_CHECK_EXCEPTION(result2.unwrap(), std::bad_variant_access, [](const std::bad_variant_access&){return true;});
+        BOOST_CHECK_EQUAL(result2.errMessage(), "err");
         BOOST_CHECK_EXCEPTION(std::move(result2).unwrap(), std::bad_variant_access, [](const std::bad_variant_access&){return true;});
     }
     BOOST_AUTO_TEST_CASE(result_ok_or) {
@@ -104,5 +105,62 @@ BOOST_AUTO_TEST_SUITE(result)
             }
         });
         BOOST_CHECK_EQUAL(msg2, "err");
+    }
+    BOOST_AUTO_TEST_CASE(result_from_optional) {
+        std::optional<int> option1 = 1;
+        auto result1 = utility::result::fromOptional(option1, "err");
+        BOOST_CHECK(result1);
+        BOOST_CHECK_EQUAL(result1.unwrap(), 1);
+        auto resultMove1 = utility::result::fromOptional(std::move(option1), "err");
+        BOOST_CHECK(resultMove1);
+        BOOST_CHECK_EQUAL(resultMove1.unwrap(), 1);
+
+        std::optional<int> option2;
+        auto result2 = utility::result::fromOptional(option2, "err");
+        BOOST_CHECK(!result2);
+        auto msg = result2.match([](auto&& result){
+            using T = std::decay_t<decltype(result)>;
+            if constexpr (std::is_same_v<T, utility::Ok<int>>) {
+                return std::to_string(result.data);
+            } else {
+                return result.message;
+            }
+        });
+        BOOST_CHECK_EQUAL(msg, "err");
+        auto resultMove2 = utility::result::fromOptional(std::move(option2), "err");
+        BOOST_CHECK(!resultMove2);
+        auto msg2 = resultMove2.match([](auto&& result){
+            using T = std::decay_t<decltype(result)>;
+            if constexpr (std::is_same_v<T, utility::Ok<int>>) {
+                return std::to_string(result.data);
+            } else {
+                return result.message;
+            }
+        });
+        BOOST_CHECK_EQUAL(msg2, "err");
+
+        int x = 0;
+        boost::optional<int&> option3 = x;
+        auto result3 = utility::result::fromOptional(option3, "err");
+        BOOST_CHECK(result3);
+        int& y = result3.unwrap();
+        y = 1;
+        BOOST_CHECK_EQUAL(x, 1);
+    }
+    BOOST_AUTO_TEST_CASE(result_sequence) {
+        auto result1 = utility::result::sequence(utility::result::ok(1),
+                                                 utility::result::ok(2.5),
+                                                 utility::result::ok(false));
+        BOOST_CHECK(result1);
+        auto& ans1 = result1.unwrap();
+        BOOST_CHECK_EQUAL(std::get<0>(ans1), 1);
+        BOOST_CHECK_EQUAL(std::get<1>(ans1), 2.5);
+        BOOST_CHECK_EQUAL(std::get<2>(ans1), false);
+
+        auto result2 = utility::result::sequence(utility::result::err<int>("err0"),
+                                                 utility::result::ok(2.5),
+                                                 utility::result::err<bool>("err2"));
+        BOOST_CHECK(!result2);
+        BOOST_CHECK_EQUAL(result2.errMessage(), "err0\nerr2");
     }
 BOOST_AUTO_TEST_SUITE_END()
