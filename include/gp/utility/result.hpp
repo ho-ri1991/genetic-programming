@@ -129,10 +129,10 @@ namespace gp::utility {
                     auto nextResults = sequenceHelper(results, TypeTuple<Ts2...>{}, msgSeparator);
                     const auto& result = std::get<sizeof...(Ts1) - sizeof...(Ts2) - 1>(results);
                     if(!nextResults) return result ? err<AnsType>(std::move(nextResults).errMessage()) : err<AnsType>(result.errMessage() + msgSeparator + std::move(nextResults).errMessage());
-                    else return result ? ok(std::tuple_cat(std::make_tuple(result.unwrap()), std::move(nextResults).unwrap())) : err<AnsType>(result.errMessage());
+                    else return result ? ok(std::tuple_cat(std::tuple<T2>(result.unwrap()), std::move(nextResults).unwrap())) : err<AnsType>(result.errMessage());
                 } else {
                     const auto& result = std::get<std::tuple_size_v<std::tuple<Ts1...>> - 1>(results);
-                    return result ? ok(std::make_tuple(result.unwrap())) : err<std::tuple<T2>>(result.errMessage());
+                    return result ? ok(std::tuple<T2>(result.unwrap())) : err<std::tuple<T2>>(result.errMessage());
                 }
             }
 
@@ -143,10 +143,10 @@ namespace gp::utility {
                     auto nextResults = sequenceHelper(std::move(results), TypeTuple<Ts2...>{}, msgSeparator);
                     auto&& result = std::get<sizeof...(Ts1) - sizeof...(Ts2) - 1>(std::move(results));
                     if(!nextResults) return result ? err<AnsType>(std::move(nextResults).errMessage()) : err<AnsType>(std::move(result).errMessage() + msgSeparator + std::move(nextResults).errMessage());
-                    else return result ? ok(std::tuple_cat(std::make_tuple(std::move(result).unwrap()), std::move(nextResults).unwrap())) : err<AnsType>(std::move(result).errMessage());
+                    else return result ? ok(std::tuple_cat(std::tuple<T2>(std::move(result).unwrap()), std::move(nextResults).unwrap())) : err<AnsType>(std::move(result).errMessage());
                 } else {
                     auto&& result = std::get<std::tuple_size_v<std::tuple<Ts1...>> - 1>(std::move(results));
-                    return result ? ok(std::make_tuple(std::move(result).unwrap())) : err<std::tuple<T2>>(std::move(result).errMessage());
+                    return result ? ok(std::tuple<T2>(std::move(result).unwrap())) : err<std::tuple<T2>>(std::move(result).errMessage());
                 }
             }
 
