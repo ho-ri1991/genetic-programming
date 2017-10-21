@@ -163,4 +163,21 @@ BOOST_AUTO_TEST_SUITE(result)
         BOOST_CHECK(!result2);
         BOOST_CHECK_EQUAL(result2.errMessage(), "err0\nerr2");
     }
+    BOOST_AUTO_TEST_CASE(result_try){
+        auto result1 = utility::result::tryFunction([](){return 1;}, "err");
+        BOOST_CHECK(result1);
+        BOOST_CHECK_EQUAL(result1.unwrap(), 1);
+
+        auto result2 = utility::result::tryFunction([](){throw std::runtime_error(""); return 0;}, "err");
+        BOOST_CHECK(!result2);
+        BOOST_CHECK_EQUAL(result2.errMessage(), "err");
+
+        auto result3 = utility::result::tryFunction([](){throw std::runtime_error(""); return 0;}, "err", std::runtime_error(""));
+        BOOST_CHECK(!result3);
+        BOOST_CHECK_EQUAL(result3.errMessage(), "err");
+
+        BOOST_CHECK_EXCEPTION(utility::result::tryFunction([](){throw std::runtime_error(""); return 0;}, "err", std::invalid_argument("")),
+                              std::runtime_error,
+                              [](const std::runtime_error&){return true;});
+    }
 BOOST_AUTO_TEST_SUITE_END()

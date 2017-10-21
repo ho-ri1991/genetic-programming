@@ -135,6 +135,27 @@ namespace gp::utility {
                     return result ? ok(std::make_tuple(result.unwrap())) : err<std::tuple<T2>>(result.errMessage());
                 }
             }
+
+            template <typename... Ts1, typename T2, typename... Ts2>
+            Result<std::tuple<T2, Ts2...>> sequenceHelper(std::tuple<Result<Ts1>...>&& results, TypeTuple<T2, Ts2...>, const char* msgSeparator) {
+                using AnsType = std::tuple<T2, Ts2...>;
+                if constexpr (sizeof...(Ts2) > 0) {
+                    auto nextResults = sequenceHelper(std::move(results), TypeTuple<Ts2...>{}, msgSeparator);
+                    auto&& result = std::get<sizeof...(Ts1) - sizeof...(Ts2) - 1>(std::move(results));
+                    if(!nextResults) return result ? err<AnsType>(std::move(nextResults).errMessage()) : err<AnsType>(std::move(result).errMessage() + msgSeparator + std::move(nextResults).errMessage());
+                    else return result ? ok(std::tuple_cat(std::make_tuple(std::move(result).unwrap()), std::move(nextResults).unwrap())) : err<AnsType>(std::move(result).errMessage());
+                } else {
+                    auto&& result = std::get<std::tuple_size_v<std::tuple<Ts1...>> - 1>(std::move(results));
+                    return result ? ok(std::make_tuple(std::move(result).unwrap())) : err<std::tuple<T2>>(std::move(result).errMessage());
+                }
+            }
+
+            template <typename T>
+            struct is_result_type: std::false_type{};
+            template <typename T>
+            struct is_result_type<Result<T>>: std::true_type{};
+            template <typename T>
+            constexpr bool is_result_type_v = is_result_type<T>::value;
         }
 
         template <typename... Ts>
@@ -142,15 +163,33 @@ namespace gp::utility {
             return detail::sequenceHelper(results, detail::TypeTuple<Ts...>{}, msgSeparator);
         }
 
-        template <typename... Ts>
-        Result<std::tuple<Ts...>> sequence(const Result<Ts>... results) {
-            return sequence(std::make_tuple(results...));
+        template <typename...Ts>
+        Result<std::tuple<Ts...>> sequence(std::tuple<Result<Ts>...>&& results, const char* msgSeparator = "\n") {
+            return detail::sequenceHelper(std::move(results), detail::TypeTuple<Ts...>{}, msgSeparator);
         }
 
-//        template <typename Ts...>
-//        Result<std::tuple<Ts...>> sequence(std::tuple<Result<Ts>...>&& results) {
-//            return detail::sequenceHelper<0>(std::move(results));
-//        }
+        template <typename... Results, typename = std::enable_if_t<std::conjunction_v<detail::is_result_type<std::decay_t<Results>>...>>>
+        auto sequence(Results&&... results) {
+            return sequence(std::make_tuple(std::forward<Results>(results)...));
+        }
+
+        template <typename Fn, typename String, typename T = std::decay_t<decltype(std::declval<Fn>()())>>
+        Result<T> tryFunction(Fn fn, String errMessage) {
+            try {
+                return ok(fn());
+            } catch (...){
+                return err<T>(std::forward<String>(errMessage));
+            }
+        }
+
+        template <typename Fn, typename String, typename Exception, typename T = std::decay_t<decltype(std::declval<Fn>()())>>
+        Result<T> tryFunction(Fn fn, String errMessage, Exception exception) {
+            try {
+                return ok(fn());
+            } catch (const Exception& ex) {
+                return err<T>(std::forward<String>(errMessage));
+            }
+        };
     }
 }
 
