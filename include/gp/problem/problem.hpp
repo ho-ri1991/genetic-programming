@@ -8,9 +8,7 @@
 #include <gp/utility/result.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
-#include <climits>
-
-#include <iostream>
+#include <limits>
 
 namespace gp::problem {
     namespace detail {
@@ -45,17 +43,8 @@ namespace gp::problem {
         constexpr const char* TEACHER_DATA_SET_FIELD = "teacher_data_set";
         constexpr const char* TEACHER_DATA_FIELD = "data";
         constexpr const char* TEACHER_DATA_ARGUMENT_FIELD = "argument";
-        constexpr const char* TEACHER_DATA_ARGUMENT_INDEX_ARRIBUTE = "idx";
+        constexpr const char* TEACHER_DATA_ARGUMENT_INDEX_ATTRIBUTE = "idx";
         constexpr const char* TEACHER_DATA_ANSWER_FIELD = "answer";
-        constexpr int MAX_NUM_DIGITS = [](){
-            int x = INT_MAX;
-            int cnt = 0;
-            while(x > 0){
-                ++cnt;
-                x /= 10;
-            }
-            return cnt;
-        }();
     }
 
     struct Problem {
@@ -137,13 +126,13 @@ namespace gp::problem {
                         for(const auto& [dataKey, dataValue]: value) {
                             if(dataKey != io::TEACHER_DATA_ARGUMENT_FIELD) continue;
 
-                            auto idxResult = result::fromOptional(dataValue.template get_optional<std::string>(std::string("<xmlattr>.") + io::TEACHER_DATA_ARGUMENT_INDEX_ARRIBUTE),
+                            auto idxResult = result::fromOptional(dataValue.template get_optional<std::string>(std::string("<xmlattr>.") + io::TEACHER_DATA_ARGUMENT_INDEX_ATTRIBUTE),
                                                                   "failed to load problem, idx attribute not found int the argument field")
                                     .flatMap([](auto&& idxStr){
                                         if(idxStr.empty()
                                            || !std::all_of(std::begin(idxStr), std::end(idxStr), [](auto c){return '0' <= c && c <= '9';})
                                            || (1 < std::size(idxStr)  && idxStr[0] == '0')
-                                           || io::MAX_NUM_DIGITS < std::size(idxStr)) return result::err<int>("failed to load problem, invalid idx \"" + idxStr + "\"");
+                                           || std::numeric_limits<int>::digits10 < std::size(idxStr)) return result::err<int>("failed to load problem, invalid idx \"" + idxStr + "\"");
 
                                         auto idx = std::stoll(idxStr);
                                         if (static_cast<long long>(INT_MAX) < idx) return result::err<int>("failed to load problem, invalid idx \"" + idxStr + "\"");

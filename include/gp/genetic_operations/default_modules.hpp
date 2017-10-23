@@ -90,13 +90,23 @@ namespace gp::genetic_operations {
                     return true;
             }
         }
-        static void setLocalVariableIndexRandm(node::NodeInterface& node, const tree::TreeProperty& treeProperty, RandomEngine& rnd){
+        static void setLocalVariableIndexRandom(node::NodeInterface& node, const tree::TreeProperty& treeProperty, RandomEngine& rnd){
             std::size_t size = std::count_if(std::begin(treeProperty.localVariableTypes),
                                              std::end(treeProperty.localVariableTypes),
                                              [&type = node.getReturnType()](auto x){return *x == type.removeReferenceType().removeLeftHandValueType();});
             if (size == 0)throw std::runtime_error("try to set local variable index, but the local variable type does not match tree property");
             std::uniform_int_distribution<node::NodeInterface::variable_index_type> dist(0, size - 1);
-            node.setNodePropertyByAny(dist(rnd));
+            auto cnt = dist(rnd);
+            auto c = cnt;
+            for(node::NodeInterface::variable_index_type i = 0; i < std::size(treeProperty.localVariableTypes); ++i){
+                if(node.getReturnType().removeReferenceType().removeLeftHandValueType() == *treeProperty.localVariableTypes[i]) {
+                    if(cnt == 0) {
+                        node.setNodePropertyByAny(i);
+                        return;
+                    }
+                    --cnt;
+                }
+            };
         }
         node_instance_type generateNodeHelper(const type_info &returnType,
                                               const tree::TreeProperty &treeProperty,
@@ -116,7 +126,7 @@ namespace gp::genetic_operations {
             if (ans->getNodeType() == node::NodeType::Const) {
                 randomConstValueGenerator.setConstRandom(*ans, rnd);
             } else if (ans->getNodeType() == node::NodeType::LocalVariable) {
-                setLocalVariableIndexRandm(*ans, treeProperty, rnd);
+                setLocalVariableIndexRandom(*ans, treeProperty, rnd);
             }
             return ans;
         }
