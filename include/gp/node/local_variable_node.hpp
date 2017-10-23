@@ -126,7 +126,7 @@ namespace gp::node {
                    + std::to_string(n)
                    + local_variable_node::nameDelimiter;
         }
-        node_instance_type clone()const override {return NodeInterface::createInstance<ThisType>();}
+        node_instance_type clone()const override {return NodeInterface::createInstance<ThisType>(n);}
         NodeType getNodeType()const noexcept override final {return NodeType::LocalVariable;}
         std::any getNodePropertyByAny()const override final {return n;}
         void setNodePropertyByNodeName(const std::string& name) override {
