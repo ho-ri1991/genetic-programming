@@ -8,6 +8,7 @@
 #include <gp/tree_operations/tree_operations.hpp>
 #include <gp/tree/io.hpp>
 #include <gp/genetic_operations/mutation.hpp>
+#include <gp/genetic_operations/crossover.hpp>
 #include <gp/genetic_operations/default_modules.hpp>
 #include <gp/gp_manager.hpp>
 #include <gp/problem/problem.hpp>
@@ -31,6 +32,7 @@ const std::vector<const utility::TypeInfo*> localVariableTypeArray = {&utility::
 constexpr std::size_t MAX_PROGN_SIZE = 5;
 constexpr std::size_t MAX_ARGUMENT_NUM = 2;
 constexpr std::size_t MAX_INITIAL_LOCALVARIABLE_NUM = 3;
+constexpr std::size_t MAX_OUTPUT_TREE_NUM = 10;
 
 template <std::size_t MAX_LOCALVARIABLE_NUM = MAX_INITIAL_LOCALVARIABLE_NUM>
 auto generateLocalVariableTypesRandom(RND& rnd) {
@@ -87,6 +89,11 @@ utility::Result<ProblemSettings> loadSettings(const std::string& name) {
                                         result::tryFunction([&crossoverRate](){return boost::lexical_cast<decltype(ProblemSettings{}.crossoverRate)>(crossoverRate);}, "failed to load problem, invalid crossover_rate field: " + crossoverRate));
             }).map([](auto&& prop){
                 return ProblemSettings{std::get<0>(prop), std::get<1>(prop), std::get<2>(prop), std::get<3>(prop), std::get<4>(prop)};
+            }).flatMap([](ProblemSettings&& settings){
+                if(settings.mutationRate < 0) return result::err<ProblemSettings>("failed to load problem, mutation_rate must be positive");
+                if(settings.crossoverRate < 0) return result::err<ProblemSettings>("failed to load problem, crossover_rate must be positive");
+                if(1 < settings.mutationRate + settings.crossoverRate) return result::err<ProblemSettings>("failed to load problem, mutation_rate + crossover_rate < 1 must be fulfilled");
+                return result::ok(std::move(settings));
             });
 }
 
@@ -230,39 +237,93 @@ int main(int argc, char* argv[]) {
         std::cout << "crossover rate: " << settings.crossoverRate << '\n';
         std::cout << std::flush;
 
+        genetic_operations::DefaultNodeSelector nodeSelector(rnd, settings.maxTreeDepth);
+        genetic_operations::DefaultLocalVariableAdapter localVariableAdapter(rnd);
+        genetic_operations::DefaultRandomTreeGenerator randomTreeGenerator(rnd, randomNodeGenerator);
+
         //create initial population
-        std::vector<std::tuple<tree::Tree, double>> population;
+        std::vector<tree::Tree> population;
         population.reserve(settings.populationSize);
         for(int i = 0; i < settings.populationSize; ++i) {
             auto treeProperty = tree::TreeProperty{problem1.returnType, problem1.argumentTypes, generateLocalVariableTypesRandom<>(rnd)};
             auto rootNode = tree_operations::generateTreeRandom(treeProperty, randomNodeGenerator, rnd, settings.maxTreeDepth);
-            population.push_back(std::make_tuple(tree::Tree(std::move(treeProperty), std::move(rootNode)), 0.));
+            population.emplace_back(std::move(treeProperty), std::move(rootNode));
         }
 
+        //execute evolution
         for(std::size_t count = 0; count < settings.evolutionNum; ++count){
             std::cout << "====" << std::to_string(count) << "th generation" << "====\n";
-            std::vector<std::tuple<std::size_t, double>> idxEvalPairs(std::size(population));
+            std::vector<double> probabilities;
+            probabilities.reserve(std::size(population));
             //evaluation for each tree
-            for(auto& [tree, inverseFitness]: population){
-                inverseFitness = 0;
+            for(const auto& tree: population){
+                double inverseFitness = 0;
+
                 //evaluation for each data set
                 for(std::size_t i = 0; i < std::size(problem1.ansArgList); ++i) {
                     const auto& [answer, arguments] = problem1.ansArgList[i];
                     auto evaluatedValue = tree.evaluate(arguments);
                     inverseFitness += evaluator(evaluatedValue, answer);
                 }
+                probabilities.push_back(1./(1. + inverseFitness));
             }
-            //order by inverse of fitness
-            std::sort(std::begin(population), std::end(population), [](const auto& x, const auto& y){return std::get<1>(x) < std::get<1>(y);});
+            assert(std::size(population) == std::size(probabilities));
+            auto maxFitnessItr = std::max_element(std::begin(probabilities), std::end(probabilities));
+            std::cout << "minimum value of inverse fitness is " << *maxFitnessItr <<'\n';
 
             //create next generation
-            std::vector<std::tuple<tree::Tree, double>> nextPopulation;
+            std::vector<tree::Tree> nextPopulation;
             nextPopulation.reserve(std::size(population));
+
+            std::discrete_distribution<std::size_t> distribution(std::begin(probabilities), std::end(probabilities));
+
+            std::size_t mutationNum = settings.mutationRate * std::size(population);
+            std::size_t crossoverNum = settings.crossoverRate * std::size(population) / 2.;
+            assert(mutationNum + 2 * crossoverNum <= std::size(population));
+            std::size_t surviveNum = std::size(population) - mutationNum - 2 * crossoverNum;
+
+            while(mutationNum--) {
+                nextPopulation.push_back(genetic_operations::mutation(population[distribution(rnd)],
+                                                                      randomTreeGenerator,
+                                                                      nodeSelector,
+                                                                      settings.maxTreeDepth));
+            }
+            while(crossoverNum--) {
+                auto [tree1, tree2] = genetic_operations::crossover(population[distribution(rnd)],
+                                                                    population[distribution(rnd)],
+                                                                    nodeSelector,
+                                                                    localVariableAdapter);
+                nextPopulation.push_back(std::move(tree1));
+                nextPopulation.push_back(std::move(tree2));
+            }
+            while(surviveNum--) {
+                nextPopulation.push_back(population[distribution(rnd)]);
+            }
+            assert(std::size(population) == std::size(nextPopulation));
+
+            swap(population, nextPopulation);
         }
 
-        for(int i = 0; i < population.size(); ++i) {
-            std::ofstream fout(problem1.name + "_random_tree" + std::to_string(i) + ".xml");
-            auto& [tree, inverseFitness] = population[i];
+        //evaluate last population
+        std::vector<std::tuple<double, tree::Tree&>> evaluatedPopulation;
+        evaluatedPopulation.reserve(std::size(population));
+        //evaluation for each tree
+        for(auto& tree: population){
+            double inverseFitness = 0;
+            //evaluation for each data set
+            for(std::size_t i = 0; i < std::size(problem1.ansArgList); ++i) {
+                const auto& [answer, arguments] = problem1.ansArgList[i];
+                auto evaluatedValue = tree.evaluate(arguments);
+                inverseFitness += evaluator(evaluatedValue, answer);
+            }
+            evaluatedPopulation.push_back(std::tuple<double, tree::Tree&>(inverseFitness, tree));
+        }
+
+        std::sort(std::begin(evaluatedPopulation), std::end(evaluatedPopulation), [](const auto& x, const auto& y){return std::get<0>(x) < std::get<0>(y);});
+
+        for(int i = 0; i < std::min(population.size(), MAX_OUTPUT_TREE_NUM); ++i) {
+            std::ofstream fout(problem1.name + "_" + std::to_string(i) + "th_tree.xml");
+            auto& [fitness, tree] = evaluatedPopulation[i];
             tree.getTreeProperty().name = problem1.name;
             gpManager.writeTree(tree, fout);
             fout.close();
