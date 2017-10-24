@@ -59,6 +59,7 @@ namespace gp::node {
             assert((m < n) && "the child index must be smaller than the number of children of the node");
             if(n <= m) throw std::invalid_argument("invalid child index");
             if(m == n - 1){
+                if(!node) return node::NodeInterface::node_instance_type(lastChild.release());
                 assert(node->getReturnType() == utility::typeInfo<T>());
                 if(utility::typeInfo<T>() != node->getReturnType()) throw std::invalid_argument("invalied type node was set as a child");
                 if(auto typed_ptr = dynamic_cast<TypedNodeInterface<T>*>(node.get())){

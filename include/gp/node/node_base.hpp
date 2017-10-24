@@ -69,6 +69,7 @@ namespace gp::node{
                               std::tuple<std::unique_ptr<TypedNodeInterface<Ts>>...> &t) {
             if constexpr (offset < sizeof...(Ts)) {
                 if (n == 0) {
+                    if(!node) return node::NodeInterface::node_instance_type(std::get<offset>(t).release());
                     if (auto typed_node = dynamic_cast<typename std::tuple_element<offset, std::tuple<TypedNodeInterface<Ts>...>>::type *>(node.get())) {
                         auto org = std::get<offset>(t).release();
                         std::get<offset>(t).reset(typed_node);
@@ -144,7 +145,7 @@ namespace gp::node{
         }
         node_instance_type setChild(std::size_t n, node_instance_type node)override {
             assert((n < sizeof...(Args)) && "the child index must be smaller than the number of children of the node");
-            assert(detail::getRTTI<Args...>(n) == node->getReturnType() && "the return type of child must equal to the argument type of the node");
+            assert((!node || detail::getRTTI<Args...>(n) == node->getReturnType()) && "the return type of child must equal to the argument type of the node");
             auto org = detail::setDynamic(n, std::move(node), children);
             if(hasChild(n))getChild(n).setParent(this);
             return org;
