@@ -230,6 +230,7 @@ int main(int argc, char* argv[]) {
         for(int i = 0; i < problem1.argumentTypes.size(); ++i){
             std::cout << problem1.argumentTypes[i]->name() << ", ";
         }
+        std::cout << '\n';
         std::cout << "population size: " << settings.populationSize << '\n';
         std::cout << "max tree depth: " <<settings.maxTreeDepth << '\n';
         std::cout << "evolution num: " << settings.evolutionNum << '\n';
@@ -263,13 +264,13 @@ int main(int argc, char* argv[]) {
                 for(std::size_t i = 0; i < std::size(problem1.ansArgList); ++i) {
                     const auto& [answer, arguments] = problem1.ansArgList[i];
                     auto evaluatedValue = tree.evaluate(arguments);
-                    inverseFitness += evaluator(evaluatedValue, answer);
+                    inverseFitness += std::abs(evaluator(evaluatedValue, answer));
                 }
                 probabilities.push_back(1./(1. + inverseFitness));
             }
             assert(std::size(population) == std::size(probabilities));
             auto maxFitnessItr = std::max_element(std::begin(probabilities), std::end(probabilities));
-            std::cout << "minimum value of inverse fitness is " << *maxFitnessItr <<'\n';
+            std::cout << "minimum value of inverse fitness is " << 1./ *maxFitnessItr - 1. <<'\n';
 
             //create next generation
             std::vector<tree::Tree> nextPopulation;
