@@ -30,9 +30,9 @@ using NumericTypeTuple = std::tuple<int, double>;
 const std::vector<const utility::TypeInfo*> localVariableTypeArray = {&utility::typeInfo<int>(), &utility::typeInfo<bool>(), &utility::typeInfo<double>()};
 
 constexpr std::size_t MAX_PROGN_SIZE = 5;
-constexpr std::size_t MAX_ARGUMENT_NUM = 2;
+constexpr std::size_t MAX_ARGUMENT_NUM = 3;
 constexpr std::size_t MAX_INITIAL_LOCALVARIABLE_NUM = 3;
-constexpr std::size_t MAX_OUTPUT_TREE_NUM = 10;
+constexpr std::size_t MAX_OUTPUT_TREE_NUM = 5;
 
 template <std::size_t MAX_LOCALVARIABLE_NUM = MAX_INITIAL_LOCALVARIABLE_NUM>
 auto generateLocalVariableTypesRandom(RND& rnd) {
@@ -51,11 +51,13 @@ struct ProblemSettings {
     static constexpr const char* EVOLUTION_NUM_FIELD = "problem.settings.evolution_num";
     static constexpr const char* MUTATION_RATE_FIELD = "problem.settings.mutation_rate";
     static constexpr const char* CROSSOVER_RATE_FIELD = "problem.settings.crossover_rate";
+    static constexpr const char* RANDOM_SEED = "problem.settings.random_seed";
     std::size_t populationSize;
     std::size_t maxTreeDepth;
     std::size_t evolutionNum;
     double mutationRate;
     double crossoverRate;
+    RND::result_type randomSeed;
 };
 
 utility::Result<ProblemSettings> loadSettings(const std::string& name) {
@@ -75,20 +77,23 @@ utility::Result<ProblemSettings> loadSettings(const std::string& name) {
                             result::fromOptional(tree.get_optional<std::string>(ProblemSettings::MAX_TREE_DEPTH_FIELD), "failed to load problem, max_tree_depth field not found"),
                             result::fromOptional(tree.get_optional<std::string>(ProblemSettings::EVOLUTION_NUM_FIELD), "failed to load problem, evolution_num field not found"),
                             result::fromOptional(tree.get_optional<std::string>(ProblemSettings::MUTATION_RATE_FIELD), "failed to load problem, mutation_rate field not found"),
-                            result::fromOptional(tree.get_optional<std::string>(ProblemSettings::CROSSOVER_RATE_FIELD), "failed to load problem, crossover_rate field not found"))
-            .flatMap([](auto&& propertyStrings){
+                            result::fromOptional(tree.get_optional<std::string>(ProblemSettings::CROSSOVER_RATE_FIELD), "failed to load problem, crossover_rate field not found"),
+                            result::fromOptional(tree.get_optional<std::string>(ProblemSettings::RANDOM_SEED), "failed to load problem, random_seed field not found")
+            ).flatMap([](auto&& propertyStrings){
                 auto& populationNum = std::get<0>(propertyStrings);
                 auto& maxTreeDepth = std::get<1>(propertyStrings);
                 auto& evolutionNum = std::get<2>(propertyStrings);
                 auto& mutationRate = std::get<3>(propertyStrings);
                 auto& crossoverRate = std::get<4>(propertyStrings);
+                auto& randomSeed = std::get<5>(propertyStrings);
                 return result::sequence(result::tryFunction([&populationNum](){return boost::lexical_cast<decltype(ProblemSettings{}.populationSize)>(populationNum);}, "failed to load problem, invalid population_size field: " + populationNum),
                                         result::tryFunction([&maxTreeDepth](){return boost::lexical_cast<decltype(ProblemSettings{}.maxTreeDepth)>(maxTreeDepth);}, "failed to load problem, invalid max_tree_depth field: " + maxTreeDepth),
                                         result::tryFunction([&evolutionNum](){return boost::lexical_cast<decltype(ProblemSettings{}.evolutionNum)>(evolutionNum);}, "failed to load problem, invalid evoluion_num field: " + evolutionNum),
                                         result::tryFunction([&mutationRate](){return boost::lexical_cast<decltype(ProblemSettings{}.mutationRate)>(mutationRate);}, "failed to load problem, invalid mutation_rate field: " + mutationRate),
-                                        result::tryFunction([&crossoverRate](){return boost::lexical_cast<decltype(ProblemSettings{}.crossoverRate)>(crossoverRate);}, "failed to load problem, invalid crossover_rate field: " + crossoverRate));
+                                        result::tryFunction([&crossoverRate](){return boost::lexical_cast<decltype(ProblemSettings{}.crossoverRate)>(crossoverRate);}, "failed to load problem, invalid crossover_rate field: " + crossoverRate),
+                                        result::tryFunction([&randomSeed](){return boost::lexical_cast<decltype(ProblemSettings{}.randomSeed)>(randomSeed);}, "failed to load problem, invalid random_seed: " + randomSeed));
             }).map([](auto&& prop){
-                return ProblemSettings{std::get<0>(prop), std::get<1>(prop), std::get<2>(prop), std::get<3>(prop), std::get<4>(prop)};
+                return ProblemSettings{std::get<0>(prop), std::get<1>(prop), std::get<2>(prop), std::get<3>(prop), std::get<4>(prop), std::get<5>(prop)};
             }).flatMap([](ProblemSettings&& settings){
                 if(settings.mutationRate < 0) return result::err<ProblemSettings>("failed to load problem, mutation_rate must be positive");
                 if(settings.crossoverRate < 0) return result::err<ProblemSettings>("failed to load problem, crossover_rate must be positive");
@@ -122,7 +127,7 @@ int main(int argc, char* argv[]) {
         if(actual.getEvaluationStatus() != utility::EvaluationStatus::ValueReturned) return err;
         auto a = std::any_cast<int>(actual.getReturnValue());
         auto b = expected.get<int>();
-        return b != 0 ? std::abs(a - b)/std::abs(b) : std::abs(a - b);
+        return b != 0 ? static_cast<double>(std::abs(a - b))/std::abs(b) : std::abs(a - b);
     };
     evaluators.insert(std::make_pair(utility::TypeIndex(utility::typeInfo<int>()), intEvaluator));
     Evaluator boolEvaluator = [](utility::EvaluationContext& actual, const utility::Variable& expected)->double{
@@ -142,6 +147,7 @@ int main(int argc, char* argv[]) {
     evaluators.insert(std::make_pair(utility::TypeIndex(utility::typeInfo<double>()), doubleEvaluator));
 
     GPManager<MAX_ARGUMENT_NUM, MAX_PROGN_SIZE, TypeTuple> gpManager("int", "bool", "double");
+    //register nodes for read tree from file, argument and local variable, progn nodes are registered as default.
     gpManager.registerNodes<node::AddNode, TypeTuple>();
     gpManager.registerNodes<node::SubtractNode, TypeTuple>();
     gpManager.registerNodes<node::MultiplyNode, TypeTuple>();
@@ -159,9 +165,13 @@ int main(int argc, char* argv[]) {
     gpManager.registerNodes<node::NopNode, TypeTuple>();
     gpManager.registerNodes<node::NopNode, LvalueTypeTuple>();
     gpManager.registerNodes<node::NopNode, RefTypeTuple>();
+    gpManager.registerNode<node::RepeatNode<int, int>>();
+    gpManager.registerNode<node::RepeatNode<bool, int>>();
+    gpManager.registerNode<node::RepeatNode<double, int>>();
 
     genetic_operations::DefaultRandomNodeGenerator<RND, TypeTuple> randomNodeGenerator(randomConstGenerators);
 
+    //register nodes for genetic operations (mutation, initial population)
     randomNodeGenerator.registerNodes<node::AddNode, NumericTypeTuple>();
     randomNodeGenerator.registerNodes<node::SubtractNode, NumericTypeTuple>();
     randomNodeGenerator.registerNodes<node::MultiplyNode, NumericTypeTuple>();
@@ -178,6 +188,9 @@ int main(int argc, char* argv[]) {
     randomNodeGenerator.registerNodes<node::LocalVariableNode, LvalueTypeTuple>();
     randomNodeGenerator.registerNodes<node::LocalVariableNode, RefTypeTuple>();
     randomNodeGenerator.registerNodes<node::SubstitutionNode, TypeTuple>();
+    randomNodeGenerator.registerNode<node::RepeatNode<int, int>>();
+    randomNodeGenerator.registerNode<node::RepeatNode<bool, int>>();
+    randomNodeGenerator.registerNode<node::RepeatNode<double, int>>();
 
     randomNodeGenerator.registerNode<node::ArgumentNode<int, 0>>();
     randomNodeGenerator.registerNode<node::ArgumentNode<int, 1>>();
@@ -199,8 +212,8 @@ int main(int argc, char* argv[]) {
     const std::size_t fileNum = argc - 1;
 
     for(int fileCnt = 0; fileCnt < fileNum; ++fileCnt){
-        auto settingResult = loadSettings(argv[fileCnt + 1]);
         auto fileName = argv[fileCnt + 1];
+        auto settingResult = loadSettings(fileName);
         std::ifstream fin(fileName);
         auto problemResult = problem::load(fin, gpManager.getStringToType(), stringToValues)
                 .flatMap([maxArgumentNum = MAX_ARGUMENT_NUM](problem::Problem&& problem_){
@@ -236,8 +249,11 @@ int main(int argc, char* argv[]) {
         std::cout << "evolution num: " << settings.evolutionNum << '\n';
         std::cout << "mutation rate: " << settings.mutationRate << '\n';
         std::cout << "crossover rate: " << settings.crossoverRate << '\n';
+        std::cout << "random seed: " << settings.randomSeed << '\n';
+        std::cout << "teacher data num: " << std::size(problem1.ansArgList) << '\n';
         std::cout << std::flush;
 
+        rnd.seed(settings.randomSeed);
         genetic_operations::DefaultNodeSelector nodeSelector(rnd, settings.maxTreeDepth);
         genetic_operations::DefaultLocalVariableAdapter localVariableAdapter(rnd);
         genetic_operations::DefaultRandomTreeGenerator randomTreeGenerator(rnd, randomNodeGenerator);
