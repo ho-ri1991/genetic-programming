@@ -298,6 +298,40 @@ namespace gp::node {
         }
         node_instance_type clone()const override {return NodeInterface::createInstance<ThisType>();}
     };
+
+    //0th child: number of repeat, 1st child: evaluated repeatedly
+    template <typename T1, typename T2, typename = std::enable_if_t<std::is_integral_v<T2>>>
+    class RepeatNode: public NodeBase<T1(T2, T1)> {
+        using ThisType = RepeatNode;
+        using node_instance_type = NodeInterface::node_instance_type;
+    private:
+        T1 evaluationDefinition(utility::EvaluationContext& evaluationContext)const override {
+            auto num = std::get<0>(this->children)->evaluate(evaluationContext);
+            if(num < 0) {
+                evaluationContext.setEvaluationStatusWithoutUpdate(utility::EvaluationStatus::InvalidValue);
+                return utility::getDefaultValue<T1>();
+            }
+            auto ans = utility::getDefaultValue<T1>();
+            for(T2 i = 0; i < num - 1; ++i) {
+                auto ans = std::get<1>(this->children)->evaluate(evaluationContext);
+                if(evaluationContext.getEvaluationStatus() == utility::EvaluationStatus::BreakCalled) {
+                    evaluationContext.clearEvaluationStatus();
+                    break;
+                } else if (evaluationContext.getEvaluationStatus() == utility::EvaluationStatus::ContinueCalled) {
+                    evaluationContext.clearEvaluationStatus();
+                    continue;
+                } else if (evaluationContext.getEvaluationStatus() != utility::EvaluationStatus::Evaluating) {
+                    return utility::getDefaultValue<T1>();
+                }
+            }
+            return ans;
+        }
+    public:
+        std::string getNodeName()const override {
+            return std::string("Repeat[") + utility::typeInfo<T1>().name() + "," + utility::typeInfo<T2>().name() + std::string("]");
+        }
+        node_instance_type clone()const override {return NodeInterface::createInstance<ThisType>();}
+    };
 }
 
 #endif
