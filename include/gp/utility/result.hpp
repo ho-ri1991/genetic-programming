@@ -7,6 +7,7 @@
 #include <optional>
 #include <functional>
 #include <boost/optional.hpp>
+#include "is_detected.hpp"
 
 namespace gp::utility {
     template <typename T>
@@ -143,10 +144,10 @@ namespace gp::utility {
                     auto nextResults = sequenceHelper(std::move(results), TypeTuple<Ts2...>{}, msgSeparator);
                     auto&& result = std::get<sizeof...(Ts1) - sizeof...(Ts2) - 1>(std::move(results));
                     if(!nextResults) return result ? err<AnsType>(std::move(nextResults).errMessage()) : err<AnsType>(std::move(result).errMessage() + msgSeparator + std::move(nextResults).errMessage());
-                    else return result ? ok(std::tuple_cat(std::tuple<T2>(std::move(result).unwrap()), std::move(nextResults).unwrap())) : err<AnsType>(std::move(result).errMessage());
+                    else return result ? ok(std::tuple_cat(std::make_tuple(std::move(result).unwrap()), std::move(nextResults).unwrap())) : err<AnsType>(std::move(result).errMessage());
                 } else {
                     auto&& result = std::get<std::tuple_size_v<std::tuple<Ts1...>> - 1>(std::move(results));
-                    return result ? ok(std::tuple<T2>(std::move(result).unwrap())) : err<std::tuple<T2>>(std::move(result).errMessage());
+                    return result ? ok(std::make_tuple(std::move(result).unwrap())) : err<std::tuple<T2>>(std::move(result).errMessage());
                 }
             }
 
@@ -156,6 +157,11 @@ namespace gp::utility {
             struct is_result_type<Result<T>>: std::true_type{};
             template <typename T>
             constexpr bool is_result_type_v = is_result_type<T>::value;
+
+            template <typename Container, typename size_type>
+            using support_reserve = decltype(std::declval<Container>().reserve(std::declval<size_type>()));
+            template <typename Container, typename value_type>
+            using support_push_back = decltype(std::declval<Container>().push_back(std::declval<value_type>()));
         }
 
         template <typename... Ts>
@@ -172,6 +178,38 @@ namespace gp::utility {
         auto sequence(Results&&... results) {
             return sequence(std::make_tuple(std::forward<Results>(results)...));
         }
+
+        template <template <typename...> class Container,
+                  typename... Ts,
+                  typename U = std::enable_if_t<
+                          detail::is_result_type_v<typename Container<Ts...>::value_type>,
+                          typename Container<Ts...>::value_type::wrap_type
+                  >,
+                  typename = std::enable_if_t<
+                          is_detected_v<detail::support_push_back, Container<U>, U>
+                  >
+        >
+        Result<Container<U>> sequence(const Container<Ts...>& results, const char* msgSeparator = "\n") {
+            using std::begin;
+            using std::end;
+            using std::advance;
+            using std::size;
+            auto ans = ok(Container<U>());
+            if(size(results) == 0)return ans;
+            if constexpr (is_detected_v<detail::support_reserve, Container<U>, typename Container<U>::size_type>) {
+                ans.unwrap().reserve(size(results));
+            }
+            for(const auto& res: results) {
+                if(ans && res) {
+                    ans.unwrap().push_back(res.unwrap());
+                } else if(ans && !res) {
+                    ans = err<Container<U>>(res.errMessage());
+                } else if(!ans && !res) {
+                    ans.errMessage() += (msgSeparator + res.errMessage());
+                }
+            }
+            return ans;
+        };
 
         template <typename Fn, typename String, typename T = std::decay_t<decltype(std::declval<Fn>()())>>
         Result<T> tryFunction(Fn fn, String errMessage) {
