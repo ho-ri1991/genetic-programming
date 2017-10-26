@@ -1,6 +1,8 @@
 #define BOOST_TEST_NO_LIB
 #define BOOST_TEST_MAIN
 #include <gp/utility/result.hpp>
+#include <vector>
+#include <list>
 #include <boost/test/unit_test.hpp>
 
 using namespace gp;
@@ -162,6 +164,32 @@ BOOST_AUTO_TEST_SUITE(result)
                                                  utility::result::err<bool>("err2"));
         BOOST_CHECK(!result2);
         BOOST_CHECK_EQUAL(result2.errMessage(), "err0\nerr2");
+
+        auto result3 = utility::result::sequence(std::vector{utility::result::ok(1),
+                                                             utility::result::ok(2),
+                                                             utility::result::ok(3)});
+        std::vector<int> ans3 = {1, 2, 3};
+        BOOST_CHECK(result3);
+        BOOST_CHECK(result3.unwrap() == ans3);
+
+        auto result4 = utility::result::sequence(std::vector{utility::result::ok(1),
+                                                             utility::result::err<int>("err1"),
+                                                             utility::result::err<int>("err2")});
+        BOOST_CHECK(!result4);
+        BOOST_CHECK_EQUAL(result4.errMessage(), "err1\nerr2");
+
+        auto result5 = utility::result::sequence(std::list{utility::result::ok(1),
+                                                           utility::result::ok(2),
+                                                           utility::result::ok(3)});
+        auto ans5 = std::list{1, 2, 3};
+        BOOST_CHECK(result5);
+        BOOST_CHECK(result5.unwrap() == ans5);
+
+        auto result6 = utility::result::sequence(std::list{utility::result::err<int>("err0"),
+                                                           utility::result::err<int>("err1"),
+                                                           utility::result::ok(1)});
+        BOOST_CHECK(!result6);
+        BOOST_CHECK_EQUAL(result6.errMessage(), "err0\nerr1");
     }
     BOOST_AUTO_TEST_CASE(result_try){
         auto result1 = utility::result::tryFunction([](){return 1;}, "err");
