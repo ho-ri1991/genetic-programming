@@ -211,6 +211,38 @@ namespace gp::utility {
             return ans;
         };
 
+        template <template <typename...> class Container,
+                typename... Ts,
+                typename U = std::enable_if_t<
+                        detail::is_result_type_v<typename Container<Ts...>::value_type>,
+                        typename Container<Ts...>::value_type::wrap_type
+                >,
+                typename = std::enable_if_t<
+                        is_detected_v<detail::support_push_back, Container<U>, U>
+                >
+        >
+        Result<Container<U>> sequence(Container<Ts...>&& results, const char* msgSeparator = "\n") {
+            using std::begin;
+            using std::end;
+            using std::advance;
+            using std::size;
+            auto ans = ok(Container<U>());
+            if(size(results) == 0)return ans;
+            if constexpr (is_detected_v<detail::support_reserve, Container<U>, typename Container<U>::size_type>) {
+                ans.unwrap().reserve(size(results));
+            }
+            for(auto& res: results) {
+                if(ans && res) {
+                    ans.unwrap().push_back(std::move(res).unwrap());
+                } else if(ans && !res) {
+                    ans = err<Container<U>>(std::move(res).errMessage());
+                } else if(!ans && !res) {
+                    ans.errMessage() += (msgSeparator + res.errMessage());
+                }
+            }
+            return ans;
+        };
+
         template <typename Fn, typename String, typename T = std::decay_t<decltype(std::declval<Fn>()())>>
         Result<T> tryFunction(Fn fn, String errMessage) {
             try {
