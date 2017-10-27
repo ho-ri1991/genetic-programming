@@ -141,7 +141,6 @@ namespace gp::utility {
     class StringToType {
     public:
         using Type = const TypeInfo&;
-    private:
         using KeyType = std::string;
         using HoldingType = const TypeInfo*;
         using ContainerType = std::unordered_map<KeyType, HoldingType>;
