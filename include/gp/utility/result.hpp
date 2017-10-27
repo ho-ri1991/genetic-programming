@@ -190,9 +190,6 @@ namespace gp::utility {
                   >
         >
         Result<Container<U>> sequence(const Container<Ts...>& results, const char* msgSeparator = "\n") {
-            using std::begin;
-            using std::end;
-            using std::advance;
             using std::size;
             auto ans = ok(Container<U>());
             if(size(results) == 0)return ans;
@@ -222,9 +219,6 @@ namespace gp::utility {
                 >
         >
         Result<Container<U>> sequence(Container<Ts...>&& results, const char* msgSeparator = "\n") {
-            using std::begin;
-            using std::end;
-            using std::advance;
             using std::size;
             auto ans = ok(Container<U>());
             if(size(results) == 0)return ans;
