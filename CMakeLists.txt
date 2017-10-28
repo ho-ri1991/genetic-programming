@@ -14,7 +14,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(SOURCE_FILES src/main.cpp)
 add_executable(genetic_programming ${SOURCE_FILES})
 
-add_executable(example1 example1/example1.cpp)
+add_subdirectory(example1)
 
 enable_testing()
 add_library(

@@ -3,7 +3,6 @@
 #include <random>
 #include <unordered_map>
 #include <gp/tree/tree.hpp>
-#include <boost/type_index.hpp>
 #include <gp/node/node.hpp>
 #include <gp/tree_operations/tree_operations.hpp>
 #include <gp/tree/io.hpp>
@@ -121,30 +120,28 @@ int main(int argc, char* argv[]) {
     );
 
     //evaluators
-    std::unordered_map<utility::TypeIndex, Evaluator, utility::TypeIndex::Hash> evaluators;
-    Evaluator intEvaluator = [](utility::EvaluationContext& actual, const utility::Variable& expected)->double {
-        static constexpr double err = 1e5;
-        if(actual.getEvaluationStatus() != utility::EvaluationStatus::ValueReturned) return err;
-        auto a = std::any_cast<int>(actual.getReturnValue());
-        auto b = expected.get<int>();
-        return b != 0 ? static_cast<double>(std::abs(a - b))/std::abs(b) : std::abs(a - b);
+    std::unordered_map<utility::TypeIndex, Evaluator, utility::TypeIndex::Hash> evaluators = {
+            {utility::TypeIndex(utility::typeInfo<int>()), Evaluator([](utility::EvaluationContext& actual, const utility::Variable& expected)->double {
+                static constexpr double err = 1e5;
+                if(actual.getEvaluationStatus() != utility::EvaluationStatus::ValueReturned) return err;
+                auto a = std::any_cast<int>(actual.getReturnValue());
+                auto b = expected.get<int>();
+                return b != 0 ? static_cast<double>(std::abs(a - b))/std::abs(b) : std::abs(a - b);
+            })},
+            {utility::TypeIndex(utility::typeInfo<bool>()), Evaluator([](utility::EvaluationContext& actual, const utility::Variable& expected)->double{
+                static constexpr double err = 1e5;
+                if(actual.getEvaluationStatus() != utility::EvaluationStatus::ValueReturned)return err;
+                return static_cast<double>(std::any_cast<bool>(actual.getReturnValue()) != expected.get<bool>());
+            })},
+            {utility::TypeIndex(utility::typeInfo<double>()), Evaluator([](utility::EvaluationContext& actual, const utility::Variable& expected)->double{
+                static constexpr double err = 1e5;
+                if(actual.getEvaluationStatus() != utility::EvaluationStatus::ValueReturned)return err;
+                static constexpr double e = 1e-1;
+                auto a = std::any_cast<double>(actual.getReturnValue());
+                auto b = expected.get<double>();
+                return b > e ? std::abs(a - b)/std::abs(b) : std::abs(a - b);
+            })}
     };
-    evaluators.insert(std::make_pair(utility::TypeIndex(utility::typeInfo<int>()), intEvaluator));
-    Evaluator boolEvaluator = [](utility::EvaluationContext& actual, const utility::Variable& expected)->double{
-        static constexpr double err = 1e5;
-        if(actual.getEvaluationStatus() != utility::EvaluationStatus::ValueReturned)return err;
-        return static_cast<double>(std::any_cast<bool>(actual.getReturnValue()) != expected.get<bool>());
-    };
-    evaluators.insert(std::make_pair(utility::TypeIndex(utility::typeInfo<bool>()), boolEvaluator));
-    Evaluator doubleEvaluator = [](utility::EvaluationContext& actual, const utility::Variable& expected)->double{
-        static constexpr double err = 1e5;
-        if(actual.getEvaluationStatus() != utility::EvaluationStatus::ValueReturned)return err;
-        static constexpr double e = 1e-1;
-        auto a = std::any_cast<double>(actual.getReturnValue());
-        auto b = expected.get<double>();
-        return b > e ? std::abs(a - b)/std::abs(b) : std::abs(a - b);
-    };
-    evaluators.insert(std::make_pair(utility::TypeIndex(utility::typeInfo<double>()), doubleEvaluator));
 
     GPManager<MAX_ARGUMENT_NUM, MAX_PROGN_SIZE, TypeTuple> gpManager("int", "bool", "double");
     //register nodes for read tree from file, argument and local variable, progn nodes are registered as default.
