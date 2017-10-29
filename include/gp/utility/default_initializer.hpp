@@ -4,19 +4,10 @@
 #include <type_traits>
 
 namespace gp::utility {
-    template <typename T, bool is_arithmetic = std::is_arithmetic_v<T>>
-    struct DefaultInitializer {
-        static T getDefaultValue(){return T();}
-    };
-
+    //(partial) specialize this class if you want to use other default value
     template <typename T>
-    struct DefaultInitializer<T, true> {
-        static T getDefaultValue(){return T(0);}
-    };
-
-    template <>
-    struct DefaultInitializer<bool> {
-        static bool getDefaultValue(){return false;}
+    struct DefaultInitializer {
+        static T getDefaultValue(){return T{};}
     };
 
     template <typename T>
