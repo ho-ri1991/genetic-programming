@@ -17,10 +17,10 @@ namespace gp::genetic_operations {
     }
     template <typename CrossoverNodeSelector,
               typename LocalVariableAdapter>
-    auto crossover(tree::Tree tree1,
-                   tree::Tree tree2,
-                   CrossoverNodeSelector& crossoverNodeSelector,
-                   LocalVariableAdapter& localVariableAdapter)->std::pair<tree::Tree, tree::Tree>{
+    std::pair<tree::Tree, tree::Tree> crossover(tree::Tree tree1,
+                                                tree::Tree tree2,
+                                                CrossoverNodeSelector& crossoverNodeSelector,
+                                                LocalVariableAdapter& localVariableAdapter) {
         static_assert(
                 std::is_same_v<
                         std::pair<const node::NodeInterface&, const node::NodeInterface&>,
