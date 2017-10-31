@@ -172,7 +172,7 @@ namespace gp::tree {
                     auto rootNode = std::move(tmpTree).getRootNodeInstance();
                     TreeProperty&& treeProperty = std::move(tmpTree).getTreeProperty();
                     subroutineEntitySet.insert(tmpTree.getName(), std::make_pair(std::move(rootNode), std::move(treeProperty.localVariableTypes)));
-                    stringToNode.registerNode(typesToSubroutineNode.createSubroutineNode(std::move(treeProperty.returnType), std::move(treeProperty.argumentTypes), std::move(treeProperty.name), subroutineEntitySet));
+                    stringToNode.registerNode(typesToSubroutineNode.createSubroutineNode(*treeProperty.returnType, std::move(treeProperty.argumentTypes), std::move(treeProperty.name), subroutineEntitySet));
                 } catch (...){
                     stringToNode.deleteNode(name);
                     subroutineEntitySet.deleteEntity(name);

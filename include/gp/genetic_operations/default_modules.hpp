@@ -178,7 +178,7 @@ namespace gp::genetic_operations {
 
 namespace gp::traits {
     template <typename RandomEngine, typename ...SupportConstTypes>
-    struct traits::random_node_generator_traits<genetic_operations::DefaultRandomNodeGenerator<RandomEngine, SupportConstTypes...>> {
+    struct random_node_generator_traits<genetic_operations::DefaultRandomNodeGenerator<RandomEngine, SupportConstTypes...>> {
     private:
         using adapt_type = genetic_operations::DefaultRandomNodeGenerator<RandomEngine, SupportConstTypes...>;
     public:
