@@ -160,13 +160,6 @@ namespace gp::utility {
                 }
             }
 
-            template <typename T>
-            struct is_result_type: std::false_type{};
-            template <typename T>
-            struct is_result_type<Result<T>>: std::true_type{};
-            template <typename T>
-            constexpr bool is_result_type_v = is_result_type<T>::value;
-
             template <typename Container, typename size_type>
             using support_reserve = decltype(std::declval<Container>().reserve(std::declval<size_type>()));
             template <typename Container, typename value_type>
@@ -183,7 +176,7 @@ namespace gp::utility {
             return detail::sequenceHelper(std::move(results), detail::TypeTuple<Ts...>{}, msgSeparator);
         }
 
-        template <typename... Results, typename = std::enable_if_t<std::conjunction_v<detail::is_result_type<std::decay_t<Results>>...>>>
+        template <typename... Results, typename = std::enable_if_t<std::conjunction_v<is_match_template<Result, std::decay_t<Results>>...>>>
         auto sequence(Results&&... results) {
             return sequence(std::make_tuple(std::forward<Results>(results)...));
         }
@@ -191,7 +184,7 @@ namespace gp::utility {
         template <template <typename...> class Container,
                   typename... Ts,
                   typename U = std::enable_if_t<
-                          detail::is_result_type_v<typename Container<Ts...>::value_type>,
+                          is_match_template_v<Result, typename Container<Ts...>::value_type>,
                           typename Container<Ts...>::value_type::wrap_type
                   >,
                   typename = std::enable_if_t<
@@ -220,7 +213,7 @@ namespace gp::utility {
         template <template <typename...> class Container,
                 typename... Ts,
                 typename U = std::enable_if_t<
-                        detail::is_result_type_v<typename Container<Ts...>::value_type>,
+                        is_match_template_v<Result, typename Container<Ts...>::value_type>,
                         typename Container<Ts...>::value_type::wrap_type
                 >,
                 typename = std::enable_if_t<
@@ -246,7 +239,7 @@ namespace gp::utility {
             return ans;
         };
 
-        template <typename Fn, typename String, typename T = std::decay_t<decltype(std::declval<Fn>()())>>
+        template <typename Fn, typename String, typename T = std::decay_t<std::invoke_result_t<Fn>>>
         Result<T> tryFunction(Fn fn, String errMessage) {
             try {
                 return ok(fn());
@@ -255,7 +248,7 @@ namespace gp::utility {
             }
         }
 
-        template <typename Fn, typename String, typename Exception, typename T = std::decay_t<decltype(std::declval<Fn>()())>>
+        template <typename Fn, typename String, typename Exception, typename T = std::decay_t<std::invoke_result_t<Fn>>>
         Result<T> tryFunction(Fn fn, String errMessage, Exception exception) {
             try {
                 return ok(fn());

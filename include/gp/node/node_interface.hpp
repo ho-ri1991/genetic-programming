@@ -16,7 +16,7 @@ namespace gp::node{
         Const
     };
 
-    //primary declarations for friend class declarations
+    //forward declarations for friend class declarations
     template <typename T>
     class TypedNodeInterface;
     template <typename T>
