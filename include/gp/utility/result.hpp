@@ -8,6 +8,7 @@
 #include <functional>
 #include <boost/optional.hpp>
 #include "is_detected.hpp"
+#include "is_match_template.hpp"
 
 namespace gp::utility {
     template <typename T>
@@ -28,10 +29,10 @@ namespace gp::utility {
     private:
         std::variant<Ok<T>, Err> data;
     public:
-        Result(const Ok<T>& ok): data(ok){}
-        Result(Ok<T>&& ok): data(std::move(ok)){}
-        Result(const Err& err): data(err){}
-        Result(Err&& err): data(std::move(err)){}
+        Result(const Ok<T>& ok)noexcept(std::is_nothrow_copy_constructible_v<Ok<T>>): data(ok){}
+        Result(Ok<T>&& ok)noexcept(std::is_nothrow_move_constructible_v<Ok<T>>): data(std::move(ok)){}
+        Result(const Err& err)noexcept(std::is_nothrow_copy_constructible_v<Err>): data(err){}
+        Result(Err&& err)noexcept(std::is_nothrow_move_constructible_v<Err>): data(std::move(err)){}
     public:
         Result(const Result&) = default;
         Result(Result&&) = default;
@@ -39,7 +40,7 @@ namespace gp::utility {
         Result& operator=(Result&&) = default;
         ~Result() = default;
     public:
-        explicit operator bool()const {return std::get_if<Ok<T>>(&data) != nullptr;}
+        explicit operator bool()const noexcept {return std::get_if<Ok<T>>(&data) != nullptr;}
         T& unwrap()& {return std::get<Ok<T>>(data).data;}
         const T& unwrap()const &{return std::get<Ok<T>>(data).data;}
         T&& unwrap()&&{return std::move(std::get<Ok<T>>(data).data);}
@@ -47,32 +48,40 @@ namespace gp::utility {
         const std::string& errMessage()const &{return std::get<Err>(data).message;}
         std::string&& errMessage()&& {return std::move(std::get<Err>(data).message);}
         template <typename Fn>
-        T ok_or(Fn fn)const &{
+        T ok_or(Fn fn)const& noexcept(std::is_nothrow_invocable_r_v<T, Fn>
+                                      && std::is_nothrow_copy_constructible_v<T>) {
             if(*this) return std::get<Ok<T>>(data).data;
             else return fn();
         }
         template <typename Fn>
-        T ok_or(Fn fn)&& {
+        T ok_or(Fn fn)&& noexcept(std::is_nothrow_invocable_r_v<T, Fn>
+                                  && std::is_nothrow_move_constructible_v<T>) {
             if(*this) return std::move(std::get<Ok<T>>(data).data);
             else return fn();
         }
-        template <typename Fn, typename U = std::decay_t<decltype(std::declval<Fn>()(std::declval<const T&>()))>>
-        Result<U> map(Fn fn)const & {
+        template <typename Fn, typename U = std::decay_t<std::invoke_result_t<Fn, const T&>>>
+        Result<U> map(Fn fn)const & noexcept(std::is_nothrow_invocable_r_v<Ok<U>, Fn, const T&>
+                                             && std::is_nothrow_constructible_v<Result<U>, Ok<U>&&>
+                                             && std::is_nothrow_constructible_v<Result<U>, const Err&>){
             if(*this) return Result<U>{Ok<U>{fn(std::get<Ok<T>>(data).data)}};
             else return Result<U>{std::get<Err>(data)};
         };
-        template <typename Fn, typename U = std::decay_t<decltype(std::declval<Fn>()(std::declval<T&&>()))>>
-        Result<U> map(Fn fn)&& {
+        template <typename Fn, typename U = std::decay_t<std::invoke_result_t<Fn, T&&>>>
+        Result<U> map(Fn fn)&& noexcept(std::is_nothrow_invocable_r_v<Ok<U>, Fn, T&&>
+                                        && std::is_nothrow_constructible_v<Result<U>, Ok<U>>
+                                        && std::is_nothrow_constructible_v<Result<U>, Err&&>){
             if(*this) return Result<U>{Ok<U>{fn(std::move(std::get<Ok<T>>(data).data))}};
             else return Result<U>{std::move(std::get<Err>(data))};
         };
-        template <typename Fn, typename U = typename decltype(std::declval<Fn>()(std::declval<const T&>()))::wrap_type>
-        Result<U> flatMap(Fn fn)const & {
+        template <typename Fn, typename U = typename std::invoke_result_t<Fn, const T&>::wrap_type>
+        Result<U> flatMap(Fn fn)const & noexcept(std::is_nothrow_invocable_r_v<Result<U>, Fn, const T&>
+                                                 && std::is_nothrow_constructible_v<Result<U>, const Err&>) {
             if(*this) return fn(std::get<Ok<T>>(data).data);
             else return std::get<Err>(data);
         };
-        template<typename Fn, typename U = typename decltype(std::declval<Fn>()(std::declval<T&&>()))::wrap_type>
-        Result<U> flatMap(Fn fn)&& {
+        template<typename Fn, typename U = typename std::invoke_result_t<Fn, T&&>::wrap_type>
+        Result<U> flatMap(Fn fn)&& noexcept(std::is_nothrow_invocable_r_v<Result<U>, Fn, T&&>
+                                            && std::is_nothrow_constructible_v<Result<U>, Err&&>) {
             if(*this) return fn(std::move(std::get<Ok<T>>(data).data));
             else return std::move(std::get<Err>(data));
         };
