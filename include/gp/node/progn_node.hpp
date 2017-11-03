@@ -62,15 +62,12 @@ namespace gp::node {
                 if(!node) return node::NodeInterface::node_instance_type(lastChild.release());
                 assert(node->getReturnType() == utility::typeInfo<T>());
                 if(utility::typeInfo<T>() != node->getReturnType()) throw std::invalid_argument("invalied type node was set as a child");
-                if(auto typed_ptr = dynamic_cast<TypedNodeInterface<T>*>(node.get())){
-                    node.release();
-                    auto org = lastChild.release();
-                    lastChild.reset(typed_ptr);
-                    if(lastChild)lastChild->setParent(this);
-                    return node::NodeInterface::node_instance_type(org);
-                }else {
-                    throw std::invalid_argument("invalied type node was set as a child");
-                }
+                auto typed_ptr = static_cast<TypedNodeInterface<T>*>(node.get());
+                node.release();
+                auto org = lastChild.release();
+                lastChild.reset(typed_ptr);
+                if(lastChild)lastChild->setParent(this);
+                return node::NodeInterface::node_instance_type(org);
             }else {
                 children[m].swap(node);
                 if(children[m])children[m]->setParent(this);
