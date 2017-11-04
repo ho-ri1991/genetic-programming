@@ -65,7 +65,7 @@ namespace gp::tree_operations {
             static_assert(traits::is_node_type_v<std::decay_t<decltype(*rootNode)>>);
             return writeTree(*rootNode, out);
         } else {
-            return detail::WriteTreeHelper::writeTreeHelper(rootNode, out);
+            return detail::WriteTreeImpl::write(rootNode, out);
         }
     }
 
@@ -81,7 +81,7 @@ namespace gp::tree_operations {
         } else {
             static_assert(std::is_same_v<typename traits::input_node_traits<node_type>::tree_property, tree_property>);
         }
-        return detail::ReadTreeHelper::readTreeHelper(stringToNode, treeProperty, in);
+        return detail::ReadTreeImpl::read(stringToNode, treeProperty, in);
     }
 
     template <typename TreeProperty, typename RandomNodeGenerator, typename RandomEngine>

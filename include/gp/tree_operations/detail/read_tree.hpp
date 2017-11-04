@@ -6,7 +6,7 @@
 #include <gp/traits/string_to_node_traits.hpp>
 
 namespace gp::tree_operations::detail {
-    class ReadTreeHelper {
+    class ReadTreeImpl {
     private:
         static std::string getNodeNameFromStream(std::istream& in) {
             std::string line = "";
@@ -23,9 +23,9 @@ namespace gp::tree_operations::detail {
             return "";
         }
         template <typename input_node, typename string_to_node, typename tree_property>
-        static void readTreeHelper(input_node& node_, const string_to_node& stringToNode, const tree_property& treeProperty, std::istream& in) {
+        static void readHelper(input_node& node_, const string_to_node& stringToNode, const tree_property& treeProperty, std::istream& in) {
             if constexpr(traits::is_input_node_ptr_type_v<std::decay_t<decltype(node_)>>) {
-                return readTreeHelper(*node_, stringToNode, treeProperty, in);
+                return readHelper(*node_, stringToNode, treeProperty, in);
             } else {
                 using node_trait = traits::input_node_traits<input_node>;
                 using string_to_node_trait = traits::string_to_node_traits<string_to_node>;
@@ -54,18 +54,18 @@ namespace gp::tree_operations::detail {
                     } else {
                         node_trait::set_child(nextNode, i);
                     }
-                    readTreeHelper(node_trait::get_child(node_, i), stringToNode, treeProperty, in);
+                    readHelper(node_trait::get_child(node_, i), stringToNode, treeProperty, in);
                 }
             }
         };
     public:
         template <typename string_to_node, typename tree_property>
-        static auto readTreeHelper(const string_to_node& stringToNode, const tree_property& treeProperty, std::istream& in){
+        static auto read(const string_to_node& stringToNode, const tree_property& treeProperty, std::istream& in){
             auto nodeName = getNodeNameFromStream(in);
             using string_to_node_trait = traits::string_to_node_traits<string_to_node>;
             if(nodeName.empty() || !string_to_node_trait::has_node(stringToNode, nodeName)) throw std::runtime_error("node not found");
             auto rootNode = stringToNode(nodeName);
-            readTreeHelper(rootNode, stringToNode, treeProperty, in);
+            readHelper(rootNode, stringToNode, treeProperty, in);
             return rootNode;
         };
     };

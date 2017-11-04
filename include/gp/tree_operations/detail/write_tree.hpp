@@ -5,7 +5,7 @@
 #include <gp/traits/node_traits.hpp>
 
 namespace gp::tree_operations::detail {
-    class WriteTreeHelper {
+    class WriteTreeImpl {
     private:
         template <typename node>
         static std::string createNextOffset(const std::string& currentOffset,
@@ -52,7 +52,7 @@ namespace gp::tree_operations::detail {
         }
     public:
         template <typename node>
-        static void writeTreeHelper(const node& node_,
+        static void write(const node& node_,
                                     std::ostream& out,
                                     std::string offsetStr = "",
                                     std::string connectionLine = std::string(io::OFFSET_NUM, io::OFFSET_CHAR) + std::string(1, io::CONNECTION)) {
@@ -61,7 +61,7 @@ namespace gp::tree_operations::detail {
             out << offsetStr << io::NODE_HEADER << trait::get_node_name(node_) << std::endl;
             out << connectionLine << std::endl;
             for(int i = 0; i < trait::get_child_num(node_); ++i) {
-                writeTreeHelper(trait::get_child(node_, i),
+                write(trait::get_child(node_, i),
                                 out,
                                 createNextOffset(offsetStr, node_),
                                 createNextConnectionLine(connectionLine, node_, i));
