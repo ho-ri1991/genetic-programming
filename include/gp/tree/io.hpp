@@ -62,24 +62,24 @@ namespace gp::tree {
         };
 
         template <typename ptree>
-        TreeProperty getTreeProperty(const ptree& tree, const utility::StringToType& stringToType) {
+        utility::Result<TreeProperty> getTreeProperty(const ptree& tree, const utility::StringToType& stringToType) {
             using namespace gp::tree::io;
             using namespace boost::property_tree;
             TreeProperty treeProperty;
             //get tree name
             if(auto treeName = tree.template get_optional<std::string>(std::string(ROOT_FIELD) + "." + NAME_FIELD)){
                 treeProperty.name = *treeName;
-            }else throw std::runtime_error("name field not found in reading tree");
+            }else return utility::result::err<TreeProperty>("failed to load tree, name field not found");
             //get return type
             if(auto returnTypeStr = tree.template get_optional<std::string>(std::string(ROOT_FIELD) + "." + RETURN_TYPE_FIELD)){
-                if(!stringToType.hasType(*returnTypeStr)) throw std::runtime_error("return type name not found in reading tree");
+                if(!stringToType.hasType(*returnTypeStr)) return utility::result::err<TreeProperty>("failed to load tree, unknown return type: " + *returnTypeStr);
                 treeProperty.returnType = &stringToType(*returnTypeStr);
-            } else throw std::runtime_error("the root field must be tree");
+            } else return utility::result::err<TreeProperty>("failed to load tree, return_type field not found.");
             //get arguments
             for(const auto& [key, val]: tree.get_child(std::string(ROOT_FIELD) + "." + ARGUMENT_TYPE_FIELD)){
                 if(key == VARIABLE_TYPE_FIELD){
                     const auto& typeStr = val.data();
-                    if(!stringToType.hasType(typeStr)) throw std::runtime_error("argument type name not found in reading tree");
+                    if(!stringToType.hasType(typeStr)) return utility::result::err<TreeProperty>("failed to load tree, unknown argument type: " + typeStr);
                     treeProperty.argumentTypes.push_back(&stringToType(typeStr));
                 }
             }
@@ -87,11 +87,11 @@ namespace gp::tree {
             for(const auto& [key, val]: tree.get_child(std::string(ROOT_FIELD) + "." + LOCAL_VARIABLE_FIELD)){
                 if(key == VARIABLE_TYPE_FIELD){
                     const auto& typeStr = val.data();
-                    if(!stringToType.hasType(typeStr)) throw std::runtime_error("argument type name not found in reading tree");
+                    if(!stringToType.hasType(typeStr)) return utility::result::err<TreeProperty>("failed to load tree, unknown local variable type: " + typeStr);
                     treeProperty.localVariableTypes.push_back(&stringToType(typeStr));
                 }
             }
-            return treeProperty;
+            return utility::result::ok(std::move(treeProperty));
         }
 
 
@@ -139,29 +139,41 @@ namespace gp::tree {
 
                 xml_parser::write_xml(out, root, xml_parser::xml_writer_make_settings<std::string>(' ' , 2));
             }
-            std::tuple<node_instance_type, TreeProperty> load(std::istream& in, const utility::StringToType& stringToType, node::StringToNode& stringToNode) {
+            utility::Result<std::tuple<node_instance_type, TreeProperty>> load(std::istream& in, const utility::StringToType& stringToType, node::StringToNode& stringToNode) {
+                using AnsType = std::tuple<node_instance_type, TreeProperty>;
                 using namespace boost::property_tree;
                 using namespace gp::tree::io;
                 ptree tree;
-                xml_parser::read_xml(in, tree);
-                auto treeProperty = detail::getTreeProperty(tree, stringToType);
+                try {
+                    xml_parser::read_xml(in, tree);
+                } catch (boost::property_tree::xml_parser_error& ex){
+                    return utility::result::err<AnsType>(std::string("failed to load tree, some error found in the xml file\n") + "line " + std::to_string(ex.line()) + ": " + ex.message());
+                }
+                auto treePropertyResult = detail::getTreeProperty(tree, stringToType);
+                if(!treePropertyResult) return utility::result::err<AnsType>(std::move(treePropertyResult).errMessage());
+                auto& treeProperty = treePropertyResult.unwrap();
                 //get tree entity
                 if(auto treeEntity = tree.get_optional<std::string>(std::string(ROOT_FIELD) + "." + TREE_ENTITY_FIELD)) {
                     //check if the same node name exists
-                    if(stringToNode.hasNode(treeProperty.name)) throw std::runtime_error("read tree but the same node name already exists");
+                    if(stringToNode.hasNode(treeProperty.name)) return utility::result::err<AnsType>("failed to load tree, the same node name has already loaded.");
                     //regist this node for the case where this subroutine is recursive
                     stringToNode.registerNode(typesToSubroutineNode.createSubroutineNode(*treeProperty.returnType, treeProperty.argumentTypes, treeProperty.name, subroutineEntitySet));
                     try {
                         std::stringstream sstream(*treeEntity);
-                        auto entity = tree_operations::readTree(stringToNode, treeProperty, sstream);
+                        auto entityResult = tree_operations::readTree(stringToNode, treeProperty, sstream);
+                        if(!entityResult){
+                            stringToNode.deleteNode(treeProperty.name);
+                            return utility::result::err<AnsType>(std::move(entityResult).errMessage());
+                        }
+                        auto entity = std::move(entityResult).unwrap();
                         //regist subroutine entity
                         subroutineEntitySet.insert(treeProperty.name, std::make_pair(std::move(entity), treeProperty.localVariableTypes));
-                    } catch (...) {//the case where we failed to read tree, delete the registed subroutine node
+                    } catch (...) {//the case where we failed to read tree, delete the registered subroutine node
                         stringToNode.deleteNode(treeProperty.name);
                         throw;
                     }
-                }else throw std::runtime_error("tree_entity field not found in reading tree");
-                return std::make_tuple(stringToNode(treeProperty.name), treeProperty);
+                }else return utility::result::err<AnsType>("failed to load tree, tree_entity field not found");
+                return utility::result::ok(std::make_tuple(stringToNode(treeProperty.name), treeProperty));
             }
             template <typename Tree_, typename = std::enable_if_t<std::is_same_v<Tree, std::decay_t<Tree_>>>>
             void registerTreeAsSubroutine(Tree_&& tree, node::StringToNode& stringToNode) {
@@ -245,27 +257,33 @@ namespace gp::tree {
         void writeTree(const node::NodeInterface& rootNode, const TreeProperty& property, std::ostream& out)const {subroutineIO.write(rootNode, property, out);}
         void writeTree(const Tree& tree, std::ostream& out)const {subroutineIO.write(tree.getRootNode(), tree.getTreeProperty(), out);}
     public:
-        Tree readTree(std::istream& in, const utility::StringToType& stringToType)const {
+        utility::Result<Tree> readTree(std::istream& in, const utility::StringToType& stringToType)const {
             using namespace boost::property_tree;
             using namespace gp::tree::io;
             ptree tree;
-            xml_parser::read_xml(in, tree);
+            try {
+                xml_parser::read_xml(in, tree);
+            } catch (boost::property_tree::xml_parser_error& ex){
+                return utility::result::err<Tree>(std::string("failed to load tree, some error found in the xml file\n") + "line " + std::to_string(ex.line()) + ": " + ex.message());
+            }
             //get treeProperty
-            auto treeProperty = detail::getTreeProperty(tree, stringToType);
+            auto treePropertyResult = detail::getTreeProperty(tree, stringToType);
+            if(!treePropertyResult) return utility::result::err<Tree>(std::move(treePropertyResult).errMessage());
+            auto treeProperty = std::move(treePropertyResult).unwrap();
             node_instance_type rootNode;
             //get tree entity
             if(auto treeEntity = tree.get_optional<std::string>(std::string(ROOT_FIELD) + "." + TREE_ENTITY_FIELD)) {
                 std::stringstream sstream(*treeEntity);
-                rootNode = tree_operations::readTree(stringToNode, treeProperty, sstream);
-            }else throw std::runtime_error("tree_entity field not found in reading tree");
-            return Tree(std::move(treeProperty), std::move(rootNode));
+                auto rootNodeResult = tree_operations::readTree(stringToNode, treeProperty, sstream);
+                if(!rootNodeResult) return utility::result::err<Tree>(std::move(rootNodeResult).errMessage());
+                rootNode = std::move(rootNodeResult).unwrap();
+            }else return utility::result::err<Tree>("failed to load tree, tree_entity field not found.");
+            return utility::result::ok(Tree(std::move(treeProperty), std::move(rootNode)));
         }
         template <typename String>
         node_instance_type getNodeByNodeName(String&& name)const{return stringToNode(std::forward<String>(name));}
     public:
         void registerNode(node_instance_type node) {return stringToNode.registerNode(std::move(node));}
-    public:
-
     };
 }
 

@@ -2,8 +2,10 @@
 #define GP_TREE_OPERATIONS_DETAIL_READ_TREE
 
 #include "defines.hpp"
+#include <gp/utility/result.hpp>
 #include <gp/traits/node_traits.hpp>
 #include <gp/traits/string_to_node_traits.hpp>
+#include <optional>
 
 namespace gp::tree_operations::detail {
     class ReadTreeImpl {
@@ -22,8 +24,9 @@ namespace gp::tree_operations::detail {
             }
             return "";
         }
+        //@return err message
         template <typename input_node, typename string_to_node, typename tree_property>
-        static void readHelper(input_node& node_, const string_to_node& stringToNode, const tree_property& treeProperty, std::istream& in) {
+        static std::optional<std::string> readHelper(input_node& node_, const string_to_node& stringToNode, const tree_property& treeProperty, std::istream& in) {
             if constexpr(traits::is_input_node_ptr_type_v<std::decay_t<decltype(node_)>>) {
                 return readHelper(*node_, stringToNode, treeProperty, in);
             } else {
@@ -35,38 +38,43 @@ namespace gp::tree_operations::detail {
                 for(int i = 0; i < node_trait::get_child_num(node_); ++i){
                     auto nextName = getNodeNameFromStream(in);
                     if(!string_to_node_trait::has_node(stringToNode, nextName)) {
-                        std::cout<<nextName<<std::endl;
-                        throw std::runtime_error("node not found");
+                        return std::optional<std::string>("failed to load tree, unknown node name: " + nextName);
                     }
                     auto nextNode = string_to_node_trait::get_node(stringToNode, nextName);
                     //check the validity of the return type of child
                     if constexpr (traits::is_input_node_ptr_type_v<std::decay_t<decltype(nextNode)>>) {
                         if(!node_trait::is_valid_child(node_, i, *nextNode, treeProperty)) {
-                            std::cout<<node_.getNodeName()<<std::endl;
-                            std::cout<<nextName<<std::endl;
-                            throw std::runtime_error("invalid child return type");
+                            return std::optional<std::string>("failed to load tree, type mismatch between " + nextName + " and parent node.");
                         }
                     } else {
-                        if(!node_trait::is_valid_child(node_, i, nextNode, treeProperty)) throw std::runtime_error("invalid child return type");
+                        if(!node_trait::is_valid_child(node_, i, nextNode, treeProperty)) {
+                            return std::optional<std::string>("failed to load tree, type mismatch between " + nextName + " and parent node.");
+                        }
                     }
                     if constexpr (std::is_move_constructible_v<decltype(nextNode)>) {
                         node_trait::set_child(node_, i, std::move(nextNode));
                     } else {
                         node_trait::set_child(nextNode, i);
                     }
-                    readHelper(node_trait::get_child(node_, i), stringToNode, treeProperty, in);
+                    auto errMsg = readHelper(node_trait::get_child(node_, i), stringToNode, treeProperty, in);
+                    if(errMsg) return errMsg;
                 }
+                return std::optional<std::string>{};
             }
         };
     public:
         template <typename string_to_node, typename tree_property>
-        static auto read(const string_to_node& stringToNode, const tree_property& treeProperty, std::istream& in){
+        static auto read(const string_to_node& stringToNode, const tree_property& treeProperty, std::istream& in)
+            -> utility::Result<typename traits::string_to_node_traits<string_to_node>::node_instance_type> {
+            using node_instance_type = typename traits::string_to_node_traits<string_to_node>::node_instance_type;
             auto nodeName = getNodeNameFromStream(in);
             using string_to_node_trait = traits::string_to_node_traits<string_to_node>;
-            if(nodeName.empty() || !string_to_node_trait::has_node(stringToNode, nodeName)) throw std::runtime_error("node not found");
+            if(nodeName.empty()) return utility::result::err<node_instance_type>("failed to load tree, node header \"+--\" found but no node name found.");
+            if(!string_to_node_trait::has_node(stringToNode, nodeName)) return utility::result::err<node_instance_type>("failed to load tree, unknown node name: " + nodeName);
+
             auto rootNode = stringToNode(nodeName);
-            readHelper(rootNode, stringToNode, treeProperty, in);
-            return rootNode;
+            auto errMsg = readHelper(rootNode, stringToNode, treeProperty, in);
+            return errMsg ? utility::result::err<node_instance_type>(std::move(*errMsg)) : utility::result::ok(std::move(rootNode));
         };
     };
 }

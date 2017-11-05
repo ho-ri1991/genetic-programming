@@ -89,7 +89,9 @@ BOOST_AUTO_TEST_SUITE(io_test)
         fout.close();
 
         std::ifstream fin("TestTree.xml");
-        auto inTree = treeIO.readTree(fin, stringToType);
+        auto inTreeResult = treeIO.readTree(fin, stringToType);
+        BOOST_CHECK(inTreeResult);
+        auto& inTree = inTreeResult.unwrap();
         BOOST_CHECK_EQUAL(inTree.getName(), tree.getName());
         BOOST_CHECK_EQUAL(inTree.getArgumentNum(), tree.getArgumentNum());
         BOOST_CHECK_EQUAL(inTree.getLocalVariableNum(), tree.getLocalVariableNum());
@@ -175,7 +177,9 @@ BOOST_AUTO_TEST_SUITE(io_test)
                 + "    </tree_entity>\n"
                 + "</tree>");
 
-        auto [factNode, factSubroutineProperty] = treeIO.loadSubroutine(recursionSubTreeStr, stringToType);
+        auto subroutineResult = treeIO.loadSubroutine(recursionSubTreeStr, stringToType);
+        BOOST_CHECK(subroutineResult);
+        auto [factNode, factSubroutineProperty] = std::move(subroutineResult).unwrap();
         BOOST_CHECK(*factSubroutineProperty.returnType == utility::typeInfo<int>());
         BOOST_CHECK_EQUAL(factSubroutineProperty.argumentTypes.size(), 1);
         BOOST_CHECK(*factSubroutineProperty.argumentTypes[0] == utility::typeInfo<int>());
@@ -248,7 +252,9 @@ BOOST_AUTO_TEST_SUITE(io_test)
                                                       + "    </tree_entity>\n"
                                                       + "</tree>");
 
-        auto [refereneTestSub, referenceTestSubProperty] = treeIO.loadSubroutine(referenceTestSubStr, stringToType);
+        auto subroutineResult = treeIO.loadSubroutine(referenceTestSubStr, stringToType);
+        BOOST_CHECK(subroutineResult);
+        auto [refereneTestSub, referenceTestSubProperty] = std::move(subroutineResult).unwrap();
         BOOST_CHECK(*referenceTestSubProperty.returnType == utility::typeInfo<int>());
         BOOST_CHECK_EQUAL(referenceTestSubProperty.argumentTypes.size(), 1);
         BOOST_CHECK(*referenceTestSubProperty.argumentTypes[0] == utility::typeInfo<utility::Reference<int>>());
@@ -276,7 +282,9 @@ BOOST_AUTO_TEST_SUITE(io_test)
                                                + "    </tree_entity>\n"
                                                + "</tree>");
 
-            auto tree = treeIO.readTree(referenceTestStr, stringToType);
+            auto treeResult = treeIO.readTree(referenceTestStr, stringToType);
+            BOOST_CHECK(treeResult);
+            auto& tree = treeResult.unwrap();
 
             for (int i = 0; i < 10; ++i) {
                 auto ans = tree.evaluate(std::make_tuple(i));
@@ -305,7 +313,9 @@ BOOST_AUTO_TEST_SUITE(io_test)
                                                + "    </tree_entity>\n"
                                                + "</tree>");
 
-            auto tree = treeIO.readTree(referenceTestStr, stringToType);
+            auto treeResult = treeIO.readTree(referenceTestStr, stringToType);
+            BOOST_CHECK(treeResult);
+            auto& tree = treeResult.unwrap();
 
             for (int i = 0; i < 10; ++i) {
                 auto ans = tree.evaluate(std::make_tuple(i));

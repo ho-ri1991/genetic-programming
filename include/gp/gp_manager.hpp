@@ -129,7 +129,7 @@ namespace gp {
         }
         template <typename Tree_, typename = std::enable_if_t<std::is_same_v<tree::Tree, std::decay_t<Tree_>>>>
         void registerTreeAsSubroutine(Tree_&& tree){treeIO.registerTreeAsSubroutine(std::forward<Tree_>(tree));}
-        tree::Tree readTree(std::istream& in) {
+        utility::Result<tree::Tree> readTree(std::istream& in) {
             return treeIO.readTree(in, stringToType);
         }
     };
