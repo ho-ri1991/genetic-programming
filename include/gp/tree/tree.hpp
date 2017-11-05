@@ -15,6 +15,14 @@ namespace gp::tree {
         container_type localVariableTypes;
         std::string name;
     };
+
+    node::NodeInterface::node_instance_type copyTreeStructure(const node::NodeInterface& rootNode) {
+        auto targetRootNode = rootNode.clone();
+        for(int i = 0; i < rootNode.getChildNum(); ++i) {
+            if(rootNode.hasChild(i)) targetRootNode->setChild(i, copyTreeStructure(rootNode.getChild(i)));
+        }
+        return targetRootNode;
+    }
 }
 
 namespace std {
@@ -40,15 +48,6 @@ namespace gp::tree{
     private:
         std::unique_ptr<node::NodeInterface> rootNode;
         TreeProperty treeProperty;
-    private:
-        static std::unique_ptr<node::NodeInterface> copyTreeStructure(const node::NodeInterface& rootNode) {
-            std::unique_ptr<node::NodeInterface> targetRootNode = rootNode.clone();
-            for(int i = 0; i < rootNode.getChildNum(); ++i) {
-                if(!rootNode.hasChild(i)) throw std::runtime_error("the copy node must not be null");
-                targetRootNode->setChild(i, copyTreeStructure(rootNode.getChild(i)));
-            }
-            return targetRootNode;
-        }
     public:
         template <typename TreeProperty_, typename = std::enable_if_t<std::is_same_v<TreeProperty, std::decay_t<TreeProperty_>>>>
         Tree(TreeProperty_&& treeProperty_, node_instance_type rootNode_):
