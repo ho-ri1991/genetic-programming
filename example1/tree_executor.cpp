@@ -73,7 +73,12 @@ int main(){
             continue;
         }
         try {
-            auto tree = gpManager.readTree(fin);
+            auto treeResult  = gpManager.readTree(fin);
+            if(!treeResult) {
+                std::cout << "Failed to load tree, " << treeResult.errMessage() << std::endl;
+                continue;
+            }
+            auto tree = std::move(treeResult).unwrap();
             auto anyToStringResult = anyToStrings.find(utility::TypeIndex(tree.getReturnType())) != std::end(anyToStrings)
                                      ? utility::result::ok(std::ref(anyToStrings.find(utility::TypeIndex(tree.getReturnType()))->second))
                                      : utility::result::err<std::reference_wrapper<AnyToString>>("failed to load tree, unknown return type: " + tree.getReturnType().name());
