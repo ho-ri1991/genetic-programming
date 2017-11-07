@@ -102,6 +102,20 @@ namespace gp::tree {
             detail::TypesToSubroutineNode typesToSubroutineNode;
             node::SubroutineEntitySet subroutineEntitySet;
         public:
+            using SubroutineEntity = node::SubroutineEntitySet::SubroutineEntity;
+            template <typename String>
+            std::optional<std::reference_wrapper<SubroutineEntity>> getSubroutineEntity(String&& name) {
+                using WrapType = std::reference_wrapper<SubroutineEntity>;
+                auto itr = subroutineEntitySet.find(std::forward<String>(name));
+                return itr != subroutineEntitySet.end() ? std::optional<WrapType>(std::ref(itr->second)) : std::optional<WrapType>{};
+            }
+            template <typename String>
+            std::optional<std::reference_wrapper<const SubroutineEntity>> getSubroutineEntity(String&& name)const {
+                using WrapType = std::reference_wrapper<const SubroutineEntity>;
+                auto itr = subroutineEntitySet.find(std::forward<String>(name));
+                return itr != subroutineEntitySet.end() ? std::optional<WrapType>(std::cref(itr->second)) : std::optional<WrapType>{};
+            }
+        public:
             void write(const node::NodeInterface& rootNode, const TreeProperty& property, std::ostream& out)const {
                 using namespace boost::property_tree;
                 using namespace gp::tree::io;
@@ -257,6 +271,7 @@ namespace gp::tree {
         void writeTree(const node::NodeInterface& rootNode, const TreeProperty& property, std::ostream& out)const {subroutineIO.write(rootNode, property, out);}
         void writeTree(const Tree& tree, std::ostream& out)const {subroutineIO.write(tree.getRootNode(), tree.getTreeProperty(), out);}
     public:
+        //this method does not support recursion tree becase this method just read and construct tree, therefor, the tree is "inline" funciton
         utility::Result<Tree> readTree(std::istream& in, const utility::StringToType& stringToType)const {
             using namespace boost::property_tree;
             using namespace gp::tree::io;
@@ -280,8 +295,34 @@ namespace gp::tree {
             }else return utility::result::err<Tree>("failed to load tree, tree_entity field not found.");
             return utility::result::ok(Tree(std::move(treeProperty), std::move(rootNode)));
         }
+        utility::Result<Tree> readAndRegisterTreeAsSubroutine(std::istream& in, const utility::StringToType& stringToType) {
+            auto loadResult = loadSubroutine(in, stringToType);
+            if(!loadResult) return utility::result::err<Tree>(std::move(loadResult).errMessage());
+            auto [subroutineNode, treeProperty] = std::move(loadResult).unwrap();
+            auto subroutineEntityOptional = subroutineIO.getSubroutineEntity(subroutineNode->getNodeName());
+            if(!subroutineEntityOptional) return utility::result::err<Tree>("failed to load tree, loading subtree is suceeded but regitering it to SubroutineEntitySet seems to failed");
+            node::SubroutineEntitySet::SubroutineEntity& subroutineEntity = *subroutineEntityOptional;
+            return utility::result::ok(Tree(std::move(treeProperty), copyTreeStructure(*std::get<0>(subroutineEntity))));
+        }
         template <typename String>
         node_instance_type getNodeByNodeName(String&& name)const{return stringToNode(std::forward<String>(name));}
+        template <typename String>
+        std::optional<Tree> getSubroutineAsTree(String&& name)const {
+            auto subroutineEntityOptional = subroutineIO.getSubroutineEntity(name);
+            if(!subroutineEntityOptional) return std::optional<Tree>{};
+            auto subroutineNode = getNodeByNodeName(name);
+            if(!subroutineNode) return std::optional<Tree>{};
+            const node::SubroutineEntitySet::SubroutineEntity& subroutineEntity = *subroutineEntityOptional;
+            const auto& [entity, localVar] = subroutineEntity;
+            TreeProperty treeProperty;
+            treeProperty.name = std::forward<String>(name);
+            treeProperty.localVariableTypes = localVar;
+            treeProperty.argumentTypes.reserve(subroutineNode->getChildNum());
+            for(int i = 0; i < subroutineNode->getChildNum(); ++i)
+                treeProperty.argumentTypes.push_back(&subroutineNode->getChildReturnType(i));
+
+            return std::optional<Tree>(Tree(std::move(treeProperty), copyTreeStructure(*std::get<0>(subroutineEntity))));
+        }
     public:
         void registerNode(node_instance_type node) {return stringToNode.registerNode(std::move(node));}
     };
