@@ -26,9 +26,44 @@ namespace gp::tree {
         private:
             using type_info = node::NodeInterface::type_info;
             using node_instance_type = node::NodeInterface::node_instance_type;
-            using key = std::string;
+        private:
+            class SubroutineTypeIndex {
+            private:
+                const utility::TypeInfo* returnTypePtr;
+                const std::vector<const utility::TypeInfo*> argumentTypes;
+            public:
+                SubroutineTypeIndex(const utility::TypeInfo& returnType, std::vector<const utility::TypeInfo*> argumentTypes_)
+                        : returnTypePtr(&returnType)
+                        , argumentTypes(std::move(argumentTypes_)){}
+            public:
+                bool operator==(const SubroutineTypeIndex& other)const {
+                    if(returnTypePtr == nullptr
+                       || other.returnTypePtr == nullptr
+                       || !std::all_of(begin(argumentTypes), end(argumentTypes), [](auto type){return type != nullptr;})
+                       || !std::all_of(begin(other.argumentTypes), end(other.argumentTypes), [](auto type){return type != nullptr;})) return false;
+
+                    if(*returnTypePtr != *other.returnTypePtr || size(argumentTypes) != size(other.argumentTypes)) return false;
+                    for(int i = 0; i < size(argumentTypes); ++i) {
+                        if(*argumentTypes[i] != *other.argumentTypes[i]) return false;
+                    }
+                    return true;
+                }
+                bool operator!=(const SubroutineTypeIndex& other)const {return !(*this == other);}
+            public:
+                struct Hash {
+                    std::size_t operator()(const SubroutineTypeIndex& key)const {
+                        auto sum = reinterpret_cast<unsigned long long>(key.returnTypePtr);
+                        for(auto type: key.argumentTypes) {
+                            sum += reinterpret_cast<unsigned long long>(type);
+                        }
+                        return std::hash<unsigned long long>()(sum);
+                    }
+                };
+            };
+            using key = SubroutineTypeIndex;
+            using hash = SubroutineTypeIndex::Hash;
             using subroutine_node_create_function = node_instance_type(*)(const std::string&, const node::SubroutineEntitySet&);
-            using containter_type = std::unordered_map<key, subroutine_node_create_function>;
+            using containter_type = std::unordered_map<key, subroutine_node_create_function, hash>;
             containter_type Container;
         private:
             static std::string createSubroutineString(const type_info& returnType, const std::vector<const type_info*>& arguments) {
@@ -51,13 +86,13 @@ namespace gp::tree {
                                                     const std::string& name,
                                                     const node::SubroutineEntitySet& subroutineEntitySet)const {
 
-                auto itr = Container.find(createSubroutineString(returnType, arguments));
+                auto itr = Container.find(SubroutineTypeIndex(returnType, arguments));
                 if(itr == std::end(Container)) return nullptr;
                 return itr->second(name, subroutineEntitySet);
             }
             template <typename T, typename ...Args>
             void registerSubroutineNodeType() {
-                Container[createSubroutineString<T, Args...>()] = node::NodeInterface::createInstance<node::SubroutineNode<T(Args...)>, const std::string&, const node::SubroutineEntitySet&>;
+                Container[SubroutineTypeIndex(utility::typeInfo<T>(), {&utility::typeInfo<Args>()...})] = node::NodeInterface::createInstance<node::SubroutineNode<T(Args...)>, const std::string&, const node::SubroutineEntitySet&>;
             };
         };
 
@@ -315,6 +350,7 @@ namespace gp::tree {
             const node::SubroutineEntitySet::SubroutineEntity& subroutineEntity = *subroutineEntityOptional;
             const auto& [entity, localVar] = subroutineEntity;
             TreeProperty treeProperty;
+            treeProperty.returnType = &subroutineNode->getReturnType();
             treeProperty.name = std::forward<String>(name);
             treeProperty.localVariableTypes = localVar;
             treeProperty.argumentTypes.reserve(subroutineNode->getChildNum());
