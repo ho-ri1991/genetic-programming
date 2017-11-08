@@ -124,9 +124,11 @@ namespace gp {
         void writeTree(const tree::Tree& tree, std::ostream& out)const {
             treeIO.writeTree(tree, out);
         }
-        auto loadSubroutine(std::istream in) {
-            treeIO.loadSubroutine(in, stringToType);
+        auto loadSubroutine(std::istream& in) {
+            return treeIO.loadSubroutine(in, stringToType);
         }
+        template <typename String>
+        auto getSubroutineAsTree(String&& name)const {return treeIO.getSubroutineAsTree(std::forward<String>(name));}
         template <typename Tree_, typename = std::enable_if_t<std::is_same_v<tree::Tree, std::decay_t<Tree_>>>>
         void registerTreeAsSubroutine(Tree_&& tree){treeIO.registerTreeAsSubroutine(std::forward<Tree_>(tree));}
         utility::Result<tree::Tree> readTree(std::istream& in) {
