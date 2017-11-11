@@ -29,8 +29,14 @@ namespace gp::node{
         using type_info = utility::TypeInfo;
         using type_index = utility::TypeIndex;
         using any_t = utility::any;
-        using node_instance_type = std::unique_ptr<NodeInterface>;
-        using const_node_instance_type = std::unique_ptr<const NodeInterface>;
+        template <typename Node>
+        using node_ptr_type = std::unique_ptr<Node>;
+        using node_instance_type = node_ptr_type<NodeInterface>;
+        using const_node_instance_type = node_ptr_type<const NodeInterface>;
+        template <typename T>
+        using typed_node_instance_type = node_ptr_type<TypedNodeInterface<T>>;
+        template <typename T>
+        using const_typed_node_instance_type = node_ptr_type<const TypedNodeInterface<T>>;
         template <typename NodeType, typename ...Ts>
         static node_instance_type createInstance(Ts&&... args) {return std::make_unique<NodeType>(std::forward<Ts>(args)...);}
     public:

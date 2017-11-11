@@ -16,8 +16,8 @@ namespace gp::node {
         static_assert(1 < n, "progn node whose child num is smaller than 2 is not supported");
     private:
         NodeInterface* parent;
-        std::array<std::unique_ptr<NodeInterface>, n - 1> children;
-        std::unique_ptr<TypedNodeInterface<T>> lastChild;
+        std::array<node_instance_type, n - 1> children;
+        NodeInterface::typed_node_instance_type<T> lastChild;
     protected:
         void setParent(NodeInterface* node)override {parent = node;}
     private:

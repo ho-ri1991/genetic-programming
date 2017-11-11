@@ -65,8 +65,8 @@ namespace gp::node{
         }
 
         template<std::size_t offset, typename ...Ts>
-        node::NodeInterface::node_instance_type setDynamicHelper(std::size_t n, std::unique_ptr<NodeInterface> node,
-                              std::tuple<std::unique_ptr<TypedNodeInterface<Ts>>...> &t) {
+        node::NodeInterface::node_instance_type setDynamicHelper(std::size_t n, NodeInterface::node_instance_type node,
+                              std::tuple<NodeInterface::typed_node_instance_type<Ts>...> &t) {
             if constexpr (offset < sizeof...(Ts)) {
                 if (n == 0) {
                     if(!node) return node::NodeInterface::node_instance_type(std::get<offset>(t).release());
@@ -84,8 +84,8 @@ namespace gp::node{
         };
 
         template<typename ...Ts>
-        node::NodeInterface::node_instance_type setDynamic(std::size_t n, std::unique_ptr<NodeInterface> node,
-                        std::tuple<std::unique_ptr<TypedNodeInterface<Ts>>...> &t) {
+        node::NodeInterface::node_instance_type setDynamic(std::size_t n, NodeInterface::node_instance_type node,
+                        std::tuple<NodeInterface::typed_node_instance_type<Ts>...> &t) {
             return setDynamicHelper<0, Ts...>(n, std::move(node), t);
         }
 
@@ -96,7 +96,7 @@ namespace gp::node{
                 template<typename ...> class Tpl,
                 typename ...Ts>
         struct EvaluateChildrenHelper<n, Tpl<Ts...>> {
-            static auto eval(const std::tuple<std::unique_ptr<TypedNodeInterface<Ts>>...> &children,
+            static auto eval(const std::tuple<NodeInterface::typed_node_instance_type<Ts>...> &children,
                              utility::EvaluationContext &evaluationContext) {
                 if constexpr (sizeof...(Ts) - 1 == n)
                 {
@@ -110,7 +110,7 @@ namespace gp::node{
     }
 
     template <typename ...Ts>
-    std::tuple<Ts...> evaluateChildren(const std::tuple<std::unique_ptr<TypedNodeInterface<Ts>>...>& children, utility::EvaluationContext& evaluationContext) {
+    std::tuple<Ts...> evaluateChildren(const std::tuple<NodeInterface::typed_node_instance_type<Ts>...>& children, utility::EvaluationContext& evaluationContext) {
         return detail::EvaluateChildrenHelper<0, std::tuple<Ts...>>::eval(children, evaluationContext);
     }
 
@@ -124,7 +124,7 @@ namespace gp::node{
         using node_instance_type =NodeInterface::node_instance_type;
     protected:
         NodeInterface* parent;
-        std::tuple<std::unique_ptr<TypedNodeInterface<Args>>...> children;
+        std::tuple<NodeInterface::typed_node_instance_type<Args>...> children;
     protected:
         void setParent(NodeInterface* node)override {parent = node;}
     public:
