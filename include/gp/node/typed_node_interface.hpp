@@ -4,6 +4,7 @@
 #include "node_interface.hpp"
 #include <gp/utility/evaluation_context.hpp>
 #include <gp/utility/default_initializer.hpp>
+#include <cassert>
 
 namespace gp::node{
     template<typename T>
@@ -33,6 +34,21 @@ namespace gp::node{
         TypedNodeInterface& operator=(const TypedNodeInterface&) = default;
         TypedNodeInterface& operator=(TypedNodeInterface&&) = default;
     };
+
+    template <typename T>
+    void swapTypedNodeInterfaceAndNodeInterface(NodeInterface::typed_node_instance_type<T>& typedNodePtr,
+                                                NodeInterface::node_instance_type& nodeInterfacePtr) {
+
+        if(nodeInterfacePtr) {
+            assert(nodeInterfacePtr->getReturnType() == utility::typeInfo<T>());
+            auto newTypedNodePtr = static_cast<TypedNodeInterface<T>*>(nodeInterfacePtr.release());
+            NodeInterface* newNodeInterfacePtr = typedNodePtr.release();
+            typedNodePtr.reset(newTypedNodePtr);
+            nodeInterfacePtr.reset(newNodeInterfacePtr);
+        } else {
+            nodeInterfacePtr.reset(typedNodePtr.release());
+        }
+    }
 }
 
 #endif

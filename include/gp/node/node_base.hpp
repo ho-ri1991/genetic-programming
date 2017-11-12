@@ -69,12 +69,8 @@ namespace gp::node{
                               std::tuple<NodeInterface::typed_node_instance_type<Ts>...> &t) {
             if constexpr (offset < sizeof...(Ts)) {
                 if (n == 0) {
-                    if(!node) return node::NodeInterface::node_instance_type(std::get<offset>(t).release());
-                    auto typed_node = static_cast<typename std::tuple_element<offset, std::tuple<TypedNodeInterface<Ts>...>>::type *>(node.get());
-                    auto org = std::get<offset>(t).release();
-                    std::get<offset>(t).reset(typed_node);
-                    node.release();
-                    return node::NodeInterface::node_instance_type(org);
+                    swapTypedNodeInterfaceAndNodeInterface(std::get<offset>(t), node);
+                    return node;
                 } else {
                     return setDynamicHelper<offset + 1, Ts...>(n - 1, std::move(node), t);
                 }
