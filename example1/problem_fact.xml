@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<problem>
+    <name>fact</name>
+    <return_type>int</return_type>
+    <arguments>
+        <type>int</type>
+    </arguments>
+    <teacher_data_set>
+        <data>
+            <argument idx = "0">-1</argument>
+            <answer>1</answer>
+        </data>
+        <data>
+            <argument idx = "0">0</argument>
+            <answer>1</answer>
+        </data>
+        <data>
+            <argument idx = "0">1</argument>
+            <answer>1</answer>
+        </data>
+        <data>
+            <argument idx = "0">2</argument>
+            <answer>2</answer>
+        </data>
+        <data>
+            <argument idx = "0">3</argument>
+            <answer>6</answer>
+        </data>
+        <data>
+            <argument idx = "0">4</argument>
+            <answer>24</answer>
+        </data>
+        <data>
+            <argument idx = "0">5</argument>
+            <answer>120</answer>
+        </data>
+        <data>
+            <argument idx = "0">6</argument>
+            <answer>720</answer>
+        </data>
+        <data>
+            <argument idx = "0">7</argument>
+            <answer>5040</answer>
+        </data>
+        <data>
+            <argument idx = "0">8</argument>
+            <answer>40320</answer>
+        </data>
+    </teacher_data_set>
+
+    <settings>
+        <population_size>10000</population_size>
+        <max_tree_depth>7</max_tree_depth>
+        <evolution_num>1000</evolution_num>
+        <mutation_rate>0.3</mutation_rate>
+        <crossover_rate>0.2</crossover_rate>
+	<random_seed>0</random_seed>
+    </settings>
+</problem>

@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<problem>
+    <name>regression_quad</name>
+    <return_type>int</return_type>
+    <arguments>
+        <type>int</type>
+        <type>int</type>
+    </arguments>
+    <!-- y = x1^2 + 2 * x2 + 1 -->
+    <teacher_data_set>
+        <data>
+            <argument idx = "0">1</argument>
+            <argument idx = "1">1</argument>
+            <answer>4</answer>
+        </data>
+        <data>
+            <argument idx = "0">1</argument>
+            <argument idx = "1">-1</argument>
+            <answer>0</answer>
+        </data>
+        <data>
+            <argument idx = "0">10</argument>
+            <argument idx = "1">5</argument>
+            <answer>111</answer>
+        </data>
+        <data>
+            <argument idx = "0">-10</argument>
+            <argument idx = "1">5</argument>
+            <answer>111</answer>
+        </data>
+        <data>
+            <argument idx = "0">-3</argument>
+            <argument idx = "1">5</argument>
+            <answer>20</answer>
+        </data>
+        <data>
+            <argument idx = "0">-3</argument>
+            <argument idx = "1">-15</argument>
+            <answer>-20</answer>
+        </data>
+    </teacher_data_set>
+
+    <settings>
+        <population_size>1000</population_size>
+        <max_tree_depth>3</max_tree_depth>
+        <evolution_num>300</evolution_num>
+        <mutation_rate>0.1</mutation_rate>
+        <crossover_rate>0.2</crossover_rate>
+	    <random_seed>0</random_seed>
+    </settings>
+</problem>

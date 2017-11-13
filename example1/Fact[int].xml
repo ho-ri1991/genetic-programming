@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<tree>
+    <name>Fact[int]</name>
+    <return_type>int</return_type>
+    <arguments>
+        <type>int</type>
+    </arguments>
+    <local_variables>
+    </local_variables>
+    <tree_entity>
+        +--If[int]
+            |
+            +--Greater[int]
+            |   |
+            |   +--Argument[int,0]
+            |   |
+            |   +--Const[int,1]
+            |
+            +--Mult[int]
+            |   |
+            |   +--Argument[int,0]
+            |   |
+            |   +--Fact[int]
+            |       |
+            |       +--Sub[int]
+            |           |
+            |           +--Argument[int,0]
+            |           |
+            |           +--Const[int,1]
+            |
+            +--Const[int,1]
+
+
+    </tree_entity>
+</tree>

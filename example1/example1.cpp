@@ -269,11 +269,11 @@ int main(int argc, char* argv[]) {
             std::cout << "====" << std::to_string(count) << "th generation" << "====\n";
             std::vector<double> probabilities;
             probabilities.reserve(std::size(population));
-            //evaluation for each tree
+            //evaluation of each tree
             for(const auto& tree: population){
                 double inverseFitness = 0;
 
-                //evaluation for each data set
+                //evaluation by each data set
                 for(std::size_t i = 0; i < std::size(problem1.ansArgList); ++i) {
                     const auto& [answer, arguments] = problem1.ansArgList[i];
                     auto evaluatedValue = tree.evaluate(arguments);

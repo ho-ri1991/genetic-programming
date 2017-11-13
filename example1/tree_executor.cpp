@@ -78,9 +78,7 @@ int main(){
                     std::cout << "Failed to open file, check file name" << std::endl;
                     continue;
                 }
-                std::cout << "loading" << std::endl;
                 auto subroutineResult = gpManager.loadSubroutine(fin);
-                std::cout << "loaeded" << std::endl;
                 if (!subroutineResult) {
                     std::cout << subroutineResult.errMessage() << std::endl;
                     continue;
