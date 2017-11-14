@@ -58,6 +58,7 @@ int main(){
     gpManager.registerNode<node::RepeatNode<int, int>>();
     gpManager.registerNode<node::RepeatNode<bool, int>>();
     gpManager.registerNode<node::RepeatNode<double, int>>();
+    gpManager.registerNodes<node::DivisionNode, TypeTuple>();
 
     try {
         while (true) {

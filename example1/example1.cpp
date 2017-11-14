@@ -165,6 +165,7 @@ int main(int argc, char* argv[]) {
     gpManager.registerNode<node::RepeatNode<int, int>>();
     gpManager.registerNode<node::RepeatNode<bool, int>>();
     gpManager.registerNode<node::RepeatNode<double, int>>();
+    gpManager.registerNode<node::DivisionNode<int>>();
 
     genetic_operations::DefaultRandomNodeGenerator<RND, TypeTuple> randomNodeGenerator(randomConstGenerators);
 
@@ -201,6 +202,7 @@ int main(int argc, char* argv[]) {
     randomNodeGenerator.registerNode<node::PrognNode<int, 3>>();
     randomNodeGenerator.registerNode<node::PrognNode<bool, 3>>();
     randomNodeGenerator.registerNode<node::PrognNode<double, 3>>();
+    randomNodeGenerator.registerNode<node::DivisionNode<int>>();
 
     if(argc < 2) {
         std::cout<<"usage: example problem_file1 problem_file2 ..."<<std::endl;
