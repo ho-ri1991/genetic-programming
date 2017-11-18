@@ -14,20 +14,96 @@ The following properties are supported in the expression tree:
  
 This framework also provides some default genetic operations (mutation and crossover and selection etc...) and IO of tree and training data. 
 
+An example of representation of a tree is the following XML form:
+```
+<?xml version="1.0" encoding="utf-8"?>
+<tree>
+    <name>Fact[int]</name>
+    <return_type>int</return_type>
+    <arguments>
+        <type>int</type>
+    </arguments>
+    <local_variables>
+    </local_variables>
+    <tree_entity>
+        +--If[int]
+            |
+            +--Greater[int]
+            |   |
+            |   +--Argument[int,0]
+            |   |
+            |   +--Const[int,1]
+            |
+            +--Mult[int]
+            |   |
+            |   +--Argument[int,0]
+            |   |
+            |   +--Fact[int]
+            |       |
+            |       +--Sub[int]
+            |           |
+            |           +--Argument[int,0]
+            |           |
+            |           +--Const[int,1]
+            |
+            +--Const[int,1]
+
+
+    </tree_entity>
+</tree>
+
+```
+
+Of course, you need not write the tree entity field like the upper example.
+The format is more loose.
+- the node name start with the header `+--` and not contain white space
+- there must be zero or one node name with header
+- if the node header `+--` is not found, the line is ignored   
+
+The following format is also fine (the same tree as the upper example):
+```
+<?xml version="1.0" encoding="utf-8"?>
+<tree>
+    <name>Fact[int]</name>
+    <return_type>int</return_type>
+    <arguments>
+        <type>int</type>
+    </arguments>
+    <local_variables>
+    </local_variables>
+    <tree_entity>
++--If[int]
++--Greater[int]
++--Argument[int,0]
++--Const[int,1]
++--Mult[int]
++--Argument[int,0]
++--Fact[int]
++--Sub[int]
++--Const[int,1]
++--Const[int,1]
+
+    </tree_entity>
+</tree>
+
+```
+
+You can load and execute this tree by using example/tree_executor.cpp.
+
 ## requirements
 - C++ compiler and standard library >= C++17
 - boost >= 1.62
 
-I have compiled by g++7.2.0 with boost 1.62.0
+We have compiled by g++7.2.0 with boost 1.62.0
 
 ## getting started
 
 This framework is a header only template library.
-Therefor, you can use this just including `genetic_programing/include/gp`.
+Therefor, you can use this just including header files.
 
 ### build examples and tests
 We use cmake to build, execute following commands to build.
-If you want to run testsm execute `ctest` after the build.
+If you want to run tests execute `ctest` after the build.
 
 ```
 $ git clone https://github.com/ho-ri1991/genetic-programming.git
