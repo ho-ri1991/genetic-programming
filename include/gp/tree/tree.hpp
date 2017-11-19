@@ -27,7 +27,7 @@ namespace gp::tree {
 
 namespace std {
     template <>
-    void swap<gp::tree::TreeProperty>(gp::tree::TreeProperty& treeProperty1, gp::tree::TreeProperty& treeProperty2) noexcept {
+    inline void swap<gp::tree::TreeProperty>(gp::tree::TreeProperty& treeProperty1, gp::tree::TreeProperty& treeProperty2) noexcept {
         using std::swap;
         swap(treeProperty1.returnType, treeProperty2.returnType);
         swap(treeProperty1.argumentTypes, treeProperty2.argumentTypes);
@@ -127,7 +127,7 @@ namespace gp::tree{
 
 namespace std {
     template <>
-    void swap<gp::tree::Tree>(gp::tree::Tree& tree1, gp::tree::Tree& tree2) noexcept {
+    inline void swap<gp::tree::Tree>(gp::tree::Tree& tree1, gp::tree::Tree& tree2) noexcept {
         tree1.swap(tree2);
     }
 }
