@@ -24,5 +24,12 @@ BOOST_AUTO_TEST_SUITE(lvalue)
         lvalue2.getRef() = 2;
         BOOST_CHECK_EQUAL(lvalue2.getRef(), 2);
         BOOST_CHECK_EQUAL(var2.get<int>(), 2);
+
+        int x = 0;
+        utility::LeftHandValue<int> lvalue3(x);
+        BOOST_CHECK(lvalue3);
+        BOOST_CHECK_EQUAL(lvalue3.getRef(), 0);
+        lvalue3.getRef() = 1;
+        BOOST_CHECK_EQUAL(x, 1);
     }
 BOOST_AUTO_TEST_SUITE_END()
