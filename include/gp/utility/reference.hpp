@@ -1,27 +1,22 @@
 #ifndef GP_UTILITY_REFERENCE
 #define GP_UTILITY_REFERENCE
 
-#include "variable.hpp"
-#include <optional>
-#include <exception>
+#include "left_hand_value.hpp"
 
 namespace gp::utility {
     template <typename T>
     class Reference {
     private:
-        Variable* variableRef;
+        LeftHandValue<T> lvalue;
     public:
-        explicit operator bool()const noexcept { return variableRef != nullptr;}
-        T& getRef(){
-            assert(variableRef != nullptr);
-            if(!variableRef) throw std::runtime_error("the vaiable must not be null");
-            assert(variableRef->hasValue() && variableRef->getType() == typeid(T));
-            return variableRef->get<T&>();
-        }
-        void setVariable(Variable& var){variableRef = &var;}
+        explicit operator bool()const noexcept { return static_cast<bool>(lvalue);}
+        T& getRef(){return lvalue.getRef();}
+        void setVariable(Variable& var){lvalue.setVariable(var);}
+        void setVariable(T& var){lvalue.setVariable(var);}
     public:
-        Reference(): variableRef(nullptr){}
-        Reference(Variable& var): variableRef(&var){}
+        Reference():lvalue(){}
+        Reference(Variable& var):lvalue(var){}
+        Reference(T& var):lvalue(var){}
         ~Reference() = default;
         Reference(const Reference&) = default;
         Reference(Reference&&) = default;
