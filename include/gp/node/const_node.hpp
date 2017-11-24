@@ -2,6 +2,7 @@
 #define GP_NODE_CONST_NODE
 
 #include "node_base.hpp"
+#include <gp/utility/is_match_template.hpp>
 #include <sstream>
 
 namespace gp::node {
@@ -13,6 +14,8 @@ namespace gp::node {
 
     template <typename T>
     class ConstNode: public NodeBase<T(void)> {
+        static_assert(!utility::is_match_template_v<utility::LeftHandValue, T>
+                      && !utility::is_match_template_v<utility::Reference, T>);
     private:
         using ThisType = ConstNode;
         using node_instance_type = NodeInterface::node_instance_type;
