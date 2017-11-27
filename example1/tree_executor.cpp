@@ -3,6 +3,7 @@
 #include <unordered_map>
 #include <gp/tree/tree.hpp>
 #include <gp/node/node.hpp>
+#include <gp/node/array_nodes.hpp>
 #include <gp/gp_manager.hpp>
 #include <gp/utility/result.hpp>
 
@@ -59,6 +60,12 @@ int main(){
     gpManager.registerNode<node::RepeatNode<bool, int>>();
     gpManager.registerNode<node::RepeatNode<double, int>>();
     gpManager.registerNodes<node::DivisionNode, TypeTuple>();
+
+    gpManager.registerNode<node::AtNode<node::GpArray<int>>>();
+    gpManager.registerNode<node::AtNode<utility::LeftHandValue<node::GpArray<int>>>>();
+    gpManager.registerNode<node::AtNode<utility::Reference<node::GpArray<int>>>>();
+    gpManager.registerNode<node::SizeOfArray<node::GpArray<int>>>();
+    gpManager.registerNode<node::SizeOfArray<utility::LeftHandValue<node::GpArray<int>>>>();
 
     try {
         while (true) {
