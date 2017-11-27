@@ -189,7 +189,7 @@ namespace gp::node {
         node_instance_type clone()const override {return NodeInterface::createInstance<ThisType>(); }
     };
 
-    template <typename, typename>
+    template <typename, typename = int>
     class SizeOfArray;
 
     template <typename T, typename SizeType>
