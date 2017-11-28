@@ -73,13 +73,25 @@ namespace gp::utility {
             if(*this) return Result<U>{Ok<U>{fn(std::move(std::get<Ok<T>>(data).data))}};
             else return Result<U>{std::move(std::get<Err>(data))};
         };
-        template <typename Fn, typename U = typename std::invoke_result_t<Fn, const T&>::wrap_type>
+        template <
+                typename Fn,
+                typename U = std::enable_if_t<
+                        is_match_template_v<gp::utility::Result, std::decay_t<std::invoke_result_t<Fn, const T&>>>,
+                        typename std::invoke_result_t<Fn, const T&>::wrap_type
+                >
+        >
         Result<U> flatMap(Fn fn)const & noexcept(std::is_nothrow_invocable_r_v<Result<U>, Fn, const T&>
                                                  && std::is_nothrow_constructible_v<Result<U>, const Err&>) {
             if(*this) return fn(std::get<Ok<T>>(data).data);
             else return std::get<Err>(data);
         };
-        template<typename Fn, typename U = typename std::invoke_result_t<Fn, T&&>::wrap_type>
+        template<
+                typename Fn,
+                typename U = std::enable_if_t<
+                        is_match_template_v<gp::utility::Result, std::decay_t<std::invoke_result_t<Fn, T&&>>>,
+                        typename std::invoke_result_t<Fn, T&&>::wrap_type
+                >
+        >
         Result<U> flatMap(Fn fn)&& noexcept(std::is_nothrow_invocable_r_v<Result<U>, Fn, T&&>
                                             && std::is_nothrow_constructible_v<Result<U>, Err&&>) {
             if(*this) return fn(std::move(std::get<Ok<T>>(data).data));
@@ -240,7 +252,7 @@ namespace gp::utility {
         };
 
         template <typename Fn, typename String, typename T = std::decay_t<std::invoke_result_t<Fn>>>
-        Result<T> tryFunction(Fn fn, String errMessage) {
+        Result<T> tryFunction(Fn fn, String&& errMessage) {
             try {
                 return ok(fn());
             } catch (...){
@@ -248,12 +260,20 @@ namespace gp::utility {
             }
         }
 
-        template <typename Fn, typename String, typename Exception, typename T = std::decay_t<std::invoke_result_t<Fn>>>
-        Result<T> tryFunction(Fn fn, String errMessage, Exception exception) {
+        template <
+                typename Fn,
+                typename ErrGen,
+                typename Exception,
+                typename T = std::decay_t<std::invoke_result_t<Fn>>,
+                typename = std::enable_if_t<
+                        std::is_constructible_v<Result<T>, std::invoke_result_t<ErrGen, Exception&>>
+                >
+        >
+        Result<T> tryFunction(Fn fn, ErrGen errGen, Exception&&) {
             try {
                 return ok(fn());
-            } catch (const Exception& ex) {
-                return err<T>(std::forward<String>(errMessage));
+            } catch (Exception& ex) {
+                return errGen(ex);
             }
         };
     }

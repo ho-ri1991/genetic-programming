@@ -200,12 +200,22 @@ BOOST_AUTO_TEST_SUITE(result)
         BOOST_CHECK(!result2);
         BOOST_CHECK_EQUAL(result2.errMessage(), "err");
 
-        auto result3 = utility::result::tryFunction([](){throw std::runtime_error(""); return 0;}, "err", std::runtime_error(""));
-        BOOST_CHECK(!result3);
-        BOOST_CHECK_EQUAL(result3.errMessage(), "err");
-
-        BOOST_CHECK_EXCEPTION(utility::result::tryFunction([](){throw std::runtime_error(""); return 0;}, "err", std::invalid_argument("")),
+        BOOST_CHECK_EXCEPTION(utility::result::tryFunction([](){throw std::runtime_error(""); return 0;}, [](std::invalid_argument&){return utility::result::err<int>("");}, std::invalid_argument("")),
                               std::runtime_error,
                               [](const std::runtime_error&){return true;});
+
+        auto result4 = utility::result::tryFunction([](){return 1;},
+                                                    [](std::exception& ex){return utility::result::err<int>(ex.what());},
+                                                    std::exception{});
+
+        BOOST_CHECK(result4);
+        BOOST_CHECK_EQUAL(result4.unwrap(), 1);
+
+        auto result5 = utility::result::tryFunction([](){throw std::runtime_error("err"); return 1;},
+                                                    [](std::exception& ex){return utility::result::err<int>(ex.what());},
+                                                    std::exception{});
+
+        BOOST_CHECK(!result5);
+        BOOST_CHECK_EQUAL(result5.errMessage(), "err");
     }
 BOOST_AUTO_TEST_SUITE_END()
