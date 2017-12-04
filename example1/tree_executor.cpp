@@ -67,6 +67,8 @@ int main(){
     gpManager.registerNode<node::SizeOfArray<node::GpArray<int>>>();
     gpManager.registerNode<node::SizeOfArray<utility::LeftHandValue<node::GpArray<int>>>>();
 
+    gpManager.registerNode<node::IncrementNode<int>>();
+
     try {
         while (true) {
             std::cout << "\'l\': load tree from file\n";

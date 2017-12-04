@@ -332,6 +332,26 @@ namespace gp::node {
         }
         node_instance_type clone()const override {return NodeInterface::createInstance<ThisType>();}
     };
+
+    template <typename T>
+    class IncrementNode: public NodeBase<T(utility::LeftHandValue<T>)> {
+        using ThisType = IncrementNode;
+        using node_instance_type = NodeInterface::node_instance_type;
+    private:
+        T evaluationDefinition(utility::EvaluationContext& evaluationContext)const override {
+            auto lvalue = std::get<0>(this->children)->evaluate(evaluationContext);
+            if(!lvalue) {
+                evaluationContext.setEvaluationStatusWithoutUpdate(utility::EvaluationStatus::InvalidValue);
+                return utility::getDefaultValue<T>();
+            }
+            return ++(lvalue.getRef());
+        }
+    public:
+        std::string getNodeName()const override {
+            return std::string("Increment[") + utility::typeInfo<T>().name() + "]";
+        }
+        node_instance_type clone()const override {return NodeInterface::createInstance<ThisType>();}
+    };
 }
 
 #endif
