@@ -1,7 +1,7 @@
 # genetic-programming
 This repository is a framework of genetic programming in C++.
-This framework mainly provides the expression of individual (i.e. expression tree) and evaluation of them (i.e. execution of expression trees).
-The following properties are supported in the expression tree:
+This framework mainly provides the expression of individual (i.e. syntax tree) and evaluation of them (i.e. execution of syntax trees).
+We can manupulate syntax trees and the following properties are supported in the syntax tree:
 - type-strict nodes
   - some default nodes are provided (ex. add, if, substitution, or, greater etc...)
 - user defined nodes
