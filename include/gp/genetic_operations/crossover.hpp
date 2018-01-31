@@ -14,25 +14,35 @@ namespace gp::genetic_operations {
             }
             return parent.getChildNum();
         }
+
+        template <typename CrossoverNodeSelector>
+        using is_match_crossover_concept =
+                std::is_invocable_r<
+                        std::pair<const node::NodeInterface&, const node::NodeInterface&>,
+                        CrossoverNodeSelector,
+                        const node::NodeInterface&,
+                        const node::NodeInterface&
+                >;
+
+        template <typename CrossoverNodeSelector>
+        static constexpr bool is_match_crossover_concept_v = is_match_crossover_concept<CrossoverNodeSelector>::value;
+
+        template <typename LocalVariableAdapter>
+        using is_match_local_variable_adapter_concept = std::is_invocable<LocalVariableAdapter, node::NodeInterface&, tree::TreeProperty&>;
+
+        template <typename LocalVariableAdapter>
+        static constexpr bool is_match_local_variable_adapter_concept_v = is_match_local_variable_adapter_concept<LocalVariableAdapter>::value;
+
+
     }
     template <typename CrossoverNodeSelector,
               typename LocalVariableAdapter>
-    std::pair<tree::Tree, tree::Tree> crossover(tree::Tree tree1,
-                                                tree::Tree tree2,
-                                                CrossoverNodeSelector& crossoverNodeSelector,
-                                                LocalVariableAdapter& localVariableAdapter) {
-        static_assert(
-                std::is_same_v<
-                        std::pair<const node::NodeInterface&, const node::NodeInterface&>,
-                        decltype(std::declval<CrossoverNodeSelector>()(std::declval<const node::NodeInterface&>(), std::declval<node::NodeInterface>()))
-                >
-        );
-        static_assert(
-                std::is_same_v<
-                        void,
-                        decltype(std::declval<LocalVariableAdapter>()(std::declval<node::NodeInterface&>(), std::declval<tree::TreeProperty&>()))
-                >
-        );
+    auto crossover(tree::Tree tree1, tree::Tree tree2, CrossoverNodeSelector& crossoverNodeSelector, LocalVariableAdapter& localVariableAdapter)
+        -> std::enable_if_t<
+            detail::is_match_crossover_concept_v<CrossoverNodeSelector> && detail::is_match_local_variable_adapter_concept_v<LocalVariableAdapter>,
+            std::pair<tree::Tree, tree::Tree>
+           >
+    {
         auto rootNode1 = std::move(tree1).getRootNodeInstance();
         auto treeProperty1 = std::move(tree1).getTreeProperty();
         auto rootNode2 = std::move(tree2).getRootNodeInstance();

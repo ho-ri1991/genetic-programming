@@ -197,6 +197,7 @@ namespace gp::traits {
     struct is_random_node_generator_type<genetic_operations::DefaultRandomNodeGenerator<RandomEngine, SupportTypes...>>: std::true_type{};
 }
 
+
 namespace gp::genetic_operations {
     template <typename RandomEngine, typename RandomNodeGenerator>
     class DefaultRandomTreeGenerator {

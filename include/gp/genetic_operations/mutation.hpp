@@ -8,25 +8,46 @@
 #include <cassert>
 
 namespace gp::genetic_operations {
+    namespace detail {
+        template <typename RandomTreeGenerator>
+        using is_match_random_tree_generator_concept =
+            std::is_invocable_r<
+                    node::NodeInterface::node_instance_type,
+                    RandomTreeGenerator,
+                    const tree::TreeProperty&,
+                    std::size_t
+            >;
+
+        template <typename RandomTreeGenerator>
+        static constexpr bool is_match_random_tree_generator_concept_v = is_match_random_tree_generator_concept<RandomTreeGenerator>::value;
+
+        template <typename NodeSelector>
+        using is_match_node_selector_concept =
+            std::is_invocable_r<
+                    const node::NodeInterface&,
+                    NodeSelector,
+                    const node::NodeInterface&
+            >;
+
+        template <typename NodeSelector>
+        static constexpr bool is_match_node_selector_concept_v = is_match_node_selector_concept<NodeSelector>::value;
+    }
+
     template <typename RandomTreeGenerator, //concept: node::NodeInterface::node_instance_type operator()(const tree::TreeProperty&, std::size_t), the first argument is property of tree, second is max tree depth
-              typename NodeSelector,        //concept: const node::NodeInterface& operator()(const node::NodeInterface&) , the argument is the root node of tree
-              typename = std::enable_if_t<
-                      std::conjunction_v<
-                              std::is_same<
-                                      node::NodeInterface::node_instance_type,
-                                      decltype(std::declval<RandomTreeGenerator>()(std::declval<const tree::TreeProperty&>(), std::declval<std::size_t>()))
-                              >,
-                              std::is_same<
-                                      const node::NodeInterface&,
-                                      decltype(std::declval<NodeSelector>()(std::declval<const node::NodeInterface&>()))
-                              >
-                      >
-              >
+              typename NodeSelector         //concept: const node::NodeInterface& operator()(const node::NodeInterface&) , the argument is the root node of tree
     >
     auto mutation(tree::Tree tree,
                   RandomTreeGenerator& randomTreeGenerator,
                   NodeSelector& nodeSelector,
-                  std::size_t maxTreeDepth) -> tree::Tree {
+                  std::size_t maxTreeDepth)
+    -> std::enable_if_t<
+            std::conjunction_v<
+                    detail::is_match_random_tree_generator_concept<RandomTreeGenerator>,
+                    detail::is_match_node_selector_concept<NodeSelector>
+            >,
+            tree::Tree
+    >
+    {
         const auto& selectedNode = nodeSelector(tree.getRootNode());
         auto depth = tree_operations::getDepth(selectedNode);
         assert(depth <= maxTreeDepth);
