@@ -213,9 +213,11 @@ int main(int argc, char* argv[]) {
             population.emplace_back(std::move(treeProperty), std::move(rootNode));
         }
 
+        std::cout << "======\n";
+        std::cout << "generation, minimum value of inverse fitness\n";
         //execute evolution
         for(std::size_t count = 0; count < settings.evolutionNum; ++count){
-            std::cout << "====" << std::to_string(count) << "th generation" << "====\n";
+//            std::cout << "====" << std::to_string(count) << "th generation" << "====\n";
             std::vector<double> probabilities;
             probabilities.reserve(std::size(population));
             //evaluation of each tree
@@ -232,7 +234,8 @@ int main(int argc, char* argv[]) {
             }
             assert(std::size(population) == std::size(probabilities));
             auto maxFitnessItr = std::max_element(std::begin(probabilities), std::end(probabilities));
-            std::cout << "minimum value of inverse fitness is " << 1./ *maxFitnessItr - 1. <<'\n';
+//            std::cout << "minimum value of inverse fitness is " << 1./ *maxFitnessItr - 1. <<'\n';
+            std::cout << count << ", " << 1./ *maxFitnessItr - 1. << '\n';
 
             //create next generation
             std::vector<tree::Tree> nextPopulation;
