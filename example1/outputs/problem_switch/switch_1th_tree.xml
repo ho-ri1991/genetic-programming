@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<tree>
+  <name>switch</name>
+  <return_type>int</return_type>
+  <arguments>
+    <type>int</type>
+    <type>int</type>
+    <type>bool</type>
+  </arguments>
+  <local_variables>
+    <type>double</type>
+    <type>int</type>
+  </local_variables>
+  <tree_entity>
++--If[int]
+    |
+    +--Argument[bool,2]
+    |
+    +--Argument[int,0]
+    |
+    +--If[int]
+         |
+         +--Argument[bool,2]
+         |
+         +--Mult[int]
+         |    |
+         |    +--Argument[int,0]
+         |    |
+         |    +--Argument[int,1]
+         |    
+         +--Argument[int,1]
+         
+</tree_entity>
+</tree>

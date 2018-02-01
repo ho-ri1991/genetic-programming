@@ -27,6 +27,11 @@
             <argument idx = "1">5</argument>
             <answer>-5</answer>
         </data>
+         <data>
+            <argument idx = "0">0</argument>
+            <argument idx = "1">0</argument>
+            <answer>0</answer>
+        </data>
     </teacher_data_set>
 
     <settings>

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<tree>
+  <name>abs</name>
+  <return_type>int</return_type>
+  <arguments>
+    <type>int</type>
+  </arguments>
+  <local_variables>
+    <type>bool</type>
+    <type>int</type>
+  </local_variables>
+  <tree_entity>
++--If[int]
+    |
+    +--LessEq[int]
+    |    |
+    |    +--Sub[int]
+    |    |    |
+    |    |    +--Nop[int]
+    |    |    |
+    |    |    +--Argument[int,0]
+    |    |    
+    |    +--Mult[int]
+    |         |
+    |         +--LocalVariable[int,1]
+    |         |
+    |         +--LocalVariable[int,1]
+    |         
+    +--Argument[int,0]
+    |
+    +--Sub[int]
+         |
+         +--LocalVariable[int,1]
+         |
+         +--Add[int]
+              |
+              +--Argument[int,0]
+              |
+              +--LocalVariable[int,1]
+              
+</tree_entity>
+</tree>

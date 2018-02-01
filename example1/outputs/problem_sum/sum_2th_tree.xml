@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="utf-8"?>
+<tree>
+  <name>sum</name>
+  <return_type>int</return_type>
+  <arguments>
+    <type>int</type>
+  </arguments>
+  <local_variables>
+    <type>double</type>
+    <type>int</type>
+    <type>double</type>
+    <type>bool</type>
+  </local_variables>
+  <tree_entity>
++--If[int]
+    |
+    +--If[bool]
+    |    |
+    |    +--Greater[double]
+    |    |    |
+    |    |    +--Repeat[double,int]
+    |    |    |    |
+    |    |    |    +--Div[int]
+    |    |    |    |    |
+    |    |    |    |    +--Nop[int]
+    |    |    |    |    |
+    |    |    |    |    +--Const[int,8]
+    |    |    |    |    
+    |    |    |    +--Mult[double]
+    |    |    |         |
+    |    |    |         +--Nop[double]
+    |    |    |         |
+    |    |    |         +--Nop[double]
+    |    |    |         
+    |    |    +--Const[double,5.91075]
+    |    |    
+    |    +--Greater[int]
+    |    |    |
+    |    |    +--Repeat[int,int]
+    |    |    |    |
+    |    |    |    +--Mult[int]
+    |    |    |    |    |
+    |    |    |    |    +--Nop[int]
+    |    |    |    |    |
+    |    |    |    |    +--Const[int,-6]
+    |    |    |    |    
+    |    |    |    +--Repeat[int,int]
+    |    |    |         |
+    |    |    |         +--LocalVariable[int,1]
+    |    |    |         |
+    |    |    |         +--Argument[int,0]
+    |    |    |         
+    |    |    +--Argument[int,0]
+    |    |    
+    |    +--LocalVariable[bool,3]
+    |    
+    +--Mult[int]
+    |    |
+    |    +--Progn[int,3]
+    |    |    |
+    |    |    +--Progn[double,3]
+    |    |    |    |
+    |    |    |    +--LessEq[int]
+    |    |    |    |    |
+    |    |    |    |    +--LocalVariable[int,1]
+    |    |    |    |    |
+    |    |    |    |    +--Argument[int,0]
+    |    |    |    |    
+    |    |    |    +--LocalVariable[ref[bool],3]
+    |    |    |    |
+    |    |    |    +--Repeat[double,int]
+    |    |    |         |
+    |    |    |         +--Nop[int]
+    |    |    |         |
+    |    |    |         +--Nop[double]
+    |    |    |         
+    |    |    +--Greater[int]
+    |    |    |    |
+    |    |    |    +--Add[int]
+    |    |    |    |    |
+    |    |    |    |    +--Const[int,6]
+    |    |    |    |    |
+    |    |    |    |    +--Argument[int,0]
+    |    |    |    |    
+    |    |    |    +--Mult[int]
+    |    |    |         |
+    |    |    |         +--Argument[int,0]
+    |    |    |         |
+    |    |    |         +--Argument[int,0]
+    |    |    |         
+    |    |    +--If[int]
+    |    |         |
+    |    |         +--Repeat[bool,int]
+    |    |         |    |
+    |    |         |    +--Argument[int,0]
+    |    |         |    |
+    |    |         |    +--Const[bool,0]
+    |    |         |    
+    |    |         +--Progn[int,3]
+    |    |         |    |
+    |    |         |    +--Const[double,5.30186]
+    |    |         |    |
+    |    |         |    +--Nop[int]
+    |    |         |    |
+    |    |         |    +--Argument[int,0]
+    |    |         |    
+    |    |         +--Increment[int]
+    |    |              |
+    |    |              +--LocalVariable[lvalue[int],1]
+    |    |              
+    |    +--If[int]
+    |         |
+    |         +--LessEq[int]
+    |         |    |
+    |         |    +--Substitute[int]
+    |         |    |    |
+    |         |    |    +--Nop[lvalue[int]]
+    |         |    |    |
+    |         |    |    +--Const[int,-2]
+    |         |    |    
+    |         |    +--Const[int,-8]
+    |         |    
+    |         +--Add[int]
+    |         |    |
+    |         |    +--Mult[int]
+    |         |    |    |
+    |         |    |    +--Argument[int,0]
+    |         |    |    |
+    |         |    |    +--LocalVariable[int,1]
+    |         |    |    
+    |         |    +--Substitute[int]
+    |         |         |
+    |         |         +--Nop[lvalue[int]]
+    |         |         |
+    |         |         +--Argument[int,0]
+    |         |         
+    |         +--Substitute[int]
+    |              |
+    |              +--Nop[lvalue[int]]
+    |              |
+    |              +--Progn[int,3]
+    |                   |
+    |                   +--Nop[bool]
+    |                   |
+    |                   +--LocalVariable[ref[bool],3]
+    |                   |
+    |                   +--Argument[int,0]
+    |                   
+    +--Div[int]
+         |
+         +--Mult[int]
+         |    |
+         |    +--Increment[int]
+         |    |    |
+         |    |    +--LocalVariable[lvalue[int],1]
+         |    |    
+         |    +--Substitute[int]
+         |         |
+         |         +--LocalVariable[lvalue[int],1]
+         |         |
+         |         +--Argument[int,0]
+         |         
+         +--Const[int,2]
+         
+</tree_entity>
+</tree>

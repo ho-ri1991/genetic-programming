@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<tree>
+  <name>switch</name>
+  <return_type>int</return_type>
+  <arguments>
+    <type>int</type>
+    <type>int</type>
+    <type>bool</type>
+  </arguments>
+  <local_variables>
+    <type>double</type>
+    <type>int</type>
+  </local_variables>
+  <tree_entity>
++--If[int]
+    |
+    +--If[bool]
+    |    |
+    |    +--If[bool]
+    |    |    |
+    |    |    +--Argument[bool,2]
+    |    |    |
+    |    |    +--Argument[bool,2]
+    |    |    |
+    |    |    +--Argument[bool,2]
+    |    |    
+    |    +--Argument[bool,2]
+    |    |
+    |    +--Progn[bool,3]
+    |         |
+    |         +--Nop[int]
+    |         |
+    |         +--Nop[double]
+    |         |
+    |         +--Nop[bool]
+    |         
+    +--Div[int]
+    |    |
+    |    +--Argument[int,0]
+    |    |
+    |    +--Increment[int]
+    |         |
+    |         +--LocalVariable[lvalue[int],1]
+    |         
+    +--Argument[int,1]
+    
+</tree_entity>
+</tree>

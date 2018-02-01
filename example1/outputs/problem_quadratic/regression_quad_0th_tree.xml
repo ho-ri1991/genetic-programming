@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<tree>
+  <name>regression_quad</name>
+  <return_type>int</return_type>
+  <arguments>
+    <type>int</type>
+    <type>int</type>
+  </arguments>
+  <local_variables>
+    <type>bool</type>
+  </local_variables>
+  <tree_entity>
++--Add[int]
+    |
+    +--Sub[int]
+    |    |
+    |    +--Mult[int]
+    |    |    |
+    |    |    +--Argument[int,0]
+    |    |    |
+    |    |    +--Argument[int,0]
+    |    |    
+    |    +--Repeat[int,int]
+    |         |
+    |         +--Nop[int]
+    |         |
+    |         +--Const[int,4]
+    |         
+    +--Add[int]
+         |
+         +--If[int]
+         |    |
+         |    +--Const[bool,0]
+         |    |
+         |    +--Argument[int,1]
+         |    |
+         |    +--Argument[int,1]
+         |    
+         +--Sub[int]
+              |
+              +--Argument[int,1]
+              |
+              +--Const[int,-1]
+              
+</tree_entity>
+</tree>

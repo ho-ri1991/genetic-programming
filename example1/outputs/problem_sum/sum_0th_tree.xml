@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8"?>
+<tree>
+  <name>sum</name>
+  <return_type>int</return_type>
+  <arguments>
+    <type>int</type>
+  </arguments>
+  <local_variables>
+    <type>bool</type>
+    <type>int</type>
+    <type>bool</type>
+    <type>bool</type>
+  </local_variables>
+  <tree_entity>
++--If[int]
+    |
+    +--Repeat[bool,int]
+    |    |
+    |    +--Argument[int,0]
+    |    |
+    |    +--LocalVariable[bool,0]
+    |    
+    +--Mult[int]
+    |    |
+    |    +--If[int]
+    |    |    |
+    |    |    +--LessEq[int]
+    |    |    |    |
+    |    |    |    +--Sub[int]
+    |    |    |    |    |
+    |    |    |    |    +--Const[int,-2]
+    |    |    |    |    |
+    |    |    |    |    +--Nop[int]
+    |    |    |    |    
+    |    |    |    +--Div[int]
+    |    |    |         |
+    |    |    |         +--Nop[int]
+    |    |    |         |
+    |    |    |         +--Const[int,-2]
+    |    |    |         
+    |    |    +--Add[int]
+    |    |    |    |
+    |    |    |    +--Mult[int]
+    |    |    |    |    |
+    |    |    |    |    +--Argument[int,0]
+    |    |    |    |    |
+    |    |    |    |    +--LocalVariable[int,1]
+    |    |    |    |    
+    |    |    |    +--Const[int,2]
+    |    |    |    
+    |    |    +--Mult[int]
+    |    |         |
+    |    |         +--Mult[int]
+    |    |         |    |
+    |    |         |    +--LocalVariable[int,1]
+    |    |         |    |
+    |    |         |    +--Nop[int]
+    |    |         |    
+    |    |         +--Div[int]
+    |    |              |
+    |    |              +--Argument[int,0]
+    |    |              |
+    |    |              +--Const[int,-3]
+    |    |              
+    |    +--If[int]
+    |         |
+    |         +--Greater[double]
+    |         |    |
+    |         |    +--Add[double]
+    |         |    |    |
+    |         |    |    +--Const[double,-3.67903]
+    |         |    |    |
+    |         |    |    +--Nop[double]
+    |         |    |    
+    |         |    +--Add[double]
+    |         |         |
+    |         |         +--Nop[double]
+    |         |         |
+    |         |         +--Nop[double]
+    |         |         
+    |         +--Mult[int]
+    |         |    |
+    |         |    +--Mult[int]
+    |         |    |    |
+    |         |    |    +--Const[int,-1]
+    |         |    |    |
+    |         |    |    +--Const[int,2]
+    |         |    |    
+    |         |    +--Increment[int]
+    |         |         |
+    |         |         +--LocalVariable[lvalue[int],1]
+    |         |         
+    |         +--If[int]
+    |              |
+    |              +--LocalVariable[bool,0]
+    |              |
+    |              +--Sub[int]
+    |              |    |
+    |              |    +--Argument[int,0]
+    |              |    |
+    |              |    +--Nop[int]
+    |              |    
+    |              +--Increment[int]
+    |                   |
+    |                   +--LocalVariable[lvalue[int],1]
+    |                   
+    +--Div[int]
+         |
+         +--Mult[int]
+         |    |
+         |    +--Increment[int]
+         |    |    |
+         |    |    +--LocalVariable[lvalue[int],1]
+         |    |    
+         |    +--Substitute[int]
+         |         |
+         |         +--LocalVariable[lvalue[int],1]
+         |         |
+         |         +--Argument[int,0]
+         |         
+         +--Const[int,2]
+         
+</tree_entity>
+</tree>

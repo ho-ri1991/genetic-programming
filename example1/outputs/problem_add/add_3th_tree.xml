@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<tree>
+  <name>add</name>
+  <return_type>int</return_type>
+  <arguments>
+    <type>int</type>
+    <type>int</type>
+  </arguments>
+  <local_variables>
+    <type>bool</type>
+    <type>bool</type>
+    <type>int</type>
+  </local_variables>
+  <tree_entity>
++--Progn[int,3]
+    |
+    +--Greater[int]
+    |    |
+    |    +--Argument[int,0]
+    |    |
+    |    +--Add[int]
+    |         |
+    |         +--Argument[int,1]
+    |         |
+    |         +--Argument[int,1]
+    |         
+    +--Nop[ref[double]]
+    |
+    +--Progn[int,3]
+         |
+         +--Less[double]
+         |    |
+         |    +--Nop[double]
+         |    |
+         |    +--Const[double,4.29465]
+         |    
+         +--Argument[int,0]
+         |
+         +--Add[int]
+              |
+              +--Argument[int,0]
+              |
+              +--Argument[int,1]
+              
+</tree_entity>
+</tree>

@@ -42,12 +42,24 @@
             <argument idx = "0">8</argument>
             <answer>36</answer>
         </data>
-    </teacher_data_set>
+        <data>
+            <argument idx = "0">9</argument>
+            <answer>45</answer>
+        </data>
+        <data>
+            <argument idx = "0">10</argument>
+            <answer>55</answer>
+        </data>
+        <data>
+            <argument idx = "0">11</argument>
+            <answer>66</answer>
+        </data>
+   </teacher_data_set>
 
     <settings>
         <population_size>10000</population_size>
-        <max_tree_depth>7</max_tree_depth>
-        <evolution_num>1000</evolution_num>
+        <max_tree_depth>5</max_tree_depth>
+        <evolution_num>100</evolution_num>
         <mutation_rate>0.3</mutation_rate>
         <crossover_rate>0.2</crossover_rate>
 	<random_seed>0</random_seed>

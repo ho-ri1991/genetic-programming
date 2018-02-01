@@ -41,9 +41,9 @@
     </teacher_data_set>
 
     <settings>
-        <population_size>1000</population_size>
+        <population_size>5000</population_size>
         <max_tree_depth>3</max_tree_depth>
-        <evolution_num>300</evolution_num>
+        <evolution_num>100</evolution_num>
         <mutation_rate>0.1</mutation_rate>
         <crossover_rate>0.2</crossover_rate>
 	    <random_seed>0</random_seed>

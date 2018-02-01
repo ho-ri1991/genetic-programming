@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<tree>
+  <name>sum</name>
+  <return_type>int</return_type>
+  <arguments>
+    <type>int</type>
+  </arguments>
+  <local_variables>
+    <type>bool</type>
+    <type>int</type>
+    <type>bool</type>
+    <type>bool</type>
+    <type>double</type>
+  </local_variables>
+  <tree_entity>
++--Div[int]
+    |
+    +--Mult[int]
+    |    |
+    |    +--Progn[int,3]
+    |    |    |
+    |    |    +--Progn[double,3]
+    |    |    |    |
+    |    |    |    +--Sub[double]
+    |    |    |    |    |
+    |    |    |    |    +--Const[double,-1.15911]
+    |    |    |    |    |
+    |    |    |    |    +--LocalVariable[double,4]
+    |    |    |    |    
+    |    |    |    +--If[double]
+    |    |    |    |    |
+    |    |    |    |    +--Const[bool,0]
+    |    |    |    |    |
+    |    |    |    |    +--LocalVariable[double,4]
+    |    |    |    |    |
+    |    |    |    |    +--Nop[double]
+    |    |    |    |    
+    |    |    |    +--Mult[double]
+    |    |    |         |
+    |    |    |         +--LocalVariable[double,4]
+    |    |    |         |
+    |    |    |         +--Nop[double]
+    |    |    |         
+    |    |    +--Const[bool,1]
+    |    |    |
+    |    |    +--If[int]
+    |    |         |
+    |    |         +--Progn[bool,3]
+    |    |         |    |
+    |    |         |    +--Const[int,6]
+    |    |         |    |
+    |    |         |    +--Const[double,-1.41523]
+    |    |         |    |
+    |    |         |    +--Nop[bool]
+    |    |         |    
+    |    |         +--Progn[int,3]
+    |    |         |    |
+    |    |         |    +--LocalVariable[double,4]
+    |    |         |    |
+    |    |         |    +--Argument[int,0]
+    |    |         |    |
+    |    |         |    +--LocalVariable[int,1]
+    |    |         |    
+    |    |         +--Increment[int]
+    |    |              |
+    |    |              +--LocalVariable[lvalue[int],1]
+    |    |              
+    |    +--Substitute[int]
+    |         |
+    |         +--LocalVariable[lvalue[int],1]
+    |         |
+    |         +--Argument[int,0]
+    |         
+    +--Const[int,2]
+    
+</tree_entity>
+</tree>
