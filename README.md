@@ -96,6 +96,16 @@ You can load and execute this tree by using example/tree_executor.cpp.
 
 We have compiled by g++7.2.0 with boost 1.62.0
 
+## directory structures
+- `example`: Some source and config files for examples
+- `test`: Source codes for test using BOOST_TEST.
+- `include`: Header files are here. Add this directory to your include path.
+  - `gp/genetic_operations`: some simple functions and classes for genetic operations (mutation, crossover, selection etc...)
+  - `gp/node`: Definitions of node classes are located here. `NodeInterface` class is the interface of nodes and user defined nodes can be defined by inheriting `NodeBase` class. See `basic_operation_node.hpp` for how to fine user defined nodes.
+  - `gp/traits`: Some traits classes for concept by traits. These traits are used in `include/gp/tree_operations`.
+  - `gp/tree`: The definition of the tree class.
+  - `gp/tree_operations`: Some utility functions for tree structures (IO of tree, Random tree generator, get tree depth, etc...)
+
 ## getting started
 
 This framework is a header only template library.
@@ -128,13 +138,65 @@ In each directory, there are top 5 result syntax trees and the 0th tree is the a
 There also exists transition of the fitness for every generation.
 For the way of caluculation of the fitness and the way of mutation and crossover and selection, see the source codes.
 
-### directory structures
-- `example`: Some source and config files for examples
-- `test`: Source codes for test using BOOST_TEST.
-- `include`: Header files are here. Add this directory to your include path.
-  - `gp/genetic_operations`: some simple functions and classes for genetic operations (mutation, crossover, selection etc...)
-  - `gp/node`: Definitions of node classes are located here. `NodeInterface` class is the interface of nodes and user defined nodes can be defined by inheriting `NodeBase` class. See `basic_operation_node.hpp` for how to fine user defined nodes.
-  - `gp/traits`: Some traits classes for concept by traits. These traits are used in `include/gp/tree_operations`.
-  - `gp/tree`: The definition of the tree class.
-  - `gp/tree_operations`: Some utility functions for tree structures (IO of tree, Random tree generator, get tree depth, etc...)
+![evolution of fitness](https://github.com/ho-ri1991/genetic-programming/blob/master/example1/outputs/problem_quadratic/chart.png?raw=true)
 
+This graph describles evolution of the inverse of fitness in the regression problem (`y = x0^2 + 2 * x1 + 1`, i.e. inputs are two number x0 and x1, output is a number).
+The settings of this problem (teacher data, population num, evolution num etc...) are shown in `example1/problem_quadratic.xml`.
+In our definition of fitness, the inverse value of the fitness becomes zero if the result syntax tree answers the same value as the teacher data (Of course, you can change the definition of the fitness, see `example1/example1.cpp1` for the definition of the fitness in this example).
+The inverse value of the fitness decreases gradually and reaches zero at 18th generation.
+The result syntax tree obtained from this regression problem is as follows:
+```
+<?xml version="1.0" encoding="utf-8"?>
+<tree>
+  <name>regression_quad</name>
+  <return_type>int</return_type>
+  <arguments>
+    <type>int</type>
+    <type>int</type>
+  </arguments>
+  <local_variables>
+    <type>bool</type>
+  </local_variables>
+  <tree_entity>
++--Add[int]
+    |
+    +--Sub[int]
+    |    |
+    |    +--Mult[int]
+    |    |    |
+    |    |    +--Argument[int,0]
+    |    |    |
+    |    |    +--Argument[int,0]
+    |    |    
+    |    +--Repeat[int,int]
+    |         |
+    |         +--Nop[int]
+    |         |
+    |         +--Const[int,4]
+    |         
+    +--Add[int]
+         |
+         +--If[int]
+         |    |
+         |    +--Const[bool,0]
+         |    |
+         |    +--Argument[int,1]
+         |    |
+         |    +--Argument[int,1]
+         |    
+         +--Sub[int]
+              |
+              +--Argument[int,1]
+              |
+              +--Const[int,-1]
+              
+</tree_entity>
+</tree>
+```
+
+You can find the definition of the nodes in `include/gp/node/basic_operation_nodes.hpp`.
+`Add` is the addition of two numbers and `Sub` is the subtraction node, `Mult` is the multiply node. 
+`Nop` is the No Operation node and `Nop[T]` returns `T{}`, thereby `Nop[int]` returns `0`. 
+`Repeat` is a node which takes two child, one is the number of repetition and the other is the expression which is evaluated repeatdly, however, is node is irrelevant in this example. `Repeat[T]` returns `T{}` when the number of repetition is zero or negative. So, `Repeat[Int]` in this tree always returns `int{}` (i.e. `0`) because the number of repetition is always 0 (this value come from `Nop[int]`).
+`If` is the if expression and this node takes three children. One is bool value, the others are expressions. The first expression is evalueated and returned from `If` node if the bool value is true, otherwise the second one.
+Even though there are some irrelevant operations in this tree, this tree certainly describles the answer of the regression problem `y = x0^2 + 2 * x^1 - 1`.
