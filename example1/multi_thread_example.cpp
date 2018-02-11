@@ -248,10 +248,11 @@ int main(int argc, char* argv[]) {
             };
 
             std::vector<std::future<void>> futures;
-            futures.reserve(EVALUATION_CONCURRENCY);
-            for(int i = 0; i < EVALUATION_CONCURRENCY; ++i) {
+            futures.reserve(EVALUATION_CONCURRENCY - 1);
+            for(int i = 0; i < EVALUATION_CONCURRENCY - 1; ++i) {
                 futures.push_back(std::async(std::launch::async, taskGeneretor(i)));
             }
+            taskGeneretor(EVALUATION_CONCURRENCY - 1)();
             for(auto& fut: futures){
                 fut.wait();
             }
