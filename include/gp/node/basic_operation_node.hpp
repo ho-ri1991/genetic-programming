@@ -313,7 +313,7 @@ namespace gp::node {
             }
             auto ans = utility::getDefaultValue<T1>();
             for(T2 i = 0; i < num; ++i) {
-                auto ans = std::get<1>(this->children)->evaluate(evaluationContext);
+                ans = std::get<1>(this->children)->evaluate(evaluationContext);
                 if(evaluationContext.getEvaluationStatus() == utility::EvaluationStatus::BreakCalled) {
                     evaluationContext.clearEvaluationStatus();
                     break;
