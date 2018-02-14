@@ -157,13 +157,13 @@ namespace gp::utility {
                           LocalVariables&& localVariables_,
                           EvaluationCount maxEvaluationCount_,
                           StackCount maxStackCount_)
-                : arguments(createVariableTable(std::forward<Arguments>(arguments_)))
+                : evaluationStatus(EvaluationStatus::Evaluating)
+                , arguments(createVariableTable(std::forward<Arguments>(arguments_)))
                 , localVariables(createVariableTable(std::forward<LocalVariables>(localVariables_)))
                 , evaluationCount(0)
                 , stackCount(0)
                 , maxEvaluationCount(maxEvaluationCount_)
-                , maxStackCount(maxStackCount_)
-                , evaluationStatus(EvaluationStatus::Evaluating){}
+                , maxStackCount(maxStackCount_) {}
         EvaluationContext() = delete;
         ~EvaluationContext() = default;
         EvaluationContext(const EvaluationContext&) = default;

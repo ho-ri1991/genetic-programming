@@ -71,8 +71,8 @@ namespace gp::utility {
                   >
         >
         explicit Variable(T&& val):
-                variable(std::forward<T>(val)),
                 hasPointer(std::is_pointer_v<T>),
+                variable(std::forward<T>(val)),
                 type(&typeid(std::remove_pointer_t<std::remove_cv_t<T>>)){}
 
         Variable(): hasPointer(false), variable(), type(&typeid(void)){};

@@ -57,7 +57,6 @@ namespace gp::tree_operations::detail {
                                     std::string offsetStr = "",
                                     std::string connectionLine = std::string(io::OFFSET_NUM, io::OFFSET_CHAR) + std::string(1, io::CONNECTION)) {
             using trait = traits::output_node_traits<node>;
-            const auto childNum = trait::get_child_num(node_);
             out << offsetStr << io::NODE_HEADER << trait::get_node_name(node_) << std::endl;
             out << connectionLine << std::endl;
             for(int i = 0; i < trait::get_child_num(node_); ++i) {
