@@ -94,14 +94,15 @@ You can load and execute this tree by using example/tree_executor.cpp.
 - C++ compiler and standard library >= C++17
 - boost >= 1.62
 
-We have compiled by g++7.2.0 with boost 1.62.0
+We have compiled by g++7.2.0 with boost 1.62.0.
+We used some core language features of C++17 and some new moduldes in standard libraries such as std::optional and std::variant.
 
 ## directory structures
 - `example`: Some source and config files for examples
 - `test`: Source codes for test using BOOST_TEST.
 - `include`: Header files are here. Add this directory to your include path.
   - `gp/genetic_operations`: some simple functions and classes for genetic operations (mutation, crossover, selection etc...)
-  - `gp/node`: Definitions of node classes are located here. `NodeInterface` class is the interface of nodes and user defined nodes can be defined by inheriting `NodeBase` class. See `basic_operation_node.hpp` for how to fine user defined nodes.
+  - `gp/node`: Definitions of node classes are located here. `NodeInterface` class is the interface of nodes and user defined nodes can be defined by inheriting `NodeBase` class. See `basic_operation_node.hpp` for how to define user defined nodes.
   - `gp/traits`: Some traits classes for concept by traits. These traits are used in `include/gp/tree_operations`.
   - `gp/tree`: The definition of the tree class.
   - `gp/tree_operations`: Some utility functions for tree structures (IO of tree, Random tree generator, get tree depth, etc...)
@@ -110,6 +111,7 @@ We have compiled by g++7.2.0 with boost 1.62.0
 
 This framework is a header only template library.
 Therefore, you can use this framework just including header files.
+Add `genetic_programming/include` to your include path.
 
 ### build examples and tests
 We use cmake to build.
@@ -121,6 +123,7 @@ For details of build, see `CMakeLists.txt`.
 $ git clone https://github.com/ho-ri1991/genetic-programming.git
 $ cd  genetic-programming
 $ mkdir build
+$ cd genetic-programming
 $ cmake ..
 $ make
 ```
@@ -190,14 +193,16 @@ The result syntax tree obtained from this regression problem is as follows:
               +--Argument[int,1]
               |
               +--Const[int,-1]
-              
+
 </tree_entity>
 </tree>
 ```
 
 You can find the definition of the nodes in `include/gp/node/basic_operation_nodes.hpp`.
-`Add` is the addition of two numbers and `Sub` is the subtraction node, `Mult` is the multiply node. 
-`Nop` is the No Operation node and `Nop[T]` returns `T{}`, thereby `Nop[int]` returns `0`. 
-`Repeat` is a node which takes two child, one is the number of repetition and the other is the expression which is evaluated repeatdly, however, is node is irrelevant in this example. `Repeat[T]` returns `T{}` when the number of repetition is zero or negative. So, `Repeat[Int]` in this tree always returns `int{}` (i.e. `0`) because the number of repetition is always 0 (this value come from `Nop[int]`).
+`Argument[T,i]` describes i-th argument node with type T.
+`Const[T,t]` describes constant node of type T whose value is t.
+`Add` is the addition of two numbers and `Sub` is the subtraction node, `Mult` is the multiply node.
+`Nop` is the No Operation node and `Nop[T]` returns `T{}`, thereby `Nop[int]` returns `0`.
+`Repeat` is a node which takes two child, one is the number of repetition and the other is the expression which is evaluated repeatdly, however, this node is irrelevant in this example. `Repeat[T]` returns `T{}` when the number of repetition is zero or negative. So, `Repeat[Int]` in this tree always returns `int{}` (i.e. `0`) because the number of repetition is always 0 (this value come from `Nop[int]`).
 `If` is the if expression and this node takes three children. One is bool value, the others are expressions. The first expression is evalueated and returned from `If` node if the bool value is true, otherwise the second one.
 Even though there are some irrelevant operations in this tree, this tree certainly describles the answer of the regression problem `y = x0^2 + 2 * x^1 - 1`.
