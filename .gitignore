@@ -1,2 +1,7 @@
 cmake-build-debug
 .idea
+GPATH
+GRTAGS
+GTAGS
+*.swp
+
